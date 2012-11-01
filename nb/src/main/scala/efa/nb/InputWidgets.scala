@@ -6,7 +6,7 @@ import efa.react.swing.AllFunctions._
 import scala.swing._
 import scalaz._, Scalaz._
 
-trait InputWidgets
+trait InputWidgets extends InputWidgetsFunctions
 
 trait InputWidgetsFunctions {
   type ValSET[A,B] = SET[A,ValRes[B]]
@@ -24,6 +24,13 @@ trait InputWidgetsFunctions {
 
   def lensed[A,B] (in: ValSET[B,B])(l: A @> B): VSET[A,A] =
     in map (_ map (l := _ void)) contramap l.get
+
+  def fullLensed[A,B] (in: VSET[B,B])(l: A @> B): VSET[A,A] = {
+    def nextSt (s: State[B,Unit]): State[A,Unit] =
+      init[A] >>= (a ⇒ l := s.exec (l get a)) void
+
+    in map (_ map nextSt) contramap l.get
+  }
 
   def valIn[A,B](in: StSET[A,B]): VSET[A,B] = in map (_.success)
 
@@ -59,5 +66,7 @@ trait InputWidgetsFunctions {
     lensed(valSET)(l)
   }
 }
+
+object InputWidgets extends InputWidgets
 
 // vim: set ts=2 sw=2 et:
