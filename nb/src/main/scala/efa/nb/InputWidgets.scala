@@ -1,7 +1,7 @@
 package efa.nb
 
 import efa.core._, Efa._
-import efa.react.{SET, Out, sTrans}
+import efa.react.{SET, EET, Out, sTrans, eTrans}
 import efa.react.swing.AllFunctions._
 import scala.swing._
 import scalaz._, Scalaz._
@@ -9,36 +9,31 @@ import scalaz._, Scalaz._
 trait InputWidgets extends InputWidgetsFunctions
 
 trait InputWidgetsFunctions {
+  type ValEET[A,B] = EET[A,ValRes[B]]
   type ValSET[A,B] = SET[A,ValRes[B]]
   type StSET[A,B] = SET[A,State[B,Unit]]
   type VSET[A,B] = SET[A,ValRes[State[B,Unit]]]
 
-  def stIn[A,B](in: SET[B,B])(l: A @> B): StSET[A,A] =
-    in map (l := _ void) contramap l.get
+  def validate[A,B](v: Validator[A,B]): ValEET[A,B] =
+    eTrans.id[A] map (v run _ validation)
 
-  def stValIn[A,B](in: SET[B,B])(l: A @> B): VSET[A,A] =
-    valIn(stIn(in)(l))
-
-  def validate[A,B,C] (in: SET[A,B])(v: Validator[B,C]): ValSET[A,C] =
-    in map (v run _ validation)
+  def success[A]: ValEET[A,A] = validate(Validators.dummy)
 
   def lensed[A,B] (in: ValSET[B,B])(l: A @> B): VSET[A,A] =
     in map (_ map (l := _ void)) contramap l.get
 
-  def fullLensed[A,B] (in: VSET[B,B])(l: A @> B): VSET[A,A] = {
+  def lensedV[A,B] (in: VSET[B,B])(l: A @> B): VSET[A,A] = {
     def nextSt (s: State[B,Unit]): State[A,Unit] =
       init[A] >>= (a ⇒ l := s.exec (l get a)) void
 
     in map (_ map nextSt) contramap l.get
   }
 
-  def valIn[A,B](in: StSET[A,B]): VSET[A,B] = in map (_.success)
-
   def checkBox[A] (b: CheckBox)(l: A @> Boolean): VSET[A,A] =
-    stValIn(values(b))(l)
+    lensed(values(b) >=> success)(l)
 
   def comboBox[A,B] (b: ComboBox[B])(l: A @> B): VSET[A,A] =
-    stValIn(values(b))(l)
+    lensed(values(b) >=> success)(l)
 
   def intIn[A](
     t: TextField,
@@ -61,7 +56,7 @@ trait InputWidgetsFunctions {
     str: B ⇒ String = (b: B) ⇒ b.toString
   )(l: A @> B): VSET[A,A] = {
     def vtot: Validator[String,B] = Read[B].validator >=> v
-    def valSET = validate (values(t))(vtot) contramap str
+    def valSET = values(t) andThen validate(vtot) contramap str
 
     lensed(valSET)(l)
   }
