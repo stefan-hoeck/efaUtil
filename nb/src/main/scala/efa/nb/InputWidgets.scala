@@ -40,6 +40,9 @@ trait InputWidgetsFunctions {
     v: EndoVal[Long] = Validators.dummy[Long]
   )(l: A @> Long): VSET[A,A] = textIn[A,Long](t, v = v)(l)
 
+  def outOnly[A] (o: Out[A]): SET[A,Nothing] =
+    (sTrans.id[A] to o) >|> eTrans.never
+
   def readVals[A:Read](
     t: TextField,
     f: A ⇒ String = (a: A) ⇒ a.toString
