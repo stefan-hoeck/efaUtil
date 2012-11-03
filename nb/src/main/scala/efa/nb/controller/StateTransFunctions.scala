@@ -1,13 +1,12 @@
 package efa.nb.controller
 
-import efa.core.ValRes
+import efa.core.{ValRes, ValSt}
 import efa.io.LoggerIO
 import efa.react._
 import scalaz._, Scalaz._, effect.IO
 
 trait StateTransFunctions {
   type St[A] = State[A,Unit]
-  type ValSt[A] = ValRes[St[A]]
   type StTrans[A] = SET[A,ValSt[A]]
 
   def accum[A](st: ValSt[A], a: A): A = st fold (_ ⇒ a, _ exec a)

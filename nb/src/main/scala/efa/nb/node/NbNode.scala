@@ -11,8 +11,6 @@ import org.openide.nodes.{Children, AbstractNode, Sheet, Node, NodeTransfer}
 object NbNode {
   import NodeOut.{outOnly, outImpure}
 
-  type ValSt[A] = ValRes[State[A,Unit]]
-
   def apply: IO[NbNode] = for {
     hc  ← NbChildren.create
     lkp ← PureLookup.apply
