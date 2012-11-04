@@ -20,6 +20,13 @@ trait InputWidgetsFunctions {
   def comboBox[A,B] (b: ComboBox[B])(l: A @> B): VSET[A,A] =
     lensed(values(b) >=> success)(l)
 
+  def getSet[A,B,C] (get: A ⇒ C)(set: (A, C) ⇒ ValSt[B], in: ValSET[C,C])
+    : VSET[A,B] = {
+    def vset (a: A, vi: ValRes[C]) = vi flatMap (set(a, _))
+
+    (in ∙ get) uponOut vset
+  }
+
   def intIn[A](
     t: TextField,
     v: EndoVal[Int] = Validators.dummy[Int]
