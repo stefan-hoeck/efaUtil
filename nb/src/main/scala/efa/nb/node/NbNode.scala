@@ -7,6 +7,7 @@ import efa.nb.dialog.DialogEditable
 import efa.react._
 import java.beans.PropertyEditor
 import org.openide.nodes.{Children, AbstractNode, Sheet, Node, NodeTransfer}
+import scala.swing.Alignment
 
 object NbNode {
   import NodeOut.{outOnly, outImpure}
@@ -121,54 +122,145 @@ object NbNode {
   lazy val clearNt: NodeOut[Any,Nothing] =
     NodeOut((_, n) ⇒ _ ⇒ n setNewTypes Nil)
 
+  def booleanProp(n: String): NodeOut[Boolean,Nothing] =
+    writeProp[Boolean,Boolean](n, identity, Some(_ ⇒ new BooleanEditor))
+
+  def intProp(n: String): NodeOut[Int,Nothing] =
+    textProp[Int,Int](n, identity, al = Alignment.Trailing)
+
+  def longProp(n: String): NodeOut[Long,Nothing] =
+    textProp[Long,Long](n, identity, al = Alignment.Trailing)
+
+  def doubleProp(n: String, format: Double ⇒ String)
+  : NodeOut[Double,Nothing] = textProp[Double,Double](
+    n, identity, toString = format, al = Alignment.Trailing
+  )
+
+  def textProp[A,B:Manifest](
+    name: String,
+    toB: A ⇒ B,
+    toString: A ⇒ String = (a: A) ⇒ a.toString,
+    desc: A ⇒ Option[String] = (a: A) ⇒ None,
+    al: Alignment.Value = Alignment.Leading
+  ): NodeOut[A,Nothing] =
+    writeProp[A,B](name, toB, TextEditor.read(al, toString, desc))
+
+  def booleanRwProp (n: String): NodeOut[Boolean,ValRes[Boolean]] =
+    rwProp[Boolean,Boolean](
+      n, identity, Validators.dummy, Some((_,_) ⇒ new BooleanEditor)
+    )
+
+  def intRwProp (n: String, v: EndoVal[Int]): NodeOut[Int,ValRes[Int]] =
+   readRwProp[Int](n, v, al = Alignment.Trailing)
+
+  def longRwProp (n: String, v: EndoVal[Long]): NodeOut[Long,ValRes[Long]] =
+   readRwProp[Long](n, v, al = Alignment.Trailing)
+
+  def stringRwProp (n: String, v: EndoVal[String])
+    : NodeOut[String,ValRes[String]] =
+   readRwProp[String](n, v, al = Alignment.Leading)
+
+  def readRwProp[A:Read:Manifest](
+    name: String,
+    validator: EndoVal[A],
+    toString: A ⇒ String = (a: A) ⇒ a.toString,
+    desc: A ⇒ Option[String] = (a: A) ⇒ None,
+    al: Alignment.Value = Alignment.Leading
+  ): NodeOut[A,ValRes[A]] = textRwProp[A](
+    name, Read[A].validator >=> validator, toString, desc, al
+  )
+
+  def textRwProp[A:Manifest](
+    name: String,
+    read: Validator[String,A],
+    toString: A ⇒ String = (a: A) ⇒ a.toString,
+    desc: A ⇒ Option[String] = (a: A) ⇒ None,
+    al: Alignment.Value = Alignment.Leading
+  ): NodeOut[A,ValRes[A]] = {
+    def ed (a: A, o: Out[ValRes[A]]) = {
+      val textOut: Out[String] = o ∙ (read run _ validation)
+      
+      TextEditor.rw(a, al, toString, desc, textOut)
+    }
+
+    rwProp[A,A](name, identity, Validators.dummy, Some(ed(_, _)))
+  }
+
+  def rwProp[A,B:Manifest](
+    name: String,
+    toB: A ⇒ B,
+    validator: EndoVal[B],
+    editor: Option[(A, Out[ValRes[B]]) ⇒ PropertyEditor]
+  ): NodeOut[A,ValRes[B]] =
+    NodeOut (
+    (o, n) ⇒ a ⇒ RwProp[A,B](name, a, toB, validator, editor, o) >>= n.setPut
+  )
+
+  def writeProp[A,B:Manifest](
+    name: String,
+    toB: A ⇒ B,
+    editor: Option[A ⇒ PropertyEditor]
+  ): NodeOut[A,Nothing] =
+    NodeOut (
+    (_, n) ⇒ a ⇒ RProp[A,B](name, a, toB, editor) >>= n.setPut
+  )
+
   //// Private Helper classes
 
-  private class RProp[A] private (
+  private class RProp[A,B] private (
     override val getName: String,
-    override val getValue: A,
+    a: A,
+    toB: A ⇒ B,
     editor: Option[A ⇒ PropertyEditor]
-  )(implicit m: Manifest[A])
-   extends Node.Property[A] (m.erasure.asInstanceOf[Class[A]]) {
+  )(implicit m: Manifest[B])
+   extends Node.Property[B] (m.erasure.asInstanceOf[Class[B]]) {
     override def canRead = true
     override def canWrite = false
-    override def setValue (a: A) {}
+    override def setValue (a: B) {}
+    override def getValue: B = toB(a)
     override def getPropertyEditor =
-      editor ∘ (_ apply getValue) | super.getPropertyEditor
+      editor ∘ (_ apply a) | super.getPropertyEditor
   }
 
   private object RProp {
-    def apply[A:Manifest] (
-      name: String, a: A, editor: Option[A ⇒ PropertyEditor]
-    ): IO[RProp[A]] = IO { new RProp (name, a, editor) }
+    def apply[A,B:Manifest] (
+      name: String,
+      a: A,
+      toB: A ⇒ B,
+      editor: Option[A ⇒ PropertyEditor]
+    ): IO[RProp[A,B]] = IO { new RProp (name, a, toB, editor) }
   }
 
-  private class RwProp[A] (
+  private class RwProp[A,B] (
     override val getName: String,
-    override val getValue: A,
-    editor: Option[A ⇒ PropertyEditor],
-    out: Out[ValRes[A]],
-    validator: EndoVal[A]
-  )(implicit m: Manifest[A])
-  extends Node.Property[A](m.erasure.asInstanceOf[Class[A]]) {
+    a: A,
+    toB: A ⇒ B,
+    validator: EndoVal[B],
+    editor: Option[(A, Out[ValRes[B]]) ⇒ PropertyEditor],
+    out: Out[ValRes[B]]
+  )(implicit m: Manifest[B])
+   extends Node.Property[B](m.erasure.asInstanceOf[Class[B]]) {
     override def canRead = true
     override def canWrite = true
+    override def getValue: B = toB (a)
 
-    override def setValue (a: A) {
-      out apply validator(a).validation unsafePerformIO
+    override def setValue (b: B) {
+      out apply validator(b).validation unsafePerformIO
     }
 
     override def getPropertyEditor =
-      editor map (_ apply getValue) getOrElse super.getPropertyEditor
+      editor ∘ (_ apply (a, out)) | super.getPropertyEditor
   }
 
   private object RwProp {
-    def apply[A:Manifest] (
+    def apply[A,B:Manifest] (
       name: String,
       a: A,
-      editor: Option[A ⇒ PropertyEditor],
-      out: Out[ValRes[A]],
-      validator: EndoVal[A]
-    ): IO[RwProp[A]] = IO { new RwProp (name, a, editor, out, validator) }
+      toB: A ⇒ B,
+      validator: EndoVal[B],
+      editor: Option[(A, Out[ValRes[B]]) ⇒ PropertyEditor],
+      out: Out[ValRes[B]]
+    ): IO[RwProp[A,B]] = IO { new RwProp (name, a, toB, validator, editor, out) }
   }
 }
 

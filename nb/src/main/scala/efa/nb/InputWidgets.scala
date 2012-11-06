@@ -1,7 +1,7 @@
 package efa.nb
 
 import efa.core._, Efa._
-import efa.react.{SET, EET, Out, sTrans, eTrans}
+import efa.react.{SET, Out, sTrans, eTrans}
 import efa.react.swing.AllFunctions._
 import scala.swing._
 import scalaz._, Scalaz._
@@ -9,10 +9,6 @@ import scalaz._, Scalaz._
 trait InputWidgets extends InputWidgetsFunctions
 
 trait InputWidgetsFunctions {
-  type ValEET[A,B] = EET[A,ValRes[B]]
-  type ValSET[A,B] = SET[A,ValRes[B]]
-  type StSET[A,B] = SET[A,State[B,Unit]]
-  type VSET[A,B] = SET[A,ValRes[State[B,Unit]]]
 
   def checkBox[A] (b: CheckBox)(l: A @> Boolean): VSET[A,A] =
     lensed(values(b) >=> success)(l)
@@ -35,11 +31,14 @@ trait InputWidgetsFunctions {
   def lensed[A,B] (in: ValSET[B,B])(l: A @> B): VSET[A,A] =
     in map (_ map (l := _ void)) contramap l.get
 
-  def lensedV[A,B] (in: VSET[B,B])(l: A @> B): VSET[A,A] = {
-    def nextSt (s: State[B,Unit]): State[A,Unit] =
-      init[A] >>= (a ⇒ l := s.exec (l get a)) void
+  def lensedV[A,B] (in: VSET[B,B])(l: A @> B): VSET[A,A] =
+    mapSt(in)(l) contramap l.get
 
-    in map (_ map nextSt) contramap l.get
+  def mapSt[A,B,C] (in: VSET[A,B])(l: C @> B): VSET[A,C] = {
+    def nextSt (s: State[B,Unit]): State[C,Unit] =
+      init[C] >>= (c ⇒ l := s.exec (l get c)) void
+
+    in map (_ map nextSt)
   }
 
   def longIn[A](
