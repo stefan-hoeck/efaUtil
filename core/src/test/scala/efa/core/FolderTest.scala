@@ -15,8 +15,8 @@ object FolderTest extends Properties("Folder") {
   val datasGen = streamGen(dataGen)
   val lblGen = Gen.identifier
   val leafGen = ^(datasGen, lblGen) (Folder(_, Stream.empty, _))
-  val l1Gen = ^(datasGen, streamGen(leafGen), lblGen) (Folder.apply)
-  val rootGen = ^(datasGen, streamGen(l1Gen), lblGen) (Folder.apply)
+  val l1Gen = ^^(datasGen, streamGen(leafGen), lblGen) (Folder.apply)
+  val rootGen = ^^(datasGen, streamGen(l1Gen), lblGen) (Folder.apply)
 
   val rootDataGen = for {
     r ← rootGen

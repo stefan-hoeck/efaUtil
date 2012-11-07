@@ -150,6 +150,27 @@ object NbNode {
       n, identity, Validators.dummy, Some((_,_) ⇒ new BooleanEditor)
     )
 
+  def booleanRwPropSetGet[A,B](set: (A,Boolean) ⇒ State[B,Unit])
+    (get: A ⇒ Boolean, n: String): NodeOut[A,ValSt[B]] =
+    booleanRwProp(n) contramap get withIn ((a,vb) ⇒ vb map (set(a, _)))
+
+  def comboRwProp[A:Manifest] (
+    as: List[A],
+    n: String,
+    al: Alignment.Value = Alignment.Trailing
+  ): NodeOut[A,ValRes[A]] =
+    rwProp[A,A](
+      n, identity, Validators.dummy, Some((_,_) ⇒ new ComboBoxEditor(as, al))
+    )
+
+  def comboRwPropSetGet[A,B,C:Manifest](set: (A,C) ⇒ State[B,Unit])(
+    get: A ⇒ C,
+    cs: List[C],
+    n: String,
+    al: Alignment.Value = Alignment.Trailing
+  ): NodeOut[A,ValSt[B]] =
+    comboRwProp(cs, n, al) contramap get withIn ((a,vc) ⇒ vc map (set(a, _)))
+
   def intRwProp (n: String, v: EndoVal[Int]): NodeOut[Int,ValRes[Int]] =
    readRwProp[Int](n, v, al = Alignment.Trailing)
 

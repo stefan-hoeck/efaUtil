@@ -78,7 +78,7 @@ object Cc {
   implicit val CcEqual: Equal[Cc] = Equal.equalA
 
   implicit val CcArbitrary: Arbitrary[Cc] = Arbitrary (
-    ^(Arbitrary.arbitrary[Int],
+    ^^^(Arbitrary.arbitrary[Int],
       Gen.identifier filter (_.length <= 100),
       Gen oneOf selections,
       Gen choose (0, 100))(Cc.apply)

@@ -175,7 +175,7 @@ object FileIO {
   def copyBinary (from: String, to: String): ValLogIO[Unit] =
     ^(file(from), createFile(to)) (copyBinary) join
 
-  def copyBinary (from: File, to: File): ValLogIO[Unit] = ^(
+  def copyBinary (from: File, to: File): ValLogIO[Unit] = ^^(
     fileInputStream(from),
     fileOutputStream(to),
     success(from.getPath)

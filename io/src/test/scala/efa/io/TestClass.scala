@@ -11,7 +11,7 @@ object TestClass {
   implicit val TestClassEqual: Equal[TestClass] = Equal.equalA
 
   implicit val TestClassArbitrary = Arbitrary(
-    ^(Gen.identifier, arbitrary[Int], arbitrary[Boolean]) (TestClass.apply)
+    ^^(Gen.identifier, arbitrary[Int], arbitrary[Boolean]) (TestClass.apply)
   )
 
   implicit val TestClassToXml: ToXml[TestClass] = new ToXml[TestClass] {
@@ -21,7 +21,7 @@ object TestClass {
       ("int" xml t.int) ++
       ("bool" xml t.bool)
 
-    def fromXml (ns: Seq[scala.xml.Node]): ValRes[TestClass] = ^(
+    def fromXml (ns: Seq[scala.xml.Node]): ValRes[TestClass] = ^^(
       ns.readTag[String]("str"),
       ns.readTag[Int]("int"),
       ns.readTag[Boolean]("bool")
