@@ -1,9 +1,18 @@
 package efa.core.spi
 
-import efa.core.ValRes
+import efa.core.{ValRes, Localization}
 import scalaz.syntax.validation._
 
 trait UtilLoc {
+  lazy val commentLoc =
+    Localization("comment", comment, commentShort, comment)
+
+  lazy val descLoc =
+    Localization("desc", desc, descShort, desc)
+
+  lazy val valueLoc =
+    Localization("value", value, valueShort, value)
+
   def name: String
 
   def desc: String
