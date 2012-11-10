@@ -19,11 +19,11 @@ class TextEditor(
   def attachEnv(env: PropertyEnv) { env.registerInplaceEditorFactory(this) }
   override def getInplaceEditor: InplaceEditor = new TextInplace
   override def setAsText (s: String) {textOut(s).unsafePerformIO}
+  override def getAsText = desc getOrElse ""
   override def isPaintable = true
   override def paintValue(g: Graphics, r: Rectangle): Unit = {
     val cbx = new Label(value){
       horizontalAlignment = al
-      desc foreach {tooltip = _}
     }
     cbx.peer.setBounds(r)
     cbx.peer.paint(g)
