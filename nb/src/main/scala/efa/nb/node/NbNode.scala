@@ -72,18 +72,6 @@ object NbNode {
 
   def nameA[A] (s: String): NodeOut[A, Nothing] = name(_ ⇒ s)
 
-//  def property[A:Manifest] (
-//    name: String, editor: Option[A ⇒ PropertyEditor] = None
-//  ): NodeOut[A] = (n,a) ⇒ RProp[A] (name, a, editor) ∗ n.setPut
-//
-//  def propertyRw[A:Manifest] (
-//    name: String,
-//    src: EventSource[ValRes[A]],
-//    validator: EndoVal[A] = Validators.dummy[A],
-//    editor: Option[A ⇒ PropertyEditor] = None
-//  ): NodeOut[A] =
-//    (n,a) ⇒ RwProp[A] (name, a, editor, src, validator) ∗ n.setPut
-
   val rename: NodeOut[Any,String] = NodeOut((o, n) ⇒ _ ⇒ n onRename o)
 
   lazy val renameD: NodeOut[EndoVal[String],DisRes[String]] =
@@ -136,6 +124,15 @@ object NbNode {
     n, identity, toString = format, al = Alignment.Trailing
   )
 
+  def showProp[A:Show](n: String): NodeOut[A,Nothing] =
+    stringProp(n) ∙ (_.shows)
+
+  def showPropTrailing[A:Show](n: String): NodeOut[A,Nothing] =
+    textProp[A,String](n, _.shows, _.shows, al = Alignment.Trailing)
+
+  def stringProp(n: String): NodeOut[String,Nothing] =
+    textProp[String,String](n, identity)
+
   def textProp[A,B:Manifest](
     name: String,
     toB: A ⇒ B,
@@ -174,12 +171,20 @@ object NbNode {
   def intRwProp (n: String, v: EndoVal[Int]): NodeOut[Int,ValRes[Int]] =
    readRwProp[Int](n, v, al = Alignment.Trailing)
 
+  def intRwPropSetGet[A,B](set: (A,Int) ⇒ State[B,Unit])
+    (get: A ⇒ Int, v: EndoVal[Int], n: String): NodeOut[A,ValSt[B]] =
+    intRwProp(n, v) contramap get withIn ((a,vb) ⇒ vb map (set(a, _)))
+
   def longRwProp (n: String, v: EndoVal[Long]): NodeOut[Long,ValRes[Long]] =
    readRwProp[Long](n, v, al = Alignment.Trailing)
 
   def stringRwProp (n: String, v: EndoVal[String])
     : NodeOut[String,ValRes[String]] =
    readRwProp[String](n, v, al = Alignment.Leading)
+
+  def stringRwPropSetGet[A,B](set: (A,String) ⇒ State[B,Unit])
+    (get: A ⇒ String, v: EndoVal[String], n: String): NodeOut[A,ValSt[B]] =
+    stringRwProp(n, v) contramap get withIn ((a,vb) ⇒ vb map (set(a, _)))
 
   def readRwProp[A:Read:Manifest](
     name: String,
