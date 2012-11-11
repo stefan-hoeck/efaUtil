@@ -17,7 +17,7 @@ class TextEditor(
    with InplaceEditor.Factory{
 
   def attachEnv(env: PropertyEnv) { env.registerInplaceEditorFactory(this) }
-  override def getInplaceEditor: InplaceEditor = new TextInplace
+  override def getInplaceEditor: InplaceEditor = new TextInplace(value)
   override def setAsText (s: String) {textOut(s).unsafePerformIO}
   override def getAsText = desc getOrElse ""
   override def isPaintable = true
@@ -45,10 +45,11 @@ object TextEditor {
   ): TextEditor = new TextEditor(al, toString(a), desc(a), o)
 }
 
-private [node] class TextInplace extends ComponentInplaceEditor[String] {
-  protected val comp = new TextField
+private [node] class TextInplace (value: String)
+   extends ComponentInplaceEditor[AnyRef] {
+  protected val comp = new TextField {text = value}
   override def get = comp.text
-  override def set(o: String) { comp.text = o }
+  override def set(o: AnyRef) {}
   override def supportsTextEntry = true
 }
 
