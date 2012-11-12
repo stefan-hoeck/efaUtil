@@ -16,6 +16,10 @@ package object node {
   type Paster = (PasteType, org.openide.nodes.Node) ⇒ IO[Unit]
 
   type Renamer = Option[String ⇒ IO[Unit]]
+
+  type ValOut[A,B] = NodeOut[A,ValRes[B]]
+
+  type ValStOut[A,B] = NodeOut[A,ValSt[B]]
 }
 
 // vim: set ts=2 sw=2 et:

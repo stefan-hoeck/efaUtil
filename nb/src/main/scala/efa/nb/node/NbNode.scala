@@ -110,30 +110,30 @@ object NbNode {
   lazy val clearNt: NodeOut[Any,Nothing] =
     NodeOut((_, n) ⇒ _ ⇒ n setNewTypes Nil)
 
-  def booleanProp(n: String): NodeOut[Boolean,Nothing] =
+  def booleanW (n: String): NodeOut[Boolean,Nothing] =
     writeProp[Boolean,Boolean](n, identity, Some(_ ⇒ new BooleanEditor))
 
-  def intProp(n: String): NodeOut[Int,Nothing] =
-    textProp[Int,Int](n, identity, al = Alignment.Trailing)
+  def intW (n: String): NodeOut[Int,Nothing] =
+    textW[Int,Int](n, identity, al = Alignment.Trailing)
 
-  def longProp(n: String): NodeOut[Long,Nothing] =
-    textProp[Long,Long](n, identity, al = Alignment.Trailing)
+  def longW (n: String): NodeOut[Long,Nothing] =
+    textW[Long,Long](n, identity, al = Alignment.Trailing)
 
-  def doubleProp(n: String, format: Double ⇒ String)
-  : NodeOut[Double,Nothing] = textProp[Double,Double](
+  def doubleW (n: String, format: Double ⇒ String)
+  : NodeOut[Double,Nothing] = textW[Double,Double](
     n, identity, toString = format, al = Alignment.Trailing
   )
 
-  def showProp[A:Show](n: String): NodeOut[A,Nothing] =
-    stringProp(n) ∙ (_.shows)
+  def showW[A:Show](n: String): NodeOut[A,Nothing] =
+    stringW(n) ∙ (_.shows)
 
-  def showPropTrailing[A:Show](n: String): NodeOut[A,Nothing] =
-    textProp[A,String](n, _.shows, _.shows, al = Alignment.Trailing)
+  def showWTrailing[A:Show](n: String): NodeOut[A,Nothing] =
+    textW[A,String](n, _.shows, _.shows, al = Alignment.Trailing)
 
-  def stringProp(n: String): NodeOut[String,Nothing] =
-    textProp[String,String](n, identity)
+  def stringW (n: String): NodeOut[String,Nothing] =
+    textW[String,String](n, identity)
 
-  def textProp[A,B:Manifest](
+  def textW[A,B:Manifest](
     name: String,
     toB: A ⇒ B,
     toString: A ⇒ String = (a: A) ⇒ a.toString,
@@ -142,61 +142,40 @@ object NbNode {
   ): NodeOut[A,Nothing] =
     writeProp[A,B](name, toB, TextEditor.read(al, toString, desc))
 
-  def booleanRwProp (n: String): NodeOut[Boolean,ValRes[Boolean]] =
+  def booleanRw (n: String): NodeOut[Boolean,ValRes[Boolean]] =
     rwProp[Boolean,Boolean](
       n, identity, Validators.dummy, Some((_,_) ⇒ new BooleanEditor)
     )
 
-  def booleanRwPropSetGet[A,B](set: (A,Boolean) ⇒ State[B,Unit])
-    (get: A ⇒ Boolean, n: String): NodeOut[A,ValSt[B]] =
-    booleanRwProp(n) contramap get withIn ((a,vb) ⇒ vb map (set(a, _)))
-
-  def comboRwProp[A:Manifest] (
+  def comboRw[A:Manifest] (
     as: List[A],
     n: String,
     al: Alignment.Value = Alignment.Trailing
   ): NodeOut[A,ValRes[A]] =
-    rwProp[A,A](
-      n, identity, Validators.dummy, Some((_,_) ⇒ new ComboBoxEditor(as, al))
-    )
+    rwProp[A,A](n, identity,
+      Validators.dummy, Some((_,_) ⇒ new ComboBoxEditor(as, al)))
 
-  def comboRwPropSetGet[A,B,C:Manifest](set: (A,C) ⇒ State[B,Unit])(
-    get: A ⇒ C,
-    cs: List[C],
-    n: String,
-    al: Alignment.Value = Alignment.Trailing
-  ): NodeOut[A,ValSt[B]] =
-    comboRwProp(cs, n, al) contramap get withIn ((a,vc) ⇒ vc map (set(a, _)))
+  def intRw (n: String, v: EndoVal[Int]): NodeOut[Int,ValRes[Int]] =
+   readRw[Int](n, v, al = Alignment.Trailing)
 
-  def intRwProp (n: String, v: EndoVal[Int]): NodeOut[Int,ValRes[Int]] =
-   readRwProp[Int](n, v, al = Alignment.Trailing)
+  def longRw (n: String, v: EndoVal[Long]): NodeOut[Long,ValRes[Long]] =
+   readRw[Long](n, v, al = Alignment.Trailing)
 
-  def intRwPropSetGet[A,B](set: (A,Int) ⇒ State[B,Unit])
-    (get: A ⇒ Int, v: EndoVal[Int], n: String): NodeOut[A,ValSt[B]] =
-    intRwProp(n, v) contramap get withIn ((a,vb) ⇒ vb map (set(a, _)))
-
-  def longRwProp (n: String, v: EndoVal[Long]): NodeOut[Long,ValRes[Long]] =
-   readRwProp[Long](n, v, al = Alignment.Trailing)
-
-  def stringRwProp (n: String, v: EndoVal[String])
+  def stringRw (n: String, v: EndoVal[String])
     : NodeOut[String,ValRes[String]] =
-   readRwProp[String](n, v, al = Alignment.Leading)
+   readRw[String](n, v, al = Alignment.Leading)
 
-  def stringRwPropSetGet[A,B](set: (A,String) ⇒ State[B,Unit])
-    (get: A ⇒ String, v: EndoVal[String], n: String): NodeOut[A,ValSt[B]] =
-    stringRwProp(n, v) contramap get withIn ((a,vb) ⇒ vb map (set(a, _)))
-
-  def readRwProp[A:Read:Manifest](
+  def readRw[A:Read:Manifest](
     name: String,
     validator: EndoVal[A],
     toString: A ⇒ String = (a: A) ⇒ a.toString,
     desc: A ⇒ Option[String] = (a: A) ⇒ None,
     al: Alignment.Value = Alignment.Leading
-  ): NodeOut[A,ValRes[A]] = textRwProp[A](
+  ): NodeOut[A,ValRes[A]] = textRw[A](
     name, Read[A].validator >=> validator, toString, desc, al
   )
 
-  def textRwProp[A:Manifest](
+  def textRw[A:Manifest](
     name: String,
     read: Validator[String,A],
     toString: A ⇒ String = (a: A) ⇒ a.toString,
@@ -218,9 +197,8 @@ object NbNode {
     validator: EndoVal[B],
     editor: Option[(A, Out[ValRes[B]]) ⇒ PropertyEditor]
   ): NodeOut[A,ValRes[B]] =
-    NodeOut (
-    (o, n) ⇒ a ⇒ RwProp[A,B](name, a, toB, validator, editor, o) >>= n.setPut
-  )
+    NodeOut ((o, n) ⇒ a ⇒ RwProp[A,B](name, a, toB,
+      validator, editor, o) >>= n.setPut)
 
   def writeProp[A,B:Manifest](
     name: String,

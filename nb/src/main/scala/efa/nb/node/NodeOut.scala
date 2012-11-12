@@ -37,7 +37,7 @@ case class NodeOut[-A,+B](run: (Out[B], NbNode) ⇒ Out[A]) {
    * Merges two node outs. The effects of this NodeOut will
    * happen before the effects of that.
    */
- def merge[C<:A,D>:B] (that: ⇒ NodeOut[C,D]): NodeOut[C,D] = 
+  def merge[C<:A,D>:B] (that: ⇒ NodeOut[C,D]): NodeOut[C,D] = 
     NodeOut((od,n) ⇒ (run(od,n): Out[C]) ⊹ that.run(od,n))
 
   def set(n: NbNode): SET[A,B] = eTrans(n)

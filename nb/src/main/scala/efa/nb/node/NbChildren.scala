@@ -19,7 +19,7 @@ final class NbChildren private() extends Children.Keys[NodeSetter] {
     }
   }
 
-  private def set (np: FullInfo): IO[Unit] = IO {
+  private[node] def set (np: FullInfo): IO[Unit] = IO {
     map = np._1
     seq = np._2
     if (addNotified) setKeys (seq)
@@ -29,11 +29,17 @@ final class NbChildren private() extends Children.Keys[NodeSetter] {
   private[this] var map: FullMap = Map.empty
   private[this] var seq: Setters = IndexedSeq.empty
 
-  private def mapAt (i: Int): IO[SetterMap] = IO (map get i getOrElse Map.empty)
+  private[node] def mapAt (i: Int): IO[SetterMap] =
+    IO (map get i getOrElse Map.empty)
+
   private[node] def children: IO[Setters] = IO (seq)
 }
 
-object NbChildren {
+object NbChildren extends NbChildrenFunctions {
+  val create: IO[NbChildren] = IO (new NbChildren)
+}
+
+trait NbChildrenFunctions {
   type Info[+A,+B,K] = (Map[K,A],IndexedSeq[B])
 
   type Setter = NodeSetter
@@ -54,9 +60,9 @@ object NbChildren {
   type Factory[-A,+B] = (Out[B], A, SetterMap) ⇒ IO[SetterInfo]
 
   //Maps and Int-Index to a OutSourceMap
-  private type FullMap = Map[Int, SetterMap]
-  
-  private type FullInfo = (FullMap, Setters)  
+  type FullMap = Map[Int, SetterMap]
+ 
+  type FullInfo = (FullMap, Setters)  
 
   implicit def InfoMonoid[A,B,K] = new Monoid[Info[A,B,K]] {
     val zero: Info[A,B,K] = (Map.empty, IndexedSeq.empty)
@@ -143,8 +149,6 @@ object NbChildren {
       fs.toList.zipWithIndex foldMap single flatMap n.hc.set
     }
   )
-
-  val create: IO[NbChildren] = IO (new NbChildren)
 }
 
 // vim: set ts=2 sw=2 et:
