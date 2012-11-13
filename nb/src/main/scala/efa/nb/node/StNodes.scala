@@ -3,11 +3,10 @@ package efa.nb.node
 import efa.core.{ValRes, EndoVal}
 import scalaz._, Scalaz._
 
-trait StNodeFunctions {
+trait StNodeFunctions extends NbNodeFunctions with NbChildrenFunctions {
 
-  def sg[A,B,C,D](o: ValOut[A,B])(set: (A,B) ⇒ C)(get: D ⇒ A)
-    : ValOut[D,C] =
-  o.withIn ((a: A,vb: ValRes[B]) ⇒ vb map (set(a,_))) contramap get
+  def sg[A,B,C](set: (A,B) ⇒ C)(get: A ⇒ B)(o: ValOut[B,B])
+    : ValOut[A,C] = o contramap get withIn ((a,vb) ⇒ vb map (set(a, _)))
 
   def lens[A,B] (o: ValStOut[A,A])(l: B @> A): ValStOut[B,B] =
     mapSt[B,A,B] (o ∙ l.get)(l)

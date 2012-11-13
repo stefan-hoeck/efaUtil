@@ -9,9 +9,7 @@ import java.beans.PropertyEditor
 import org.openide.nodes.{Children, AbstractNode, Sheet, Node, NodeTransfer}
 import scala.swing.Alignment
 
-object NbNode {
-  import NodeOut.{outOnly, outImpure}
-
+object NbNode extends NbNodeFunctions {
   def apply: IO[NbNode] = for {
     hc  ← NbChildren.create
     lkp ← PureLookup.apply
@@ -25,6 +23,10 @@ object NbNode {
 
   private[node] def createIO(ns: NodeSetter) =
     create(ns).unsafePerformIO
+}
+
+trait NbNodeFunctions {
+  import NodeOut.{outOnly, outImpure}
 
   val contextRoots: NodeOut[List[String],Nothing] = outOnly(_.contextRoots)
 
