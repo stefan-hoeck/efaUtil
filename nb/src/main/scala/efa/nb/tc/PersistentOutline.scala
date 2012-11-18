@@ -28,17 +28,18 @@ trait PersistentOutline extends PersistentComponent {
     _  ← point (prefs.putInt(prefId + RowHeight, rh))
     ps ← point (new Properties)
     _  ← point (outline.writeSettings(ps, prefix))
-    _  ← ps.stringPropertyNames.toList filter (_ startsWith prefix) foldMap (
-           k ⇒ point (prefs.put(k, ps.getProperty(k)))
-         )
+    _  ← point (ps.stringPropertyNames filter (_ startsWith prefix) foreach {
+           k ⇒ prefs.put(k, ps.getProperty(k))
+         })
   } yield ()
 
   override protected def readProps(prefs: Preferences) = for {
     rh ← point (prefs.getInt(prefId + RowHeight, MinRowHeight))
+    _  ← liftIO(rowHeightSet(rh))
     ps ← point (new Properties)
-    _  ← prefs.keys.toList filter (_ startsWith prefix) foldMap {
-           k ⇒ point (ps.put(k, prefs.get(k, ""))) >| ()
-         }
+    _  ← point (prefs.keys filter (_ startsWith prefix) foreach {
+           k ⇒ ps.put(k, prefs.get(k, ""))
+         })
     _  ← try {
            outline.readSettings(ps, prefix)
            nullValLogIO 
