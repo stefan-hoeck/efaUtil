@@ -28,7 +28,7 @@ object Resolvers {
 }
 
 object Dependencies {
-  val nbV = "RELEASE701"
+  val nbV = "RELEASE71"
   val orgNb = "org.netbeans.api"
 
   val scalaSwing = "org.scala-lang" % "scala-swing" % "2.9.2" 
