@@ -7,7 +7,7 @@ import scala.collection.JavaConversions._
 import scalaz._, Scalaz._, effect._
 
 trait PersistentOutline extends PersistentComponent {
-  import WithOutline._
+  import WithOutline._, PersistentOutline._
   protected def outline: OutlineView
 
   final protected def rowHeight = IO (outline.getOutline.getRowHeight)
@@ -28,19 +28,14 @@ trait PersistentOutline extends PersistentComponent {
     _  ← point (prefs.putInt(prefId + RowHeight, rh))
     ps ← point (new Properties)
     _  ← point (outline.writeSettings(ps, prefix))
-    _  ← point (ps.stringPropertyNames filter (_ startsWith prefix) foreach {
-           k ⇒ prefs.put(k, ps.getProperty(k))
-         })
+    _  ← point (prefs.putByteArray(prefix, propsToArray(ps)))
   } yield ()
 
   override protected def readProps(prefs: Preferences) = for {
     rh ← point (prefs.getInt(prefId + RowHeight, MinRowHeight))
     _  ← liftIO(rowHeightSet(rh))
-    ps ← point (new Properties)
-    _  ← point (prefs.keys filter (_ startsWith prefix) foreach {
-           k ⇒ ps.put(k, prefs.get(k, ""))
-         })
     _  ← try {
+           val ps = propsFromArray(prefs.getByteArray(prefix, Array()))
            outline.readSettings(ps, prefix)
            nullValLogIO 
          } catch {
@@ -52,6 +47,29 @@ trait PersistentOutline extends PersistentComponent {
 
   private def readError (e: Exception) = 
     "Error when reading props for %s: %s" format (prefId, e.toString)
+}
+
+object PersistentOutline {
+  import java.io.{ByteArrayOutputStream, ByteArrayInputStream}
+
+  private def propsToArray (ps: Properties): Array[Byte] = {
+    val os = new ByteArrayOutputStream
+
+    ps.store(os, "")
+    os.close()
+
+    os.toByteArray
+  }
+
+  private def propsFromArray (bs: Array[Byte]): Properties = {
+    val in = new ByteArrayInputStream(bs)
+    val ps = new Properties
+
+    ps.load(in)
+    in.close()
+
+    ps
+  }
 }
 
 // vim: set ts=2 sw=2 et:
