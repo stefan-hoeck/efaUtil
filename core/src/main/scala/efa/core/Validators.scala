@@ -65,6 +65,9 @@ trait Validators {
 
     check (_.length <= length, _ ⇒ loc maxStringLengthMsg length)
   }
+
+  def uniqueName (ns: Set[String]): EndoVal[String] =
+    check(s ⇒ !ns(s), loc.nameExists)
 }
 
 object Validators extends Validators

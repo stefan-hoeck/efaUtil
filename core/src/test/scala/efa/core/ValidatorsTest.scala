@@ -50,6 +50,12 @@ object ValidatorTest
       x ⇒ s.length <= i && (x ≟ s)
     )
   }
+
+  property("uniqueName") = Prop.forAll { p: (Set[String],String) ⇒ 
+    val (ns, n) = p
+
+    uniqueName(ns).run(n).isLeft ≟ ns(n)
+  }
     
 } 
 
