@@ -2,6 +2,7 @@ package efa.nb.controller
 
 import efa.core.{ValRes, ValSt}
 import efa.io.LoggerIO
+import efa.nb.UndoEdit
 import efa.react._
 import scalaz._, Scalaz._, effect.IO
 
@@ -13,6 +14,9 @@ trait StateTransFunctions {
 
   def basicIn[A] (s: StTrans[A])(a: IO[A]): SIn[A] =
     sTrans.loop(toSST(s))(a)
+
+  def undoIn[A] (s: StTrans[A], out: Out[UndoEdit])(a: IO[A]): SIn[A] =
+    sTrans.loop(toSST(s) >=> UndoEdit.undoSST(out))(a)
 
   def basicLogIn[A] (s: StTrans[A], l: LoggerIO)(a: IO[A]): SIn[A] =
     basicIn(s --> l.logValRes)(a)

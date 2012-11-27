@@ -28,9 +28,8 @@ object UndoEdit extends IOCFunctions {
     )
 
   def undoSST[A] (out: Out[UndoEdit]): SST[A,A] =
-    eTrans loopHold (
-      pairs[A] andThen undoEET(out) merge sTrans.id[A].events
-    )
+    eTrans loopHold (pairs[A] >=> undoEET(out)) append
+    sTrans.id[A].events
 
   def managedOut (manager: UndoRedo.Manager): Out[UndoEdit] = {
     def event (ue: UndoEdit) = new UndoableEditEvent (this, ue)
