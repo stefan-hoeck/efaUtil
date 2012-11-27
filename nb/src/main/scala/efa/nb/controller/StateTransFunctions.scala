@@ -10,18 +10,25 @@ trait StateTransFunctions {
   type St[A] = State[A,Unit]
   type StTrans[A] = SET[A,ValSt[A]]
 
-  def accum[A](st: ValSt[A], a: A): A = st fold (_ ⇒ a, _ exec a)
+  def accum[A](a: A, st: ValSt[A]): A = st fold (_ ⇒ a, _ exec a)
 
   def basicIn[A] (s: StTrans[A])(a: IO[A]): SIn[A] =
     sTrans.loop(toSST(s))(a)
 
-  def undoIn[A] (s: StTrans[A], out: Out[UndoEdit])(a: IO[A]): SIn[A] =
-    sTrans.loop(toSST(s) >=> UndoEdit.undoSST(out))(a)
-
   def basicLogIn[A] (s: StTrans[A], l: LoggerIO)(a: IO[A]): SIn[A] =
     basicIn(s --> l.logValRes)(a)
 
-  def toSST[A] (s: StTrans[A]): SST[A,A] = eTrans.loopFold(s)(accum)
+  def undoIn[A] (s: StTrans[A], out: Out[UndoEdit])(a: IO[A]): SIn[A] =
+    sTrans.loop(toSST(s) >=> UndoEdit.undoSST(out))(a)
+
+  def undoLogIn[A] (
+    s: StTrans[A],
+    out: Out[UndoEdit],
+    l: LoggerIO
+  )(a: IO[A]): SIn[A] = undoIn (s --> l.logValRes, out)(a)
+
+  def toSST[A] (s: StTrans[A]): SST[A,A] =
+    eTrans.loopHold(s uponOut accum)
 
   def worldSST[A,B,W] (s: SET[B,ValSt[A]], wIn: SIn[W])
     (aaSST: SST[A,A], f: (A,W) ⇒ B): SST[A,A] = {
