@@ -9,7 +9,7 @@ trait AnyValInstances {
     msg: String ⇒ String
   ): Read[A] with UniqueId[A,A] = new Read[A] with UniqueId[A,A]{
     override def read(s: String) =
-      ((_: Exception) ⇒ msg(s).wrapNel) <-: v(s)
+      ((_: Exception) ⇒ msg(s).wrapNel) <-: v(s.trim)
 
     def id (a: A) = a
   }
