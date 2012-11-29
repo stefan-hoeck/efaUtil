@@ -19,7 +19,7 @@ abstract class CookieAllAction[A:Manifest](
   override final protected def cookieClasses = Array(cc)
 
   override final protected def performAction(nodes: Array[Node]) {
-    nodes.toList foldMap (_.getLookup.all[A] >>= run) unsafePerformIO
+    nodes.toList foldMap (_.getLookup.all[A]) flatMap run unsafePerformIO
   }
 
   def run (as: Seq[A]): IO[Unit]
