@@ -1,8 +1,9 @@
 package efa.nb
 
-import efa.react._
-import scalaz._, Scalaz._, effect._
 import efa.core._
+import efa.react._
+import java.awt.Image
+import scalaz._, Scalaz._, effect._
 
 package object node {
   type DataCookie = PureLookup ⇒ Option[IO[Unit]]
@@ -20,6 +21,8 @@ package object node {
   type ValOut[A,B] = NodeOut[A,ValRes[B]]
 
   type ValStOut[A,B] = NodeOut[A,ValSt[B]]
+
+  type IconImageF = Int ⇒ IO[Option[Image]]
 }
 
 // vim: set ts=2 sw=2 et:

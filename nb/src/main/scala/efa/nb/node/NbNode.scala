@@ -5,7 +5,9 @@ import efa.core._, Efa._
 import efa.nb.PureLookup
 import efa.nb.dialog.DialogEditable
 import efa.react._
+import java.awt.Image
 import java.beans.PropertyEditor
+import javax.swing.Action
 import org.openide.nodes.{Children, AbstractNode, Sheet, Node, NodeTransfer}
 import scala.swing.Alignment
 
@@ -68,6 +70,16 @@ trait NbNodeFunctions {
     outImpure(_ setIconBaseWithExtension _)
 
   def iconBaseA[A] (s: String): NodeOut[A,Nothing] = iconBase ∙ (_ ⇒ s)
+
+  def iconImage[A] (f: A ⇒ IconImageF): NodeOut[A,Nothing] = 
+    NodeOut((_,n) ⇒ a ⇒ n setIconImage Some(f(a)))
+
+  def preferredAction[A](f: A ⇒ Action): NodeOut[A,Nothing] =
+    NodeOut((_,n) ⇒ a ⇒ n setPreferredAction Some(f(a)))
+
+  def preferredActionA[A](a: Action): NodeOut[A,Nothing] =
+    preferredAction(_ ⇒ a)
+    
 
   def name[A] (f: A ⇒ String): NodeOut[A, Nothing] =
     outImpure((n,a) ⇒ n.setDisplayName(f(a)))

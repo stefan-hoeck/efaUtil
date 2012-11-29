@@ -1,9 +1,11 @@
 package efa.nb.node
 
 import efa.react.Out
-import java.util.{List ⇒ JList}
+import java.awt.Image
 import java.awt.datatransfer.Transferable
 import java.awt.dnd.DnDConstants
+import java.util.{List ⇒ JList}
+import javax.swing.Action
 import org.openide.nodes.{Children, AbstractNode, Sheet, Node, NodeTransfer}
 import org.openide.util.Lookup
 import org.openide.util.datatransfer.{NewType, PasteType ⇒ JPasteType}
@@ -74,6 +76,22 @@ abstract class PureNode(c: Children, l: Lookup)
     super.createPasteTypes(t, s)
     Option(getDropType( t, DnDConstants.ACTION_COPY, -1 )) foreach {s add _}
   }
+
+  private[this] var prefAction: Option[Action] = None
+
+  final def setPreferredAction (oa: Option[Action]): IO[Unit] =
+    IO(prefAction = oa)
+
+  final override def getPreferredAction =
+    prefAction getOrElse super.getPreferredAction
+
+  private[this] var iconImage: Option[IconImageF] = None
+
+  final def setIconImage (o: Option[IconImageF]): IO[Unit] =
+    IO(iconImage = o)
+
+  final override def getIcon(t: Int) = 
+    iconImage flatMap (_ apply t unsafePerformIO) getOrElse super.getIcon(t)
 }
 
 // vim: set ts=2 sw=2 et:
