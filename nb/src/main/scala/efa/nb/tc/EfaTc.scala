@@ -1,6 +1,5 @@
 package efa.nb.tc
 
-import efa.io.LoggerIO
 import org.openide.windows.{TopComponent, WindowManager}
 import org.openide.util.{Lookup, NbPreferences}
 import java.util.prefs.Preferences

@@ -1,12 +1,11 @@
 package efa.nb.tc
 
-import efa.io.{LoggerIO, IOCached}
+import efa.io.IOCached
+import efa.nb.pref
 import org.openide.windows.{TopComponent, WindowManager}
 import scalaz._, Scalaz._, effect._
 
-abstract class TcProvider[Tc <: TopComponent](
-  factory: IO[Tc], logger: LoggerIO
-)
+abstract class TcProvider[Tc <: TopComponent](factory: IO[Tc])
 (implicit m: Manifest[Tc]) {
   import TcProvider._
 
@@ -15,17 +14,20 @@ abstract class TcProvider[Tc <: TopComponent](
 
   protected val preferredId: String
   
-  private[this] def getDef: IO[Tc] =
-    logger.debug ("Get default incstance for " + preferredId) >>
-    inst.get
+  private[this] def getDef: IO[Tc] = for {
+    l ← pref.tcLogger
+    _ ← l debug ("Get default incstance for " + preferredId)
+    t ← inst.get
+  } yield t
 
   private[this] def findInst: IO[Tc] = for {
-    _  ← logger.debug ("Searching instance for " + preferredId)
+    l  ← pref.tcLogger
+    _  ← l debug ("Searching instance for " + preferredId)
     tc ← IO(WindowManager.getDefault().findTopComponent(preferredId))
     r  ← tc match {
-           case null ⇒  logger.warn(notFound(preferredId)) >> getDef
+           case null ⇒  l.warn(notFound(preferredId)) >> getDef
            case w if(tcc isAssignableFrom w.getClass) ⇒ IO(w.asInstanceOf[Tc])
-           case _ ⇒ logger.warn(multipleFound(preferredId)) >> getDef
+           case _ ⇒ l.warn(multipleFound(preferredId)) >> getDef
          }
   } yield r
 

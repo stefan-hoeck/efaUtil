@@ -8,8 +8,8 @@ import scalaz._, Scalaz._, effect._
 
 trait PersistentComponent extends ValLogIOFunctions with ValLogIOInstances {
 
-  final def read: IO[Unit] = logger logValM {
-    for {
+  final def read: IO[Unit] = {
+    def doRead = for {
       _ ← info ("Reading " + prefId)
       p ← prefs
       _ ← (p.get(prefId + "%s version", null) == version) ?
@@ -17,9 +17,11 @@ trait PersistentComponent extends ValLogIOFunctions with ValLogIOInstances {
           nullValLogIO
       _ ← liftIO (persistentChildren foldMap (_.read))
     } yield ()
+
+    logger >>= (_ logValM doRead)
   }
 
-  protected def logger: LoggerIO = LoggerIO.consoleLogger
+  protected def logger: IO[LoggerIO] = efa.nb.pref.tcLogger
 
   protected def persistentChildren: List[PersistentComponent] = Nil 
 
@@ -36,14 +38,16 @@ trait PersistentComponent extends ValLogIOFunctions with ValLogIOInstances {
   
   protected def writeProps(prefs: Preferences): ValLogIO[Unit] = nullValLogIO
   
-  final def persist: IO[Unit] = logger logValM {
-    for {
+  final def persist: IO[Unit] = {
+    def doPersist = for {
       _ ← info ("Persisting " + prefId)
       p ← prefs
       _ ← liftIO (IO (p.put(prefId + "%s version", version)))
       _ ← writeProps(p)
       _ ← liftIO (persistentChildren foldMap (_.persist))
     } yield ()
+
+    logger >>= (_ logValM doPersist)
   }
 }
 
