@@ -7,6 +7,8 @@ sealed trait LoggerIO {
   self ⇒
   
   def log (log: Log): IO[Unit]
+  
+  def logNel (ss: NonEmptyList[String]): IO[Unit]
 
   def logs (ls: Logs) = ls.toList foldMap log
 
@@ -17,11 +19,9 @@ sealed trait LoggerIO {
   def error (msg: ⇒ String) = log (Log error msg)
 
   def filter (max: Level) =
-    LoggerIO (l ⇒ (l.level >= max) ? self.log (l) | IO.ioUnit)
+    LoggerIO (l ⇒ (l.level >= max) ? self.log (l) | IO.ioUnit, logNel)
 
   def logDisRes[A](v: DisRes[A]): IO[Unit] = v fold (logNel, _ ⇒ IO.ioUnit)
-
-  def logNel (ss: NonEmptyList[String]): IO[Unit] = ss foldMap (error(_))
 
   def logVal[A] (i: ValLogIO[A], default: A): IO[A] = logValV(i) | default
 
@@ -44,9 +44,12 @@ sealed trait LoggerIO {
 }
 
 object LoggerIO {
-  def apply (f: Log ⇒ IO[Unit]): LoggerIO = new LoggerIO {
-    def log (log: Log) = f (log)
+  def apply (l: Log ⇒ IO[Unit], lNel: Nel[String] ⇒ IO[Unit]): LoggerIO = new LoggerIO {
+    def log (log: Log) = l (log)
+    def logNel (ss: Nel[String]) = lNel(ss)
   }
+
+  def logOnly (l: Log ⇒ IO[Unit]): LoggerIO = apply(l, _ foldMap (s ⇒ l(Log error s)))
 
   private def color (c: String, msg: String) =
     c + msg + Console.RESET
@@ -59,20 +62,19 @@ object LoggerIO {
   import Level._
   import IO.putStrLn
 
-  lazy val consoleLogger = apply { log ⇒ log.level match {
+  lazy val consoleLogger = logOnly ( log ⇒ log.level match {
       case Trace ⇒ putStrLn ("[" + white ("trace") +"] " + log.msg)
       case Debug ⇒ putStrLn ("[" + blue ("debug") +"] " + log.msg)
       case Info ⇒ putStrLn ("[" + green ("info") +"] " + log.msg)
       case Warning ⇒ putStrLn ("[" + yellow ("warning") +"] " + log.msg)
       case Error ⇒ putStrLn ("[" + red ("error") +"] " + log.msg)
     }
-  }
-
+  )
 
   implicit val LoggerIOMonoid = new Monoid[LoggerIO]{
-    val zero = LoggerIO(_ ⇒ IO.ioUnit)
+    val zero = logOnly (_ ⇒ IO.ioUnit)
     def append (a: LoggerIO, b: ⇒ LoggerIO): LoggerIO = 
-      LoggerIO(l ⇒ a.log(l) >> b.log(l))
+      LoggerIO(l ⇒ a.log(l) >> b.log(l), nel ⇒ a.logNel(nel) >> b.logNel(nel))
   }
 }
 
