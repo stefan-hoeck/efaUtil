@@ -39,18 +39,32 @@ case class IOChooser (chooser: ValLogIO[FileChooser]) {
 object IOChooser {
   val noFilter: IOChooser = IOChooser(point(new FileChooser))
 
-  def filter(desc: String, exts: String*): IOChooser = IOChooser (
-    point(new FileChooser {
-      fileFilter = new FileNameExtensionFilter (desc, exts: _*)
-    })
+  def filter(
+    desc: String,
+    selected: Option[String],
+    exts: String*
+  ): IOChooser = IOChooser (
+    point(
+      new FileChooser {
+        if (exts.nonEmpty)
+          fileFilter = new FileNameExtensionFilter (desc, exts: _*)
+
+        selected foreach {
+          new java.io.File(_) match {
+            case f if (f.exists && f.isDirectory) ⇒ peer.setCurrentDirectory(f)
+            case f if (f.exists)                  ⇒ selectedFile = f
+            case _                                ⇒ 
+          }
+        }
+      }
+    )
   )
 
-  def selectedFile(path: String): IOChooser = IOChooser(point(new FileChooser{
-    selectedFile = new java.io.File(path) match {
-      case f if (f.exists) ⇒ f
-      case _               ⇒ selectedFile
-    }
-  }))
+  def txtOnly (selected: Option[String]): IOChooser = 
+    filter(loc.txtFiles, selected, loc.txtExt)
+
+  def all (selected: Option[String]): IOChooser = 
+    filter(loc.allFiles, selected)
 }
 
 // vim: set ts=2 sw=2 et:

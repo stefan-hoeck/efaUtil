@@ -3,6 +3,8 @@ package efa.local.de
 import efa.io.spi.IOLoc
 
 class IoLocal extends IOLoc {
+  def allFiles = "Alle Dateien"
+
   def closed (s: String) = s + " geschlossen"
 
   def dataReadError = "Fehler beim Lesen von Daten"
@@ -62,6 +64,10 @@ class IoLocal extends IOLoc {
       nameExt, cl.getCanonicalName)
 
   def stringWritten (s: String) = "Text geschrieben nach " + s
+
+  def txtExt = "txt"
+
+  def txtFiles = "Textdateien [.txt]"
 
   def xmlRead (s: String) = "Xml gelesen von " + s
 

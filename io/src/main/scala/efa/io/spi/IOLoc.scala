@@ -4,6 +4,7 @@ import java.io.File
 
 trait IOLoc {
 
+  def allFiles: String
   def closed (s: String): String
   def dataReadError: String
   def fileNotFound (s: String): String
@@ -29,6 +30,8 @@ trait IOLoc {
   def resourceNotFound (nameExt: String, cl: Class[_], t: Throwable): String
   def resourceOpened (nameExt: String, cl: Class[_]): String
   def stringWritten (s: String): String
+  def txtExt: String
+  def txtFiles: String
   def xmlRead (s: String): String
   def xmlWritten (s: String): String
 
@@ -76,6 +79,9 @@ trait IOLoc {
 }
 
 object IOLoc extends IOLoc {
+
+  def allFiles = "All Files"
+
   def closed (s: String) = "Closed " + s
 
   def dataReadError = "Error when reading data."
@@ -135,6 +141,10 @@ object IOLoc extends IOLoc {
       nameExt, cl.getCanonicalName)
 
   def stringWritten (s: String) = "Wrote string to " + s
+
+  def txtExt = "txt"
+
+  def txtFiles = "Text Files [.txt]"
 
   def xmlRead (s: String) = "Read xml from " + s
 
