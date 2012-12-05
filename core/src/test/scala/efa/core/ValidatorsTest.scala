@@ -54,7 +54,7 @@ object ValidatorTest
   property("uniqueName") = Prop.forAll { p: (Set[String],String) ⇒ 
     val (ns, n) = p
 
-    uniqueName(ns).run(n).isLeft ≟ ns(n)
+    uniqueString(ns, "Name").run(n).isLeft ≟ ns(n)
   }
     
 } 
