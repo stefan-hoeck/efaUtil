@@ -65,6 +65,21 @@ object IOChooser {
 
   def all (selected: Option[String]): IOChooser = 
     filter(loc.allFiles, selected)
+
+  def folders (selected: Option[String]): IOChooser = IOChooser (
+    point(
+      new FileChooser {
+        selected foreach {
+          new java.io.File(_) match {
+            case f if (f.exists && f.isDirectory) ⇒ peer.setCurrentDirectory(f)
+            case _                                ⇒ 
+          }
+        }
+
+        fileSelectionMode = FileChooser.SelectionMode.DirectoriesOnly
+      }
+    )
+  )
 }
 
 // vim: set ts=2 sw=2 et:
