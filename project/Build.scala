@@ -51,6 +51,7 @@ object Dependencies {
   val nbActions = orgNb % "org-openide-actions" % nbV
   val nbDialogs = orgNb % "org-openide-dialogs" % nbV
   val nbOutline = orgNb % "org-netbeans-swing-outline" % nbV
+  val nbOptions = "org.netbeans.api" % "org-netbeans-modules-options-api" % nbV
   val nbAutoupdateUi = orgNb % "org-netbeans-modules-autoupdate-ui" % nbV
   val nbAutoupdateServices =
     orgNb % "org-netbeans-modules-autoupdate-services" % nbV
@@ -100,7 +101,7 @@ object UtilBuild extends Build {
     file("nb"),
     settings = addDeps (scalazCheckET ++
       Seq (nbUtil, nbLookup, nbDialogs, nbNodes, nbExplorer, nbModules,
-           nbFilesystems, nbLoaders, scalaSwing, react, react_swing))
+           nbOptions, nbFilesystems, nbLoaders, scalaSwing, react, react_swing))
   ) dependsOn (core, io)
 
   lazy val localDe = Project (
