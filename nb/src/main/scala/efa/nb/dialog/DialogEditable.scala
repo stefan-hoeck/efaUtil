@@ -1,12 +1,12 @@
 package efa.nb.dialog
 
 import efa.core._
-import efa.nb.{VSIn, ValidatedPanel, loc}
+import efa.nb.{VSIn, loc}
 import efa.react.{Out, EET, eTrans}
 import scala.swing.event.ActionEvent
 import javax.swing.JDialog
-import org.openide.{DialogDisplayer, DialogDescriptor}
-import scala.swing.{Component, Button}
+import org.openide.{DialogDisplayer, DialogDescriptor, NotifyDescriptor}
+import scala.swing.{Component, Button, BorderPanel}
 import scalaz._, Scalaz._, effect.IO
 
 trait DialogEditable[-A,+B] {
@@ -26,24 +26,24 @@ trait DialogEditable[-A,+B] {
   def newTitle (a: A): String = loc newTitle name(a)
 
   final def editDialog (title: String, a: A): IO[Option[B]] = for {
-    p   ← component(a)
-    ref ← IO newIORef "".failureNel[B]
-    vp  ← ValidatedPanel(p)
-    d   ← dialog(vp, title)
-    btn ← button[B](d)
-    p   ← signalIn(p) to (btn.out ⊹ vp.out) on btn to (ref write _) apply ()
-    _   ← IO(d.setVisible(true))
-    res ← ref.read
-    _   ← p._1.toList foldMap (_.disconnect) //clean up events
-  } yield res.toOption
+    p    ← component(a)
+    pnl  ← IO(new BorderPanel{add (p, BorderPanel.Position.North)})
+    desc ← IO (new NotifyDescriptor.Confirmation(
+              pnl.peer, title, NotifyDescriptor.OK_CANCEL_OPTION))
+    _    ← IO(desc.createNotificationLineSupport())
+    cs   ← signalIn(p) to descOut(desc) apply ()
+    b    ← IO(DialogDisplayer.getDefault.notify(desc))
+    ok   = b == NotifyDescriptor.YES_OPTION ||
+           b == NotifyDescriptor.OK_OPTION
+    res  ← ok ? cs._2.now.map (_.toOption) | IO(None)
+    _    ← cs._1.toList foldMap (_.disconnect) //clean up events
+  } yield res
 
   final def edit (a: A): IO[Option[B]] = editDialog(editTitle(a), a)
 
   final def create (a: A): IO[Option[B]] = editDialog(newTitle(a), a)
 
   lazy val editTrans: EET[A,B] = eTrans.id collectIO edit
-
-//  def ntInfo (a: A, out: Out[B]): NtInfo = (name(a), edit(a, out))
 }
 
 object DialogEditable {
@@ -59,18 +59,19 @@ object DialogEditable {
     override def name (a: A) = Show[A] shows a
   }
 
-  private def button[B](d: JDialog) = IO(
-    new Button {
-      override lazy val peer = d.getRootPane.getDefaultButton
-      lazy val out: Out[ValRes[B]] = vr ⇒ IO(enabled = vr.isSuccess)
+  def descOut[A](desc: NotifyDescriptor): Out[ValRes[A]] = {
+    def valid (a: A) = IO{
+      desc.setValid(true)
+      desc.getNotificationLineSupport.clearMessages()
     }
-  )
 
-  private def dialog (c: Component, title: String): IO[JDialog] = IO (
-    DialogDisplayer.getDefault.createDialog(
-      new DialogDescriptor(c.peer, title, true, null)
-    ).asInstanceOf[JDialog]
-  )
+    def msg (n: NonEmptyList[String]) = IO{
+      desc.setValid(false)
+      desc.getNotificationLineSupport.setErrorMessage(n.head)
+    }
+
+    _ fold (msg, valid)
+  }
 }
 
 // vim: set ts=2 sw=2 et:
