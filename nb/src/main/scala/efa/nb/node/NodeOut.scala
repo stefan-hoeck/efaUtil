@@ -7,7 +7,7 @@ case class NodeOut[-A,+B](run: (Out[B], NbNode) ⇒ Out[A]) {
   def collect[C] (f: B ⇒ Option[C]): NodeOut[A,C] = collectIO(f ∘ (IO(_)))
 
   def collectIO[C] (f: B ⇒ IO[Option[C]]): NodeOut[A,C] = contramapM(oc ⇒
-    b ⇒ f(b) >>= (_ fold (oc, IO.ioUnit))
+    b ⇒ f(b) >>= (_ map oc orZero)
   )
 
   def contramap[C] (f: C ⇒ A): NodeOut[C,B] =

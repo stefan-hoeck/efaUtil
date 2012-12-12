@@ -231,7 +231,7 @@ trait NbNodeFunctions {
     toB: A ⇒ B,
     editor: Option[A ⇒ PropertyEditor]
   )(implicit m: Manifest[B])
-   extends Node.Property[B] (m.erasure.asInstanceOf[Class[B]]) {
+   extends Node.Property[B] (m.runtimeClass.asInstanceOf[Class[B]]) {
     override def canRead = true
     override def canWrite = false
     override def setValue (a: B) {}
@@ -257,7 +257,7 @@ trait NbNodeFunctions {
     editor: Option[(A, Out[ValRes[B]]) ⇒ PropertyEditor],
     out: Out[ValRes[B]]
   )(implicit m: Manifest[B])
-   extends Node.Property[B](m.erasure.asInstanceOf[Class[B]]) {
+   extends Node.Property[B](m.runtimeClass.asInstanceOf[Class[B]]) {
     override def canRead = true
     override def canWrite = true
     override def getValue: B = toB (a)

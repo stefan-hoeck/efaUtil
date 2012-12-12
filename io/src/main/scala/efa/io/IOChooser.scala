@@ -29,10 +29,10 @@ case class IOChooser (chooser: ValLogIO[FileChooser]) {
   } yield r
 
   def withWriter (cs: CharSet)(f: Writer ⇒ ValLogIO[Unit]): ValLogIO[Unit] =
-    saveFile ∗ ( _ fold (fi ⇒ FileIO.withWriter(fi, cs)(f), ().η[ValLogIO]) )
+    saveFile >>= (_ map (fi ⇒ FileIO.withWriter(fi, cs)(f)) orZero)
   
   def withOutputStream (f: OutputStream ⇒ ValLogIO[Unit]): ValLogIO[Unit] =
-    saveFile ∗ ( _ fold (fi ⇒ FileIO.withOutputStream(fi)(f), ().η[ValLogIO]) )
+    saveFile >>= (_ map (fi ⇒ FileIO.withOutputStream(fi)(f)) orZero)
 
 }
 

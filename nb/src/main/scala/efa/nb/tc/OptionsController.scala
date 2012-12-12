@@ -39,7 +39,7 @@ class OptionsController[A,B] (
 
   private[this] def getPnl: IO[B] = for {
     op   ← IO(pnl)
-    res  ← op fold (IO(_), createPnl)
+    res  ← op.fold(createPnl)(IO(_))
   } yield res
 
   private[this] def clear: IO[Unit] = for {
@@ -63,7 +63,7 @@ class OptionsController[A,B] (
     _  ← setChanged(false)
     _  ← clear
     b  ← getPnl
-    p  ← in(b) spinoff changedSet apply () 
+    p  ← in(b) spinoff changedSet runIO () 
     _  ← IO(cs = p.some)
   } yield ()
 
@@ -81,7 +81,7 @@ class OptionsController[A,B] (
 
   private[this] def valid: IO[Boolean] = for {
     ocs ← IO(cs)
-    b   ← ocs fold (_._2.now ∘ (_.isSuccess), IO(false))
+    b   ← ocs.fold(IO(false))(_._2.now ∘ (_.isSuccess))
   } yield b
     
   private[this] def createPnl: IO[B] = for {

@@ -25,7 +25,7 @@ object NbChildrenTest extends Properties("NbChildren") {
   property ("seqFactory") = forAll { cs: List[Child] ⇒ 
     val res = for {
       n ← NbNode.apply
-      _ ← seqOut set n apply Signal.newVal(cs)
+      _ ← seqOut set n runIO Signal.newVal(cs)
       names = displayNames (n)
     } yield names ≟ cs.map (_.name)
 
@@ -39,7 +39,7 @@ object NbChildrenTest extends Properties("NbChildren") {
     val res = for {
       n ← NbNode.apply
       v ← Signal newVar cs
-      _ ← seqOut set n apply v
+      _ ← seqOut set n runIO v
       ca = n.getChildren.getNodes
       aSet = (displayNames (n) ≟ cs.map (_.name)) :| "first set"
       _ ← v put rs
@@ -57,7 +57,7 @@ object NbChildrenTest extends Properties("NbChildren") {
   property ("uidFactory") = Prop.forAll { cs: List[Child] ⇒ 
     val res = for {
       n ← NbNode.apply
-      _ ← uidOut set n apply Signal.newVal(cs)
+      _ ← uidOut set n runIO Signal.newVal(cs)
       names = displayNames (n)
     } yield names ≟ cs.map (_.name)
 
@@ -72,7 +72,7 @@ object NbChildrenTest extends Properties("NbChildren") {
     val res = for {
       n ← NbNode.apply
       v ← Signal newVar cs
-      _ ← uidOut set n apply v
+      _ ← uidOut set n runIO v
       ca = n.getChildren.getNodes
       aSet = (displayNames (n) ≟ cs.map (_.name)) :| "first set"
       _ ← v put rs

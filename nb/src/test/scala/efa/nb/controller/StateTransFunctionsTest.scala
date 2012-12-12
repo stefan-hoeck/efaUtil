@@ -169,7 +169,8 @@ object StateTransTest extends Properties("StateTrans") {
 
     val res = for {
       ui  ← UI(a)
-      p   ← undoIn(ui.stTrans, ui.undoOut)(IO(a)) apply ()
+      undoInS = undoIn(ui.stTrans, ui.undoOut)(IO(a))
+      p   ← undoInS.go
       _   ← ui mod (b + _)
       _   ← ui.undo
       now ← p._2.now
@@ -206,7 +207,7 @@ object StateTransTest extends Properties("StateTrans") {
       _   ← ui.undo
       _   ← ui mod (b + _)
       now ← ui.get
-    } yield (now ≟ (b + a)) :| "exp: %s but was: %s".format(b + a, now)
+    } yield (now ≟ (b + a)) :| s"exp: ${b + a} but was: $now"
 
     eval(res)
   }

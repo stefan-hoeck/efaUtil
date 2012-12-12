@@ -47,7 +47,7 @@ object NbNodeTest extends Properties("NbNode") {
     val res = for {
       r   ← IO newIORef "".failureNel[String]
       n   ← NbNode.apply
-      _   ← renameV set n to (r write _) apply Signal.newVal(nameVal)
+      _   ← renameV set n to (r write _) runIO Signal.newVal(nameVal)
       _   ← IO(n.setName(s))
       res ← r.read
     } yield res ≟ nameVal(s).validation
@@ -59,7 +59,7 @@ object NbNodeTest extends Properties("NbNode") {
     val res = for {
       r   ← IO newIORef none[Cc]
       n   ← NbNode.apply
-      _   ← destroy[Cc] set n to (r write _.some) apply Signal.newVal(cc)
+      _   ← destroy[Cc] set n to (r write _.some) runIO Signal.newVal(cc)
       _   ← IO(n.destroy)
       res ← r.read
     } yield res ≟ cc.some
@@ -71,7 +71,7 @@ object NbNodeTest extends Properties("NbNode") {
     val res = for {
       r   ← IO newIORef none[Cc]
       n   ← NbNode.apply
-      _   ← edit[Cc] set n to (r write _.some) apply Signal.newVal(cc)
+      _   ← edit[Cc] set n to (r write _.some) runIO Signal.newVal(cc)
       e   ← n.getLookup.head[EditCookie]
       _   = e foreach (_.edit())
       res ← r.read
@@ -92,7 +92,7 @@ object NbNodeTest extends Properties("NbNode") {
 
     def res = for {
       n ← NbNode.apply
-      _ ← out set n apply Signal.newVal(a)
+      _ ← out set n runIO Signal.newVal(a)
       b ← get (n)
     } yield (b ≟ must) :| msg (b)
 

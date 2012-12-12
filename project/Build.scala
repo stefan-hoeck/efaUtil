@@ -4,16 +4,20 @@ import Keys._
 object BuildSettings {
   import Resolvers._
 
+  val sv = "2.10.0-RC5"
   val buildOrganization = "efa"
   val buildVersion = "0.1.0-SNAPSHOT"
-  val buildScalaVersion = "2.9.2"
+  val buildScalaVersion = sv
 
   val buildSettings = Defaults.defaultSettings ++ Seq (
     organization := buildOrganization,
     version := buildVersion,
     scalaVersion := buildScalaVersion,
+    scalaBinaryVersion <<= scalaVersion,
     resolvers ++= repos,
-    scalacOptions ++= Seq ("-deprecation")
+    scalacOptions ++= Seq ("-deprecation", "-feature",
+      "-language:postfixOps", "-language:implicitConversions",
+      "-language:higherKinds")
   )
 } 
 
@@ -28,10 +32,12 @@ object Resolvers {
 }
 
 object Dependencies {
+  import BuildSettings.sv
+
   val nbV = "RELEASE71"
   val orgNb = "org.netbeans.api"
 
-  val scalaSwing = "org.scala-lang" % "scala-swing" % "2.9.2" 
+  val scalaSwing = "org.scala-lang" % "scala-swing" % sv
 
   val react = "efa.react" %% "core" % "0.1.0-SNAPSHOT" changing
 
@@ -57,15 +63,14 @@ object Dependencies {
     orgNb % "org-netbeans-modules-autoupdate-services" % nbV
   val nbModulesOptions = orgNb % "org-netbeans-modules-options-api" % nbV
 
-  val scalaz_core = "org.scalaz" %% "scalaz-core" % "7.0.0-M5"
-  val scalaz_effect = "org.scalaz" %% "scalaz-effect" % "7.0.0-M5"
-  val scalaz_scalacheck =
-    "org.scalaz" %% "scalaz-scalacheck-binding" % "7.0.0-M5"
-  val scalaz_scalacheckT = scalaz_scalacheck % "test"
+  val scalaz_core = "org.scalaz" %% "scalaz-core" % "7.0.0-M6"
+  val scalaz_effect = "org.scalaz" %% "scalaz-effect" % "7.0.0-M6"
+  val scalaz_scalacheck = "org.scalaz" %% "scalaz-scalacheck-binding" % "7.0.0-M6"
 
-  val scalacheck = "org.scalacheck" %% "scalacheck" % "1.9"
+  val scalacheck = "org.scalacheck" %% "scalacheck" % "1.10.0"
   val scalacheckT = scalacheck % "test"
-  val scalazCheckT = Seq(scalaz_core, scalaz_scalacheckT, scalacheckT)
+  val scalazCheckT = Seq(scalaz_core, scalaz_effect, scalaz_scalacheck, scalacheckT)
+
   val scalazCheckET = scalazCheckT :+ scalaz_effect
 }
 

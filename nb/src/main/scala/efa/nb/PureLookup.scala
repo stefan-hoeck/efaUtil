@@ -18,7 +18,7 @@ class PureLookup private (ic: InstanceContent) {
   def head[A:Manifest]: IO[Option[A]] = l.head[A]
 
   def mod[A:Manifest] (f: A ⇒ A): IO[Unit] =
-    head[A] >>= (_ fold (a ⇒ update(a, f(a)), IO.ioUnit))
+    head[A] >>= (_ map (a ⇒ update(a, f(a))) orZero)
 
   def remove[A] (a: A): IO[Unit] = this - a
 

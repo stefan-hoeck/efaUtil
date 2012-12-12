@@ -13,7 +13,7 @@ object UndoEditTest extends Properties ("UndoEdit") {
     val res = for {
       ref ← IO newIORef List.empty[(Int,Int)]
       s   ← Signal newVar is.head
-      _   ← pairs[Int] to prep(ref) apply s
+      _   ← pairs[Int] to prep(ref) runIO s
       _   ← is foldMap s.put
       res ← ref.read
     } yield (exp ≟ res) :| "Exp: %s but was: %s".format(exp, res)
@@ -30,7 +30,7 @@ object UndoEditTest extends Properties ("UndoEdit") {
     val res = for {
       ref ← IO newIORef List.empty[Int]
       s   ← Signal newVar is.head
-      _   ← undoSST[Int](_ ⇒ IO.ioUnit) to prep(ref) apply s
+      _   ← undoSST[Int](_ ⇒ IO.ioUnit) to prep(ref) runIO s
       _   ← is.tail foldMap s.put
       res ← ref.read
     } yield (exp ≟ res) :| "Exp: %s but was: %s".format(exp, res)
@@ -48,7 +48,7 @@ object UndoEditTest extends Properties ("UndoEdit") {
       ref ← IO newIORef List.empty[Int]
       out ← IO newIORef List.empty[UndoEdit]
       s   ← Signal newVar is.head
-      _   ← undoSST[Int](prep(out)) to prep(ref) apply s
+      _   ← undoSST[Int](prep(out)) to prep(ref) runIO s
       _   ← is.tail foldMap s.put
       _   ← ref write Nil
       _   ← out.read >>= (_ foldMap (_.un))
@@ -68,7 +68,7 @@ object UndoEditTest extends Properties ("UndoEdit") {
       ref ← IO newIORef List.empty[Int]
       out ← IO newIORef List.empty[UndoEdit]
       s   ← Signal newVar is.head
-      _   ← undoSST[Int](prep(out)) to prep(ref) apply s
+      _   ← undoSST[Int](prep(out)) to prep(ref) runIO s
       _   ← is.tail foldMap s.put
       _   ← ref write Nil
       _   ← out.read >>= (_ foldMap (_.re))

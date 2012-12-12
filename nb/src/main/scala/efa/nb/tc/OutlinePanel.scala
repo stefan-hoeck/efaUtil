@@ -7,11 +7,10 @@ import efa.core.Localization
 import org.openide.explorer.view.OutlineView
 import org.openide.nodes.Node
 import org.openide.util.Lookup
+import scala.language.reflectiveCalls
 import scala.swing.Panel
 
 abstract class OutlinePanel extends Panel with Lookup.Provider{
-  type NameInfo = Pair[String, String]
-
   protected def rootNode: Node
 
   protected def mainColumnName = efa.core.loc.name

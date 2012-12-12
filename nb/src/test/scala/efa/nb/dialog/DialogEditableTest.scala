@@ -32,7 +32,7 @@ object DialogEditableTest extends Properties("DialogEditable") {
     def res = for {
       ref ← IO newIORef "".failureNel[Cc]
       pnl ← CcPanel(c)
-      _   ← pnl.sin to (ref write _) apply ()
+      _   ← pnl.sin to (ref write _) runIO ()
       _   ← IO(handle(pnl))
       res ← ref.read
     } yield (exp ≟ res) :| "Exp: %s but was: %s".format(exp, res)

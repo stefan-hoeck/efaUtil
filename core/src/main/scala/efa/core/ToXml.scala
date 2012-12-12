@@ -14,7 +14,7 @@ trait ToXml[A] {
   def scope: NamespaceBinding = TopScope
 
   def writeTag(t: String, prefix: String, a: A): Node =
-    scala.xml.Elem(prefix, t, attributes(a), scope, toXml(a): _*)
+    scala.xml.Elem(prefix, t, attributes(a), scope, true, toXml(a): _*)
 
   def writeTag(t: String, a: A): Node = writeTag(t, null, a)
 
@@ -23,7 +23,7 @@ trait ToXml[A] {
     tag: String,
     default: Option[A] = None
   ): ValRes[A] = ns \ tag match {
-    case xs if xs.isEmpty ⇒ default fold (_.success, loc tagNotFoundFail tag)
+    case xs if xs.isEmpty ⇒ default toSuccess loc.tagNotFoundMsg(tag).wrapNel
     case xs ⇒ ToXml adjMessages(tag, fromXml(xs))
   }
 

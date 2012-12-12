@@ -31,7 +31,7 @@ trait DialogEditable[-A,+B] {
     desc ← IO (new NotifyDescriptor.Confirmation(
               pnl.peer, title, NotifyDescriptor.OK_CANCEL_OPTION))
     _    ← IO(desc.createNotificationLineSupport())
-    cs   ← signalIn(p) to descOut(desc) apply ()
+    cs   ← signalIn(p) to descOut(desc) runIO ()
     b    ← IO(DialogDisplayer.getDefault.notify(desc))
     ok   = b == NotifyDescriptor.YES_OPTION ||
            b == NotifyDescriptor.OK_OPTION

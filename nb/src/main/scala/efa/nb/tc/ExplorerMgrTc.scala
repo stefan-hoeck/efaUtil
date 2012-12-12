@@ -15,8 +15,8 @@ abstract class ExplorerMgrTc(rn: ⇒ Node, lkp: Option[Lookup])
     def explorerLookup: Lookup =
       ExplorerUtils createLookup (res, getActionMap)
 
-    def myLookup: Lookup = lkp fold (
-      l ⇒ new ProxyLookup (l, explorerLookup), explorerLookup)
+    def myLookup: Lookup =
+      lkp.fold(explorerLookup)(new ProxyLookup (_, explorerLookup))
 
     associateLookup(myLookup)
     res setRootContext rn

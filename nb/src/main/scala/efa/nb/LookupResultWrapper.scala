@@ -24,7 +24,7 @@ object LookupResultWrapper {
   def apply[A](l: Lookup)(implicit M: Manifest[A])
     : IO[LookupResultWrapper[A]] = for {
     src ← Events.src[List[A]]
-    res ← IO(l.lookupResult(M.erasure.asInstanceOf[Class[A]]))
+    res ← IO(l.lookupResult(M.runtimeClass.asInstanceOf[Class[A]]))
     lis ← listener(src, res)
     _   ← IO(res.addLookupListener(lis))
     wrp ← IO(new LookupResultWrapper(res, src, lis))

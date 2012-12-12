@@ -32,9 +32,6 @@ trait UtilLoc {
   def tagNotFoundMsg (s: String): String
   def value: String
   def valueShort: String
-
-  final def tagNotFoundFail[A] (s: String): ValRes[A] =
-    tagNotFoundMsg(s).failureNel
 } 
 
 /**

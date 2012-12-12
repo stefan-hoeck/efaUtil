@@ -10,7 +10,7 @@ abstract class TcProvider[Tc <: TopComponent](factory: IO[Tc])
   import TcProvider._
 
   private[this] val inst = IOCached(factory)
-  private[this] val tcc = m.erasure
+  private[this] val tcc = m.runtimeClass
 
   protected val preferredId: String
   

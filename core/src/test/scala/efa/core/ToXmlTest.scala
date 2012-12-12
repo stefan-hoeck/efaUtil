@@ -31,7 +31,7 @@ object ToXmlTest extends Properties("ToXml") with ToXmlSpecs {
 
   property("tagNotFound") = Prop.forAll {s: String ⇒ 
     def res = (<tc><name>{s}</name></tc>).read[TestClass]
-    res ≟ (loc tagNotFoundFail "id")
+    res ≟ (loc tagNotFoundMsg "id" failureNel)
   }
 
   case class TestClass (id: Int, name: String)

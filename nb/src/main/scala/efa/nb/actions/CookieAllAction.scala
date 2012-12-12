@@ -14,7 +14,7 @@ abstract class CookieAllAction[A:Manifest](
   override final protected def mode = caMode.value
 
   private[this] lazy val cc: Class[A] =
-    implicitly[Manifest[A]].erasure.asInstanceOf[Class[A]]
+    implicitly[Manifest[A]].runtimeClass.asInstanceOf[Class[A]]
 
   override final protected def cookieClasses = Array(cc)
 

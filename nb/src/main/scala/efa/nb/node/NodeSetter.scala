@@ -15,7 +15,7 @@ private[node] final class NodeSetter (
   private def adjust: IO[Unit] = for {
     o ← out.read
     n ← node.read
-    _ ← n fold (o, IO.ioUnit)
+    _ ← n map o orZero
   } yield ()
 }
 

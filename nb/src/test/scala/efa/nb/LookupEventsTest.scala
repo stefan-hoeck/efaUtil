@@ -16,7 +16,7 @@ object LookupEventsTest extends Properties("LookupEvents") {
       ref ← IO newIORef List.empty[Cc]
       pl  ← PureLookup.apply
       lr  ← pl.result[Cc]
-      _   ← eTrans.in(lr) to (c ⇒ ref mod (c ::: _) void) apply ()
+      _   ← (eTrans.in(lr) to (c ⇒ ref mod (c ::: _) void)).go
       _   ← pl + cc
       now ← ref.read
     } yield (now ≟ List(cc))
@@ -33,7 +33,7 @@ object LookupEventsTest extends Properties("LookupEvents") {
 
     val res = for {
       ref ← IO newIORef List.empty[Cc]
-      _   ← eTrans.in(wrap) to (ref write _) apply ()
+      _   ← (eTrans.in(wrap) to (ref write _)).go
       _   ← pl ++ ccs
       now ← ref.read
     } yield (now ≟ ccs) :| "Exp: %s but was %s".format(ccs, now)

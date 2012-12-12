@@ -24,20 +24,20 @@ case class UI[A] (
 
   def undo: IO[Unit] = for {
     us ← undos.read
-    _  ← us.headOption fold (u ⇒ for {
+    _  ← us.headOption map (u ⇒ for {
            _ ← u.un
            _ ← undos mod (_.tail)
            _ ← redos mod (u :: _)
-         } yield (), IO.ioUnit)
+         } yield ()) orZero
   } yield ()
 
   def redo: IO[Unit] = for {
     rs ← redos.read
-    _  ← rs.headOption fold (r ⇒ for {
+    _  ← rs.headOption map (r ⇒ for {
            _ ← r.re
            _ ← redos mod (_.tail)
            _ ← undos mod (r :: _)
-         } yield (), IO.ioUnit)
+         } yield ()) orZero
   } yield ()
 
   def stTrans: SET[A,ValSt[A]] =

@@ -8,10 +8,10 @@ import scala.collection.JavaConversions._
 
 trait LookupFunctions {
   private[this] def lkp[A](l: Lookup)(implicit m: Manifest[A]): Option[A] =
-    Option(l lookup m.erasure.asInstanceOf[Class[A]])
+    Option(l lookup m.runtimeClass.asInstanceOf[Class[A]])
 
   private[this] def lkpAll[A](l: Lookup)(implicit m: Manifest[A]): List[A] =
-    l lookupAll m.erasure.asInstanceOf[Class[A]] toList
+    l lookupAll m.runtimeClass.asInstanceOf[Class[A]] toList
 
   def head[A:Manifest](l: Lookup): IO[Option[A]] = IO(lkp[A](l))
 

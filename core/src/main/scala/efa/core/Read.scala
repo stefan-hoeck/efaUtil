@@ -50,7 +50,7 @@ trait ReadSpecs {
     a ⇒ Localized[A].names(a) foldMap (s ⇒ compareP(a, s.read[A]))
 
   def readAll[A:Read]: String ⇒ Prop =
-    s ⇒ try{val r = s.read[A]; true} catch {case e ⇒ false}
+    s ⇒ try{val r = s.read[A]; true} catch {case e: Throwable ⇒ false}
 }
 
 object ReadSpecs extends ReadSpecs
