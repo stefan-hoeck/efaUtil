@@ -4,7 +4,7 @@ import efa.core.TaggedToXml
 import scala.xml.Node
 
 trait IdFunctions {
-  def xml[A:TaggedToXml](a: A): Seq[Node] = TaggedToXml[A] write a
+  def toXml[A:TaggedToXml](a: A): Seq[Node] = TaggedToXml[A] write a
 }
 
 object id extends IdFunctions
