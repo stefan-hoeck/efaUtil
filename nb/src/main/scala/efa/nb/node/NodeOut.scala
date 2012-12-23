@@ -13,6 +13,9 @@ case class NodeOut[-A,+B](run: (Out[B], NbNode) ⇒ Out[A]) {
   def contramap[C] (f: C ⇒ A): NodeOut[C,B] =
     mapM (_ compose f)
 
+  def contramapIO[C] (f: C ⇒ IO[A]): NodeOut[C,B] =
+    mapM (oa ⇒ c ⇒ f(c) >>= oa)
+
   def contramapM[C](f: Out[C] ⇒ Out[B]): NodeOut[A,C] =
     NodeOut((oc, n) ⇒ run(f(oc), n))
 
