@@ -9,7 +9,7 @@
   </parent>
 
   <groupId>efa</groupId>
-  <artifactId>localDe</artifactId>
+  <artifactId>efa-localDe</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>nbm</packaging>
 
@@ -18,17 +18,17 @@
   <dependencies>
     <dependency>
       <groupId>efa</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>efa-core</artifactId>
       <version>${core.version}</version>
     </dependency>
     <dependency>
       <groupId>efa</groupId>
-      <artifactId>io</artifactId>
+      <artifactId>efa-io</artifactId>
       <version>${io.version}</version>
     </dependency>
     <dependency>
       <groupId>efa</groupId>
-      <artifactId>nb</artifactId>
+      <artifactId>efa-nb</artifactId>
       <version>${nb.version}</version>
     </dependency>
   </dependencies>

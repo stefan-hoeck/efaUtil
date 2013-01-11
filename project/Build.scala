@@ -38,9 +38,9 @@ object Dependencies {
 
   val scalaSwing = "org.scala-lang" % "scala-swing" % sv
 
-  val react = "efa.react" %% "core" % "0.1.0-SNAPSHOT" changing
+  val react = "efa.react" %% "react-core" % "0.1.0-SNAPSHOT" changing
 
-  val react_swing = "efa.react" %% "swing" % "0.1.0-SNAPSHOT" changing
+  val react_swing = "efa.react" %% "react-swing" % "0.1.0-SNAPSHOT" changing
  
   val nbAnnotations = orgNb % "org-netbeans-api-annotations-common" % nbV
   val nbUtil = orgNb % "org-openide-util" % nbV
@@ -82,26 +82,26 @@ object UtilBuild extends Build {
     BuildSettings.buildSettings ++ Seq (libraryDependencies ++= ds)
 
   lazy val util = Project (
-    "util",
+    "efa-util",
     file("."),
     settings = buildSettings
   ) aggregate (core, io, nb, localDe)
 
   lazy val core = Project (
-    "core",
+    "efa-core",
     file("core"),
     settings = addDeps (Seq (nbUtil, nbLookup, scalacheck, scalaz_core,
                              scalaz_effect, scalaz_scalacheck))
   )
 
   lazy val io = Project (
-    "io",
+    "efa-io",
     file("io"),
     settings = addDeps (scalazCheckET :+ scalaSwing)
   ) dependsOn (core)
 
   lazy val nb = Project (
-    "nb",
+    "efa-nb",
     file("nb"),
     settings = addDeps (scalazCheckET ++
       Seq (nbUtil, nbLookup, nbDialogs, nbNodes, nbExplorer, nbModules,
@@ -109,7 +109,7 @@ object UtilBuild extends Build {
   ) dependsOn (core, io)
 
   lazy val localDe = Project (
-    "localDe",
+    "efa-localDe",
     file("localDe"),
     settings = addDeps (scalazCheckT)
   ) dependsOn (core, nb, io)

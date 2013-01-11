@@ -9,7 +9,7 @@
   </parent>
 
   <groupId>efa</groupId>
-  <artifactId>core</artifactId>
+  <artifactId>efa-core</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>nbm</packaging>
 

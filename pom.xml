@@ -50,12 +50,12 @@
 
       <dependency>
         <groupId>efa.react</groupId>
-        <artifactId>core</artifactId>
+        <artifactId>react-core</artifactId>
         <version>0.1.0-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>efa.react</groupId>
-        <artifactId>swing</artifactId>
+        <artifactId>react-swing</artifactId>
         <version>0.1.0-SNAPSHOT</version>
       </dependency>
     </dependencies>    
