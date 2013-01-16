@@ -6,7 +6,7 @@ object BuildSettings {
 
   val sv = "2.10.0"
   val buildOrganization = "efa"
-  val buildVersion = "0.1.0-SNAPSHOT"
+  val buildVersion = "0.1.0"
   val buildScalaVersion = sv
 
   val buildSettings = Defaults.defaultSettings ++ Seq (
@@ -38,9 +38,8 @@ object Dependencies {
 
   val scalaSwing = "org.scala-lang" % "scala-swing" % sv
 
-  val react = "efa.react" %% "react-core" % "0.1.0-SNAPSHOT" changing
-
-  val react_swing = "efa.react" %% "react-swing" % "0.1.0-SNAPSHOT" changing
+  val react = "efa.react" %% "react-core" % "0.1.0"
+  val react_swing = "efa.react" %% "react-swing" % "0.1.0"
  
   val nbAnnotations = orgNb % "org-netbeans-api-annotations-common" % nbV
   val nbUtil = orgNb % "org-openide-util" % nbV
