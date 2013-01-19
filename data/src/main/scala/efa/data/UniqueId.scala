@@ -1,8 +1,9 @@
-package efa.core
+package efa.data
 
-@deprecated("Use efa.data.UniqueId instead", "0.2.0")
-trait UniqueId[-A,+I] {
+trait UniqueId[A,I] {
   def id (a: A): I
+
+  def idMap (as: Seq[A]): Map[I,A] = as map (a ⇒ id (a) → a) toMap
 }
 
 object UniqueId {
