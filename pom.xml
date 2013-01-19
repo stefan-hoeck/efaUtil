@@ -10,7 +10,7 @@
 
   <groupId>efa</groupId>
   <artifactId>util</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>util</name>
@@ -82,10 +82,10 @@
   </modules>
 
   <properties>
-    <core.version>0.1.0</core.version>
-    <io.version>0.1.0</io.version>
-    <nb.version>0.1.0</nb.version>
-    <localDe.version>0.1.0</localDe.version>
+    <core.version>0.2.0-SNAPSHOT</core.version>
+    <io.version>0.2.0-SNAPSHOT</io.version>
+    <nb.version>0.2.0-SNAPSHOT</nb.version>
+    <localDe.version>0.2.0-SNAPSHOT</localDe.version>
   </properties>
 </project>
 <!-- vim: set ts=2 sw=2 et: -->

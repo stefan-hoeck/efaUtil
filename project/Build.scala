@@ -6,7 +6,7 @@ object BuildSettings {
 
   val sv = "2.10.0"
   val buildOrganization = "efa"
-  val buildVersion = "0.1.0"
+  val buildVersion = "0.2.0-SNAPSHOT"
   val buildScalaVersion = sv
 
   val buildSettings = Defaults.defaultSettings ++ Seq (
