@@ -13,14 +13,20 @@ trait UniqueId[A,I] {
     : I = e succ f.foldLeft(as, m.zero)((i,a) ⇒ i max id(a))
 }
 
-object UniqueId {
+object UniqueId extends UniqueIdFunctions {
   @inline def apply[A,I](implicit U: UniqueId[A,I]): UniqueId[A,I] = U
+}
 
+trait UniqueIdFunctions {
   def get[A, B] (f: A ⇒ B): UniqueId[A, B] = new UniqueId[A, B] {
     def id (a: A) = f(a)
   }
 
-  def unique[A]: UniqueId[A, A] = get (identity)
+  def intId[A] (f: A ⇒ Int): IntId[A] = get (f)
+
+  def longId[A] (f: A ⇒ Long): LongId[A] = get (f)
+
+  def self[A]: UniqueId[A, A] = get (identity)
 
   def trivial[A]: UniqueId[A,Unit] = get (_ ⇒ ())
 }
