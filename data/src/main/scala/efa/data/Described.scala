@@ -1,7 +1,7 @@
 package efa.data
 
 trait Described[-A] {
-  def desc (a: A): String
+  def shortDesc (a: A): String
 }
 
 trait HtmlDescribed[A] extends Described[A] with Named[A] {
@@ -9,7 +9,7 @@ trait HtmlDescribed[A] extends Described[A] with Named[A] {
 
   def tags (a: A): Tags
 
-  override def desc (a: A): String = {
+  override def shortDesc (a: A): String = {
     val title = s"$B${name (a)}$Be"
     def tag (t: Tag): String = s"$B${t._1}$Be: ${t._2}"
     val ts = tags (a) map tag mkString Br

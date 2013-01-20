@@ -2,6 +2,7 @@ package efa.nb.node
 
 import scalaz._, Scalaz._, effect.{IO, IORef}
 import efa.core._, Efa._
+import efa.data.{Named, Described}
 import efa.nb.PureLookup
 import efa.nb.dialog.DialogEditable
 import efa.react._
@@ -46,6 +47,9 @@ trait NbNodeFunctions {
   def desc[A] (desc: A ⇒ String): NodeOut[A,Nothing] =
     outImpure((n,a) ⇒ n.setShortDescription(desc(a)))
 
+  def described[A:Described]: NodeOut[A,Nothing] =
+    desc (Described[A].shortDesc)
+
   def destroy[A]: NodeOut[A,A] = destroyOption ∙ (_.some)
 
   def destroyEs[A,B] (f: A ⇒ State[B,Unit]): NodeOut[A,ValSt[B]] =
@@ -80,9 +84,10 @@ trait NbNodeFunctions {
   def preferredActionA[A](a: Action): NodeOut[A,Nothing] =
     preferredAction(_ ⇒ a)
     
-
   def name[A] (f: A ⇒ String): NodeOut[A, Nothing] =
     outImpure((n,a) ⇒ n.setDisplayName(f(a)))
+
+  def named[A:Named]: NodeOut[A, Nothing] = name[A](Named[A].name)
 
   def nameA[A] (s: String): NodeOut[A, Nothing] = name(_ ⇒ s)
 

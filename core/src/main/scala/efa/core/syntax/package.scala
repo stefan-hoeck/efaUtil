@@ -5,7 +5,6 @@ package object syntax {
   object lookup extends ToLookupOps
   object nodeSeq extends ToNodeSeqOps
   object string extends ToStringOps
-  object uniqueId extends ToUniqueIdOps
 }
 
 

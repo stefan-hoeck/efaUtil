@@ -1,6 +1,6 @@
 package efa.nb.node
 
-import efa.core.UniqueId
+import efa.data.UniqueId
 import efa.react._
 import org.openide.nodes.{Children, Node}
 import scalaz._, Scalaz._, effect.IO
