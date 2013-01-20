@@ -1,11 +1,17 @@
 package efa.data
 
-import scalaz.Show
+import scalaz._, Scalaz._
+import scalaz.std.indexedSeq._
 
 trait Named[A] extends Show[A] {
   def name (a: A): String
 
-  def nameSort (as: List[A]): List[A] = as sortBy name
+  final def nameSort (as: List[A]): List[A] = as sortBy name
+
+  final def nameSort (as: IxSq[A]): IxSq[A] = as sortBy name
+
+  final def sortedPairs[B] (m: Map[B,A]): List[(B,A)] =
+    m.toList sortBy (p ⇒ name (p._2))
 
   override def shows (a: A): String = name (a)
 }

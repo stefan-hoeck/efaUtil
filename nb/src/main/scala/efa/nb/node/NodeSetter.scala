@@ -7,7 +7,6 @@ private[node] final class NodeSetter (
   val out: IORef[Out[NbNode]],
   val node: IORef[Option[NbNode]]
 ) {
-
   def setNode: Out[NbNode] = n ⇒ node.write(Some(n)) >> adjust
 
   def setOut: Out[Out[NbNode]] = o ⇒ out.write(o) >> adjust

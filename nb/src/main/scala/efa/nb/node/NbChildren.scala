@@ -1,6 +1,6 @@
 package efa.nb.node
 
-import efa.data.UniqueId
+import efa.data.{UniqueId, Named, IntId, LongId}
 import efa.react._
 import org.openide.nodes.{Children, Node}
 import scalaz._, Scalaz._, effect.IO
@@ -92,7 +92,7 @@ trait NbChildrenFunctions {
     uniqueIdF[A,B,Unit](out)(UniqueId.trivial) ∙ (List(_))
 
   /**
-   * Displays a sequence of objects each in a Node.
+   * Displays a list of objects each in a Node.
    * New nodes are created every time the sequence
    * changes, therefore this factory is usually not
    * well suited for Nodes that have themselves children,
@@ -100,16 +100,38 @@ trait NbChildrenFunctions {
    * a new sequence is displayed, no matter what the
    * previos state of the nodes where.
    */
-  def seqF[A,B] (out: NodeOut[A,B]): Factory[List[A],B] = (ob,as, _) ⇒ {
-    def setter (a: A) = NodeSetter out (out.run(ob,_)(a))
+  def listF[A,B] (out: NodeOut[A,B]): Factory[List[A],B] = (ob,as, _) ⇒ {
+    def setter (a: A) = create (out)(ob, a)
     def toPair(ss: List[Setter]): SetterInfo = (Map.empty, ss.toIndexedSeq)
 
     as traverse setter map toPair
   }
 
-  def uIntSeqF[A,B,C](f: A ⇒ List[B])(out: NodeOut[B,C])
-    (implicit uid: UniqueId[B,Int]): Factory[A,C] =
-    uniqueIdF[B,C,Int](out) ∙ f
+  /**
+   * Displays a List of values with a unique Long as id number.
+   */
+  def longIdF[A:LongId,B](out: NodeOut[A,B]): Factory[List[A],B] =
+    uniqueIdF(out)
+
+  /**
+   * Displays a List of values with a unique Int as id number.
+   */
+  def intIdF[A:IntId,B](out: NodeOut[A,B]): Factory[List[A],B] =
+    uniqueIdF(out)
+
+  /**
+   * Displays a List of values with a unique Long as id number. Values
+   * are sorted by name before being displayed.
+   */
+  def longIdNamedF[A:LongId:Named,B](out: NodeOut[A,B]): Factory[List[A],B] =
+    longIdF(out) ∙ Named[A].nameSort
+
+  /**
+   * Displays a List of values with a unique Int as id number. Values
+   * are sorted by name before being displayed.
+   */
+  def intIdNamedF[A:IntId:Named,B](out: NodeOut[A,B]): Factory[List[A],B] =
+    intIdF(out) ∙ Named[A].nameSort
 
   /**
    * Displays a sequence of objects each in a Node.
@@ -123,20 +145,35 @@ trait NbChildrenFunctions {
    * sequence is indeed unique. This might lead to
    * unexpected behavior if ids are not indeed unique.
    */
-  def uniqueIdF[A,B,I] (out: NodeOut[A,B])(implicit uid: UniqueId[A,I])
-  : Factory[List[A],B] = (ob, as, m) ⇒ {
+  def uniqueIdF[A,B,I] (out: NodeOut[A,B])(implicit u: UniqueId[A,I])
+    : Factory[List[A],B] = pairListF[I,A,B](out) ∙ u.pairList
 
-    def toIoInfo (a: A): IO[SetterInfo] = {
-      val id = uid id a // id of the given b
-      def setterOption = m get id map (IO(_)) //Setter for b in m (if any)
-      def toInfo(s: Setter): SetterInfo = (Map (id → s), IndexedSeq(s))
-      def display (s: Setter) = s setOut (n ⇒ out.run(ob,n)(a)) as s
+  /**
+   * Displays a map in nodes. Since maps are unordered, values are sorted
+   * alphabetically.
+   */
+  def mapF[A,B:Named,C](out: NodeOut[B,C]): Factory[Map[A,B],C] =
+    pairListF[A,B,C](out) ∙ Named[B].sortedPairs[A]
 
-      (setterOption | NodeSetter.apply) ∗ display ∘ toInfo
+  /**
+   * Displays a list of key - value pairs in nodes. Existing nodes for
+   * a given key A are reused.
+   *
+   * Note that key values must be unique, otherwise the behavior is
+   * undefined.
+   */
+  def pairListF[A,B,C] (out: NodeOut[B,C]): Factory[List[(A,B)],C] = 
+    (oc, abs, m) ⇒ {
+      def setterPair (p: (A,B)): IO[(Any,NodeSetter)] =
+        m get p._1 cata (
+          display (out)(oc, p._2),
+          create(out)(oc, p._2)
+        ) strengthL p._1
+      
+      for {
+        pairList ← abs traverse setterPair
+      } yield (pairList.toMap, pairList.toIndexedSeq map (_._2))
     }
-
-    as foldMap toIoInfo
-  }
 
   def children[A,B] (fs: Factory[A,B]*): NodeOut[A,B] = NodeOut(
     (ob, n) ⇒ a ⇒ {
@@ -149,6 +186,12 @@ trait NbChildrenFunctions {
       fs.toList.zipWithIndex foldMap single flatMap n.hc.set
     }
   )
+
+  private def display[A,B] (no: NodeOut[A,B])(ob: Out[B], a: A)(s: NodeSetter) =
+    s setOut (n ⇒ no.run(ob, n)(a)) as s
+
+  private def create[A,B] (no: NodeOut[A,B])(ob: Out[B], a: A) =
+    NodeSetter.apply >>= display(no)(ob, a)
 }
 
 // vim: set ts=2 sw=2 et:
