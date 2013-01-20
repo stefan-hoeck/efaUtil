@@ -27,9 +27,9 @@ sealed trait LoggerIO {
 
   def logValRes[A](v: ValRes[A]): IO[Unit] = logDisRes (v.disjunction)
     
-  def logValZ[A:Default] (i: ValLogIO[A]): IO[A] = logVal (i, !!!)
+  def logValD[A:Default] (i: ValLogIO[A]): IO[A] = logVal (i, !!!)
     
-  def logValM[A:Monoid] (i: ValLogIO[A]): IO[A] = logVal (i, ∅[A])
+  def logValZ[A:Monoid] (i: ValLogIO[A]): IO[A] = logVal (i, ∅[A])
 
   def logValV[A] (i: ValLogIO[A]): EitherT[IO,NonEmptyList[String],A] = {
     def res = for {

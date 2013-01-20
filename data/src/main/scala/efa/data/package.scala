@@ -1,5 +1,7 @@
 package efa
 
+import scalaz._, Scalaz._
+
 package object data {
   type IntId[A] = UniqueId[A,Int]
 

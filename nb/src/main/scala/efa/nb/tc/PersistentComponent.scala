@@ -18,7 +18,7 @@ trait PersistentComponent extends ValLogIOFunctions with ValLogIOInstances {
       _ ← liftIO (persistentChildren foldMap (_.read))
     } yield ()
 
-    logger >>= (_ logValM doRead)
+    logger >>= (_ logValZ doRead)
   }
 
   protected def logger: IO[LoggerIO] = efa.nb.pref.tcLogger
@@ -47,7 +47,7 @@ trait PersistentComponent extends ValLogIOFunctions with ValLogIOInstances {
       _ ← liftIO (persistentChildren foldMap (_.persist))
     } yield ()
 
-    logger >>= (_ logValM doPersist)
+    logger >>= (_ logValZ doPersist)
   }
 }
 
