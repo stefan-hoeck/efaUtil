@@ -19,7 +19,7 @@ trait PersistentOutline extends PersistentComponent {
     rowHeight >>= (rh ⇒ rowHeightSet((rh + Step) min MaxRowHeight))
 
   final protected def reduce: IO[Unit] =
-    rowHeight >>= (rh ⇒ rowHeightSet((rh - Step) max MaxRowHeight))
+    rowHeight >>= (rh ⇒ rowHeightSet((rh - Step) max MinRowHeight))
   
   private[this] lazy val prefix = prefId + WithOutline.OutlineView
   
