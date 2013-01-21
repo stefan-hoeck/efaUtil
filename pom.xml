@@ -84,7 +84,7 @@
   <properties>
     <core.version>0.1.0</core.version>
     <io.version>0.1.0</io.version>
-    <nb.version>0.1.0</nb.version>
+    <nb.version>0.1.1</nb.version>
     <localDe.version>0.1.0</localDe.version>
   </properties>
 </project>
