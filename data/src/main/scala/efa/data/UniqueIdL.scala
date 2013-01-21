@@ -17,7 +17,7 @@ trait UniqueIdLFunctions {
 
   def longIdL[A] (l: A @> Long): LongIdL[A] = lens (l)
 
-  def selfL[A]: UniqueIdL[A, A] = lens (Lens.self)
+  def idL[A]: UniqueIdL[A, A] = lens (Lens.self)
 
   def lens[A,I] (l: A @> I): UniqueIdL[A,I] = new UniqueIdL[A,I] {
     val idL = l

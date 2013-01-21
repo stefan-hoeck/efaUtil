@@ -26,7 +26,7 @@ trait UniqueIdFunctions {
 
   def longId[A] (f: A ⇒ Long): LongId[A] = get (f)
 
-  def self[A]: UniqueId[A, A] = get (identity)
+  def id[A]: UniqueId[A, A] = get (identity)
 
   def trivial[A]: UniqueId[A,Unit] = get (_ ⇒ ())
 }
