@@ -88,8 +88,11 @@ trait NbChildrenFunctions {
    * the old Node is overwritten. This will keep it
    * expanded if it was so before.
    */
-  def singleF[A,B] (out: NodeOut[A,B]): Factory[A,B] =
-    uniqueIdF[A,B,Unit](out)(UniqueId.trivial) ∙ (List(_))
+  def singleF[A,B] (out: NodeOut[A,B]): Factory[A,B] = {
+    implicit def uid = UniqueId.trivial[A]
+
+    uniqueIdF[A,B,Unit,Id](out)
+  }
 
   /**
    * Displays a list of objects each in a Node.
@@ -100,38 +103,39 @@ trait NbChildrenFunctions {
    * a new sequence is displayed, no matter what the
    * previos state of the nodes where.
    */
-  def listF[A,B] (out: NodeOut[A,B]): Factory[List[A],B] = (ob,as, _) ⇒ {
-    def setter (a: A) = create (out)(ob, a)
-    def toPair(ss: List[Setter]): SetterInfo = (Map.empty, ss.toIndexedSeq)
+  def leavesF[A,B,F[_]:Traverse] (out: NodeOut[A,B]): Factory[F[A],B] = 
+    (ob,as, _) ⇒ {
+      def setter (a: A) = create (out)(ob, a)
+      def toPair(ss: F[Setter]): SetterInfo = (Map.empty, ss.toIndexedSeq)
 
-    as traverse setter map toPair
-  }
+      as traverse setter map toPair
+    }
 
   /**
    * Displays a List of values with a unique Long as id number.
    */
-  def longIdF[A:LongId,B](out: NodeOut[A,B]): Factory[List[A],B] =
+  def longIdF[A:LongId,B,F[_]:Traverse](out: NodeOut[A,B]): Factory[F[A],B] =
     uniqueIdF(out)
 
   /**
    * Displays a List of values with a unique Int as id number.
    */
-  def intIdF[A:IntId,B](out: NodeOut[A,B]): Factory[List[A],B] =
+  def intIdF[A:IntId,B,F[_]:Traverse](out: NodeOut[A,B]): Factory[F[A],B] =
     uniqueIdF(out)
 
   /**
    * Displays a List of values with a unique Long as id number. Values
    * are sorted by name before being displayed.
    */
-  def longIdNamedF[A:LongId:Named,B](out: NodeOut[A,B]): Factory[List[A],B] =
-    longIdF(out) ∙ Named[A].nameSort
+  def longIdNamedF[A:LongId:Named,B,F[_]:Traverse](out: NodeOut[A,B])
+  : Factory[F[A],B] = longIdF[A,B,List](out) ∙ Named[A].nameSortF[F]
 
   /**
    * Displays a List of values with a unique Int as id number. Values
    * are sorted by name before being displayed.
    */
-  def intIdNamedF[A:IntId:Named,B](out: NodeOut[A,B]): Factory[List[A],B] =
-    intIdF(out) ∙ Named[A].nameSort
+  def intIdNamedF[A:IntId:Named,B,F[_]:Traverse](out: NodeOut[A,B])
+  : Factory[F[A],B] = intIdF[A,B,List](out) ∙ Named[A].nameSortF[F]
 
   /**
    * Displays a sequence of objects each in a Node.
@@ -145,34 +149,35 @@ trait NbChildrenFunctions {
    * sequence is indeed unique. This might lead to
    * unexpected behavior if ids are not indeed unique.
    */
-  def uniqueIdF[A,B,I] (out: NodeOut[A,B])(implicit u: UniqueId[A,I])
-    : Factory[List[A],B] = pairListF[I,A,B](out) ∙ u.pairList
+  def uniqueIdF[A,B,C,F[_]:Traverse] (out: NodeOut[A,B])
+  (implicit u: UniqueId[A,C]): Factory[F[A],B] = 
+    pairsF[C,A,B,F](out) ∙ u.pairs[F]
 
   /**
    * Displays a map in nodes. Since maps are unordered, values are sorted
    * alphabetically.
    */
   def mapF[A,B:Named,C](out: NodeOut[B,C]): Factory[Map[A,B],C] =
-    pairListF[A,B,C](out) ∙ Named[B].sortedPairs[A]
+    pairsF[A,B,C,List](out) ∙ Named[B].sortedPairs[A]
 
   /**
-   * Displays a list of key - value pairs in nodes. Existing nodes for
+   * Displays a collection of key - value pairs in nodes. Existing nodes for
    * a given key A are reused.
    *
    * Note that key values must be unique, otherwise the behavior is
    * undefined.
    */
-  def pairListF[A,B,C] (out: NodeOut[B,C]): Factory[List[(A,B)],C] = 
+  def pairsF[A,B,C,F[_]:Traverse] (out: NodeOut[B,C]): Factory[F[(A,B)],C] = 
     (oc, abs, m) ⇒ {
-      def setterPair (p: (A,B)): IO[(Any,NodeSetter)] =
-        m get p._1 cata (
-          display (out)(oc, p._2),
-          create(out)(oc, p._2)
-        ) strengthL p._1
+      def setterPair (p: (A,B)): IO[(Any,NodeSetter)] = p match {
+        case (a,b) ⇒ 
+          m get a cata (display (out)(oc, b), create(out)(oc, b)) strengthL a 
+      }
       
       for {
-        pairList ← abs traverse setterPair
-      } yield (pairList.toMap, pairList.toIndexedSeq map (_._2))
+        pairs ← abs traverse setterPair
+        ixsq  = pairs.toIndexedSeq
+      } yield (ixsq.toMap, ixsq map (_._2))
     }
 
   def children[A,B] (fs: Factory[A,B]*): NodeOut[A,B] = NodeOut(

@@ -10,6 +10,8 @@ trait Named[A] extends Show[A] {
 
   final def nameSort (as: IxSq[A]): IxSq[A] = as sortBy name
 
+  final def nameSortF[F[_]:Foldable] (as: F[A]): List[A] = nameSort (as.toList)
+
   final def sortedPairs[B] (m: Map[B,A]): List[(B,A)] =
     m.toList sortBy (p ⇒ name (p._2))
 

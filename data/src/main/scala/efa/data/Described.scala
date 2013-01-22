@@ -5,31 +5,38 @@ trait Described[-A] {
 }
 
 trait HtmlDescribed[A] extends Described[A] with Named[A] {
-  import Described.{Tag, Tags, B, Be, Br, Html, HtmlE}
+  import Described.{Tag, Tags}
 
   def tags (a: A): Tags
 
-  override def shortDesc (a: A): String = {
-    val title = s"$B${name (a)}$Be"
-    def tag (t: Tag): String = s"$B${t._1}$Be: ${t._2}"
-    val ts = tags (a) map tag mkString Br
-
-    s"$Html$title$Br$ts$HtmlE"
-  }
+  override def shortDesc (a: A): String =
+    Described namePlusTags (name (a), tags (a): _*)
 }
 
-object Described {
+trait DescribedFunctions {
+  import Described.{Tag, Tags}
+
+  def formatTag (t: Tag): String =  s"<P><B>${t._1}</B>: ${t._2}</P>"
+
+  def formatTags (ts: Tag*): String =  ts map formatTag mkString ""
+
+  def namePlusTags (n: String, ts: Tag*): String =
+    titleBodyHtml (n, formatTags (ts: _*))
+
+  def titleBody (title: String, body: String) = s"<P><B>$title</B></P>$body"
+
+  def titleBodyHtml (title: String, body: String) = 
+    wrapHtml (titleBody (title, body))
+
+  def wrapHtml (s: String): String = s"<html>$s</html>"
+}
+
+object Described extends DescribedFunctions {
   @inline def apply[A:Described]: Described[A] = implicitly
 
   type Tag = (String, String)
 
   type Tags = IndexedSeq[Tag]
-
-  final val B = "<b>"
-  final val Be = "</b>"
-  final val Br = "<br>"
-  final val Html = "<html>"
-  final val HtmlE = "</html>"
 }
 
 // vim: set ts=2 sw=2 et:
