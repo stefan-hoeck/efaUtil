@@ -19,7 +19,7 @@ object NbChildrenTest extends Properties("NbChildren") {
   implicit val ChildrenArbitrary = Arbitrary (childrenGen)
 
   lazy val nameOut = NbNode.name[Child](_.name)
-  lazy val listFac = NbChildren.leavesF[Child,Nothing,List](nameOut)
+  lazy val listFac = NbChildren.leavesF(nameOut)(identity[List[Child]])
   lazy val seqOut = NbChildren children listFac
 
   property ("seqFactory") = forAll { cs: List[Child] ⇒ 

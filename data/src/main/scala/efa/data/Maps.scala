@@ -8,7 +8,10 @@ trait Maps {
   def values[A,B] (m: Map[A,B]): List[B] = m.toList map (_._2)
 
   def mapArbitrary[A,K] (implicit a: Arbitrary[A], u: UniqueId[A,K])
-  : Arbitrary[Map[K,A]] = Arbitrary (Gen listOf arbitrary[A] map u.idMap)
+  : Arbitrary[Map[K,A]] = Arbitrary (mapGen[A,K])
+
+  def mapGen[A,K] (implicit a: Arbitrary[A], u: UniqueId[A,K])
+  : Gen[Map[K,A]] = Gen listOf arbitrary[A] map u.idMap
 
   def mapToXml[A,K](lbl: String)(implicit a: ToXml[A], u: UniqueId[A,K])
   : ToXml[Map[K,A]] = new ToXml[Map[K,A]] {

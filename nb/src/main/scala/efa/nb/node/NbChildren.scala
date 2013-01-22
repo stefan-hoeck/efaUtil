@@ -103,39 +103,40 @@ trait NbChildrenFunctions {
    * a new sequence is displayed, no matter what the
    * previos state of the nodes where.
    */
-  def leavesF[A,B,F[_]:Traverse] (out: NodeOut[A,B]): Factory[F[A],B] = 
-    (ob,as, _) ⇒ {
+  def leavesF[A,B,C,F[_]:Traverse] (out: NodeOut[A,B])
+  (get: C ⇒ F[A]): Factory[C,B] = (ob,c, _) ⇒ {
       def setter (a: A) = create (out)(ob, a)
-      def toPair(ss: F[Setter]): SetterInfo = (Map.empty, ss.toIndexedSeq)
 
-      as traverse setter map toPair
+      get (c) traverse setter map (ss ⇒ (Map.empty, ss.toIndexedSeq))
     }
 
   /**
    * Displays a List of values with a unique Long as id number.
    */
-  def longIdF[A:LongId,B,F[_]:Traverse](out: NodeOut[A,B]): Factory[F[A],B] =
-    uniqueIdF(out)
+  def longIdF[A:LongId,B,C,F[_]:Traverse](out: NodeOut[A,B])
+  (get: C ⇒ F[A]): Factory[C,B] = uniqueIdF[A,B,Long,F](out) ∙ get
 
   /**
    * Displays a List of values with a unique Int as id number.
    */
-  def intIdF[A:IntId,B,F[_]:Traverse](out: NodeOut[A,B]): Factory[F[A],B] =
-    uniqueIdF(out)
+  def intIdF[A:IntId,B,C,F[_]:Traverse](out: NodeOut[A,B])
+  (get: C ⇒ F[A]): Factory[C,B] = uniqueIdF[A,B,Int,F](out) ∙ get
 
   /**
    * Displays a List of values with a unique Long as id number. Values
    * are sorted by name before being displayed.
    */
-  def longIdNamedF[A:LongId:Named,B,F[_]:Traverse](out: NodeOut[A,B])
-  : Factory[F[A],B] = longIdF[A,B,List](out) ∙ Named[A].nameSortF[F]
+  def longIdNamedF[A:LongId:Named,B,C,F[_]:Traverse](out: NodeOut[A,B])
+  (get: C ⇒ F[A]): Factory[C,B] =
+    longIdF(out)(get andThen Named[A].nameSortF[F])
 
   /**
    * Displays a List of values with a unique Int as id number. Values
    * are sorted by name before being displayed.
    */
-  def intIdNamedF[A:IntId:Named,B,F[_]:Traverse](out: NodeOut[A,B])
-  : Factory[F[A],B] = intIdF[A,B,List](out) ∙ Named[A].nameSortF[F]
+  def intIdNamedF[A:IntId:Named,B,C,F[_]:Traverse](out: NodeOut[A,B])
+  (get: C ⇒ F[A]): Factory[C,B] =
+    intIdF(out)(get andThen Named[A].nameSortF[F])
 
   /**
    * Displays a sequence of objects each in a Node.
