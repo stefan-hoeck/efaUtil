@@ -12,6 +12,8 @@ abstract class EfaTc extends TopComponent with PersistentComponent {
   
   override def componentOpened() { read.unsafePerformIO }
   
+  override def componentClosed() { persist.unsafePerformIO }
+  
   override def getPersistenceType = TopComponent.PERSISTENCE_ALWAYS
   
   protected[tc] def prefId = preferredID
