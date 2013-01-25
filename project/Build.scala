@@ -61,13 +61,14 @@ object Dependencies {
     orgNb % "org-netbeans-modules-autoupdate-services" % nbV
   val nbModulesOptions = orgNb % "org-netbeans-modules-options-api" % nbV
 
+  val shapeless = "com.chuusai" %% "shapeless" % "1.2.3"
   val scalaz_core = "org.scalaz" %% "scalaz-core" % "7.0.0-M7"
   val scalaz_effect = "org.scalaz" %% "scalaz-effect" % "7.0.0-M7"
   val scalaz_scalacheck = "org.scalaz" %% "scalaz-scalacheck-binding" % "7.0.0-M7"
 
   val scalacheck = "org.scalacheck" %% "scalacheck" % "1.10.0"
   val scalacheckT = scalacheck % "test"
-  val scalazCheckT = Seq(scalaz_core, scalaz_effect, scalaz_scalacheck, scalacheckT)
+  val scalazCheckT = Seq(scalaz_core, scalaz_effect, scalaz_scalacheck, scalacheckT, shapeless)
 
   val scalazCheckET = scalazCheckT :+ scalaz_effect
 }
@@ -90,14 +91,14 @@ object UtilBuild extends Build {
     "efa-core",
     file("core"),
     settings = addDeps (Seq (nbUtil, nbLookup, scalacheck, scalaz_core,
-                             scalaz_effect, scalaz_scalacheck))
+                             scalaz_effect, scalaz_scalacheck, shapeless))
   )
 
   lazy val data = Project (
     "efa-data",
     file("data"),
     settings = addDeps (Seq (nbUtil, nbLookup, scalacheck, scalaz_core,
-                             scalaz_effect, scalaz_scalacheck))
+                             scalaz_effect, scalaz_scalacheck, shapeless))
   ) dependsOn (core)
 
   lazy val io = Project (
@@ -111,7 +112,8 @@ object UtilBuild extends Build {
     file("nb"),
     settings = addDeps (scalazCheckET ++
       Seq (nbUtil, nbLookup, nbDialogs, nbNodes, nbExplorer, nbModules,
-           nbOptions, nbFilesystems, nbLoaders, scalaSwing, react, react_swing))
+           nbOptions, nbFilesystems, nbLoaders, scalaSwing, react, react_swing,
+           shapeless))
   ) dependsOn (core, io, data)
 
   lazy val localDe = Project (
