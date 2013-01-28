@@ -1,6 +1,8 @@
 package efa.core
 
+import Shapeless._
 import scalaz._, Scalaz._
+import shapeless._, HList._
 
 case class Localization(name: String, locName: String, shortName: String,
                         desc: String) {
@@ -11,7 +13,8 @@ case class Localization(name: String, locName: String, shortName: String,
 }
 
 object Localization {
-  implicit val LocalizationEqual: Equal[Localization] = Equal.equalA
+  implicit val LIso = Iso.hlist(Localization.apply _, Localization.unapply _)
+  implicit val LocalizationEqual: Equal[Localization] = ccEqual
 }
 
 // vim: set ts=2 sw=2 et:
