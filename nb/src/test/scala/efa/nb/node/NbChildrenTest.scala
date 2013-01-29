@@ -1,9 +1,9 @@
 package efa.nb.node
 
+import efa.core.UniqueId
 import efa.react._
-import scalaz._, Scalaz._, effect.IO
 import org.scalacheck._, Prop._
-import efa.data.UniqueId
+import scalaz._, Scalaz._, effect.IO
 
 object NbChildrenTest extends Properties("NbChildren") {
 

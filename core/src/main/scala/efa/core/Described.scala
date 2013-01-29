@@ -1,4 +1,4 @@
-package efa.data
+package efa.core
 
 trait Described[-A] {
   def shortDesc (a: A): String

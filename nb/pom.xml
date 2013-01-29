@@ -26,11 +26,6 @@
       <artifactId>efa-io</artifactId>
       <version>${io.version}</version>
     </dependency>
-    <dependency>
-      <groupId>efa</groupId>
-      <artifactId>efa-data</artifactId>
-      <version>${data.version}</version>
-    </dependency>
 
     <dependency>
       <groupId>efa.scala</groupId>

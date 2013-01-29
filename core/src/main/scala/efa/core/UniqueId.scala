@@ -1,4 +1,4 @@
-package efa.data
+package efa.core
 
 import scalaz._, Scalaz._
 

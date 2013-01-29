@@ -2,7 +2,6 @@ package efa.nb.node
 
 import scalaz._, Scalaz._, effect.{IO, IORef}
 import efa.core._, Efa._
-import efa.data.{Named, Described}
 import efa.nb.PureLookup
 import efa.nb.dialog.DialogEditable
 import efa.react._

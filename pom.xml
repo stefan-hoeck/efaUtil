@@ -85,7 +85,6 @@
 
   <modules>
     <module>core</module>
-    <module>data</module>
     <module>io</module>
     <module>nb</module>
     <module>localDe</module>
@@ -93,7 +92,6 @@
 
   <properties>
     <core.version>0.2.0-SNAPSHOT</core.version>
-    <data.version>0.2.0-SNAPSHOT</data.version>
     <io.version>0.2.0-SNAPSHOT</io.version>
     <nb.version>0.2.0-SNAPSHOT</nb.version>
     <localDe.version>0.2.0-SNAPSHOT</localDe.version>

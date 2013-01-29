@@ -85,7 +85,7 @@ object UtilBuild extends Build {
     "efa-util",
     file("."),
     settings = buildSettings
-  ) aggregate (core, data, io, nb, localDe)
+  ) aggregate (core, io, nb, localDe)
 
   lazy val core = Project (
     "efa-core",
@@ -93,13 +93,6 @@ object UtilBuild extends Build {
     settings = addDeps (Seq (nbUtil, nbLookup, scalacheck, scalaz_core,
                              scalaz_effect, scalaz_scalacheck, shapeless))
   )
-
-  lazy val data = Project (
-    "efa-data",
-    file("data"),
-    settings = addDeps (Seq (nbUtil, nbLookup, scalacheck, scalaz_core,
-                             scalaz_effect, scalaz_scalacheck, shapeless))
-  ) dependsOn (core)
 
   lazy val io = Project (
     "efa-io",
@@ -114,13 +107,13 @@ object UtilBuild extends Build {
       Seq (nbUtil, nbLookup, nbDialogs, nbNodes, nbExplorer, nbModules,
            nbOptions, nbFilesystems, nbLoaders, scalaSwing, react, react_swing,
            shapeless))
-  ) dependsOn (core, io, data)
+  ) dependsOn (core, io)
 
   lazy val localDe = Project (
     "efa-localDe",
     file("localDe"),
     settings = addDeps (scalazCheckT)
-  ) dependsOn (core, nb, io, data)
+  ) dependsOn (core, nb, io)
 }
 
 // vim: set ts=2 sw=2 et:
