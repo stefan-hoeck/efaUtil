@@ -4,6 +4,9 @@ import shapeless._, HList._
 import org.scalacheck.{Gen, Arbitrary}, Arbitrary.{arbitrary ⇒ arb}
 import scalaz._, Scalaz._
 
+/**
+  * Some type class implementations via shapeless HList-isomorphisms
+  */
 trait ShapelessInstances {
 
   def ccDefault[C, L <: HList](implicit iso: Iso[C, L], md: Default[L])

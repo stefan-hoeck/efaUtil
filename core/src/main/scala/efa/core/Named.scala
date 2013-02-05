@@ -3,6 +3,14 @@ package efa.core
 import scalaz._, Scalaz._
 import scalaz.std.indexedSeq._
 
+/**
+  * Type class that associates a (typically localized) name with
+  * an object of a type.
+  *
+  * Implementations of this type class can not only be used to display
+  * names of objects in some output device, but also to sort collections
+  * of objects by name.
+  */
 trait Named[A] extends Show[A] {
   def name (a: A): String
 

@@ -1,5 +1,9 @@
 package efa.core
 
+/**
+  * Similar to the might Scalaz._ import, importing Efa._ gives access to
+  * (almost) all the goodies of the efa.core module.
+  */
 object Efa
   extends std.AllFunctions
   with std.AllInstances

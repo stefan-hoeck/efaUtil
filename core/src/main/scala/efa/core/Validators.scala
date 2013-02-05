@@ -2,6 +2,9 @@ package efa.core
 
 import scalaz._, Scalaz._
 
+/**
+  * Some useful Validators
+  */
 trait Validators {
 
   private def kl[A,B](f: A ⇒ DisRes[B]): Validator[A,B] =

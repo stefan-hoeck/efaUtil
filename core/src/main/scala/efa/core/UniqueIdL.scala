@@ -2,6 +2,12 @@ package efa.core
 
 import scalaz.{@>, Lens}
 
+/**
+  * Type class that allows the editing of a unique identifier
+  * in an object of a given type.
+  *
+  * See UniqueId for a more thorough explanation about identifiers.
+  */
 trait UniqueIdL[A,I] extends UniqueId[A,I] {
   def idL: A @> I
   def id (a: A) = idL get a

@@ -7,6 +7,9 @@ import scalaz.effect.IO
 import scala.collection.JavaConversions._
 
 trait LookupFunctions {
+  //@TODO: Implement via a Macro that checks that runtime type does not
+  //suffer from erasure. This will render the implementation completely
+  //type safe.
   private[this] def lkp[A](l: Lookup)(implicit m: Manifest[A]): Option[A] =
     Option(l lookup m.runtimeClass.asInstanceOf[Class[A]])
 

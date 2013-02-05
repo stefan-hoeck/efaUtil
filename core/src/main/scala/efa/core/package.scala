@@ -11,7 +11,7 @@ package object core {
 
   type Logs = DList[Log]
 
-  type DisRes[+A] = NonEmptyList[String] \/ A
+  type DisRes[+A] = Nel[String] \/ A
 
   type ValRes[+A] = ValidationNEL[String,A]
 

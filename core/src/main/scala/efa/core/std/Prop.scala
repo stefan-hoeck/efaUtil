@@ -7,6 +7,7 @@ import org.scalacheck.Prop
 
 trait PropFunctions {
 
+  //@TODO: Some macros might be of interest here
   def compare[A:Equal](e: A, f: A): Prop =
     Prop.propBoolean(f ≟ e) :| "Expected: %s, but found %s".format(e, f)
 

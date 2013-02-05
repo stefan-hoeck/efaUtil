@@ -1,16 +1,20 @@
 package efa.core
 
 import shapeless._, HList._
-import scalaz._, Scalaz._, scalaz.{Lens ⇒ Lensz}
+import scalaz.{Lens ⇒ Lensz, @>}
 
+/**
+  * Convenient access to scalaz.Lenses via shapless
+  * HList-isomorphisms.
+  */
 trait SLens[A] {
 
-  def at[L <: HList, N <: Nat](n : N)(
-    implicit iso : Iso[A, L], lens : NthLens[L, N]
-  ): A @> lens.Elem =
+  def at[L <: HList, N <: Nat]
+    (n : N)
+    (implicit iso : Iso[A, L], lens : NthLens[L, N]): A @> lens.Elem =
     Lensz.lensu[A, lens.Elem] (
-      (a, e) ⇒ iso from (lens set(iso to a, e)),
-      a ⇒ lens get (iso to a)
+      (a, e) ⇒ iso from lens.set(iso to a, e),
+      a ⇒ lens get iso.to(a)
     )
 }
 
@@ -26,8 +30,7 @@ trait NthLens[L,N] {
 
 object NthLens {
   implicit def nthLens[L <: HList, N <: Nat, E](
-    implicit la: NthLensAux[L, N, E]
-  ) = new NthLens[L, N] {
+    implicit la: NthLensAux[L, N, E]) = new NthLens[L, N] {
     type Elem = E
     def get(l : L) : Elem = la get l
     def set(l : L, e : Elem) : L = la set (l, e)

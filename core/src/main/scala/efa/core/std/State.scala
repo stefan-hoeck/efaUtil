@@ -1,6 +1,6 @@
 package efa.core.std
 
-import scalaz._, Scalaz._
+import scalaz.{StateT, State, Scalaz}, Scalaz.Id
 
 trait StateFunctions {
   def toState[S,A](f: S ⇒ (S,A)): State[S,A] = StateT[Id,S,A](f)

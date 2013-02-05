@@ -1,9 +1,22 @@
 package efa.core
 
+/**
+  * A type class representing a short description associated with a type.
+  *
+  * Typically, these descriptions can be displayed conveniently in GUIs.
+  *
+  */
 trait Described[-A] {
   def shortDesc (a: A): String
 }
 
+/**
+  * This version of Described uses html to format its descriptions.
+  *
+  * The html-description consists of a bold title (the object's name)
+  * plus several tags in bold, each on its own line.
+  *
+  */
 trait HtmlDescribed[A] extends Described[A] with Named[A] {
   import Described.{Tag, Tags}
 

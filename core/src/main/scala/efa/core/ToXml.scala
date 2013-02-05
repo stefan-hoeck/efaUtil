@@ -3,6 +3,10 @@ package efa.core
 import scala.xml.{Node, MetaData, Null, NamespaceBinding, TopScope, Text, XML}
 import scalaz._, Scalaz._
 
+/**
+  * Type class that provides referentially transparent reading from
+  * and writing to xml-format.
+  */
 trait ToXml[A] {
 
   def toXml(a: A): Seq[Node]

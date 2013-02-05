@@ -2,6 +2,20 @@ package efa.core
 
 import scalaz._, Scalaz._
 
+/**
+  * Type class that links objects of a given type to unique
+  * identifiers of another type.
+  *
+  * That identifiers are indeed unique is the client's responsibility. Also,
+  * what 'unique' identifier means, is not clearly defined. Typically it is
+  * assumed, that in a collection of objects, each identifier is indeed unique.
+  * This makes transforming such a collection to a Map with identifiers as
+  * keys, trivial.
+  *
+  * Well behaved identifiers are suitable to be used as keys in Maps, provide
+  * an implementation of type class Equal (Enum would be even better), and
+  * are - of course - immutable.
+  */
 trait UniqueId[A,I] {
   def id (a: A): I
 
