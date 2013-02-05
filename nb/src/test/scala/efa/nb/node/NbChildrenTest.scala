@@ -1,15 +1,11 @@
 package efa.nb.node
 
-import efa.core.UniqueId
+import efa.core.{UniqueId, Efa}, Efa._
 import efa.react._
 import org.scalacheck._, Prop._
 import scalaz._, Scalaz._, effect.IO
 
 object NbChildrenTest extends Properties("NbChildren") {
-
-  case class Child (id: Int, name: String)
-
-  implicit val ChildUid: UniqueId[Child,Int] = UniqueId.get (_.id)
   private val toChild = (p: (String,Int)) ⇒ Child (p._2, p._1)
 
   //Generators
@@ -83,6 +79,13 @@ object NbChildrenTest extends Properties("NbChildren") {
 
     evalProp (res)
   }
+
+  //HList-based
+  val childOut: NodeOut[FullChild,Child] = NbNode.named
+
+  val parentOut: NodeOut[Parent,Child] = 
+    NbChildren.children(NbChildren.parentF(childOut)) ⊹
+    NbNode.named
   
   private def displayNames (n: NbNode): List[String] =
     n.getChildren.getNodes(true).toList map (_.getDisplayName)
@@ -90,6 +93,7 @@ object NbChildrenTest extends Properties("NbChildren") {
   private def eval (io: IO[Boolean]) = io.unsafePerformIO
 
   private def evalProp (io: IO[Prop]) = io.unsafePerformIO
+
 }
 
 // vim: set ts=2 sw=2 et:

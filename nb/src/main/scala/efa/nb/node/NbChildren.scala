@@ -1,6 +1,6 @@
 package efa.nb.node
 
-import efa.core.{UniqueId, Named, IntId, LongId}
+import efa.core.{UniqueId, Named, IntId, LongId, Parent}
 import efa.react._
 import org.openide.nodes.{Children, Node}
 import scalaz._, Scalaz._, effect.IO
@@ -138,6 +138,12 @@ trait NbChildrenFunctions {
   (get: C ⇒ F[A]): Factory[C,B] =
     intIdF(out)(get andThen Named[A].nameSortF[F])
 
+  def parentF[F[_],P,C,X,Id](out: NodeOut[C,X])
+                            (implicit u: UniqueId[C,Id],
+                              n: Named[C],
+                              p: Parent[F,P,C]): Factory[P,X] =
+    pairsF[Id,C,X,List](out) ∙ p.sortedUniqueChildren[Id]
+
   /**
    * Displays a sequence of objects each in a Node.
    * There must be a unique id available for each object.
@@ -158,8 +164,9 @@ trait NbChildrenFunctions {
    * Displays a map in nodes. Since maps are unordered, values are sorted
    * alphabetically.
    */
-  def mapF[A,B:Named,C](out: NodeOut[B,C]): Factory[Map[A,B],C] =
-    pairsF[A,B,C,List](out) ∙ Named[B].sortedPairs[A]
+  def mapF[A,B,C:Named,D](out: NodeOut[C,D])
+                         (get: A ⇒ Map[B,C]): Factory[A,D] =
+    pairsF[B,C,D,List](out) ∙ Named[C].sortedPairs[B] ∙ get
 
   /**
    * Displays a collection of key - value pairs in nodes. Existing nodes for

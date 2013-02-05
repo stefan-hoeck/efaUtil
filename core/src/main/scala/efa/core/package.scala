@@ -21,6 +21,8 @@ package object core {
   
   type EndoVal[A] = Validator[A,A]
 
+  //Aliases for some of the most common UniqueId types
+
   type IntId[A] = UniqueId[A,Int]
 
   type IntIdL[A] = UniqueIdL[A,Int]
@@ -29,13 +31,21 @@ package object core {
 
   type LongIdL[A] = UniqueIdL[A,Long]
 
+  type StringId[A] = UniqueId[A,String]
+
+  type StringIdL[A] = UniqueIdL[A,String]
+
   def IntId[A:IntId]: IntId[A] = implicitly
 
   def LongId[A:LongId]: LongId[A] = implicitly
 
+  def StringId[A:StringId]: StringId[A] = implicitly
+
   def IntIdL[A:IntIdL]: IntIdL[A] = implicitly
 
   def LongIdL[A:LongIdL]: LongIdL[A] = implicitly
+
+  def StringIdL[A:StringIdL]: StringIdL[A] = implicitly
 }
 
 // vim: set ts=2 sw=2 et:
