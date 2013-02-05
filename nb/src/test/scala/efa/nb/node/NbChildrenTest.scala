@@ -1,6 +1,6 @@
 package efa.nb.node
 
-import efa.core.{UniqueId, Efa}, Efa._
+import efa.core.{UniqueId, Efa, ValSt}, Efa._
 import efa.react._
 import org.scalacheck._, Prop._
 import scalaz._, Scalaz._, effect.IO
@@ -81,9 +81,14 @@ object NbChildrenTest extends Properties("NbChildren") {
   }
 
   //HList-based
-  val childOut: NodeOut[FullChild,Child] = NbNode.named
+  type NPOut[A] = NodeOut[A,ValSt[Parent]]
 
-  val parentOut: NodeOut[Parent,Child] = 
+  val childOut: NPOut[FullChild] =
+    (NbNode.destroyP: NPOut[FullChild]) ⊹ 
+    NbNode.editDialogP ⊹ 
+    NbNode.named
+
+  val parentOut: NodeOut[Parent,ValSt[Parent]] = 
     NbChildren.children(NbChildren.parentF(childOut)) ⊹
     NbNode.named
   

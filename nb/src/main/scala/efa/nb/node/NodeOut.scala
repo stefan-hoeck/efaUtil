@@ -4,6 +4,9 @@ import efa.react._
 import scalaz._, Scalaz._, effect.IO
 
 case class NodeOut[-A,+B](run: (Out[B], NbNode) ⇒ Out[A]) {
+  def andThen[C](c: NodeOut[B,C]): NodeOut[A,C] = 
+    NodeOut[A,C]((oc,n) ⇒ run(c run (oc, n), n))
+
   def collect[C] (f: B ⇒ Option[C]): NodeOut[A,C] = collectIO(f ∘ (IO(_)))
 
   def collectIO[C] (f: B ⇒ IO[Option[C]]): NodeOut[A,C] = contramapM(oc ⇒
@@ -77,6 +80,8 @@ trait NodeOutInstances {
 }
 
 trait NodeOutFunctions {
+  def point[A]: NodeOut[A,A] = NodeOut[A,A]((oa,_) ⇒ oa)
+
   def outOnly[A](f: NbNode ⇒ Out[A]): NodeOut[A,Nothing] =
     NodeOut((_,n) ⇒ f(n))
 

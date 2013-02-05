@@ -10,6 +10,7 @@ import java.beans.PropertyEditor
 import javax.swing.Action
 import org.openide.nodes.{Children, AbstractNode, Sheet, Node, NodeTransfer}
 import scala.swing.Alignment
+import shapeless.{HList, ::}
 
 object NbNode extends NbNodeFunctions {
   def apply: IO[NbNode] = for {
@@ -54,6 +55,10 @@ trait NbNodeFunctions {
   def destroyEs[A,B] (f: A ⇒ State[B,Unit]): NodeOut[A,ValSt[B]] =
     destroy[A] map (f(_).success)
 
+  def destroyP[F[_],P,C:Equal,Path <: HList](implicit p: ParentL[F,P,C,Path])
+    : NodeOut[C :: Path,ValSt[P]] =
+    destroy[C :: Path] map p.delete
+
   def destroyOption[A]: NodeOut[Option[A],A] =
     NodeOut((outA, n) ⇒ oa ⇒ n setDestroyer oa.map(outA))
 
@@ -68,6 +73,11 @@ trait NbNodeFunctions {
   def editDialogEs[A,B,C] (f: B ⇒ State[C,Unit])
     (implicit D: DialogEditable[A,B]): NodeOut[A,ValSt[C]] =
     editDialog[A,B] map (f(_).success)
+
+  def editDialogP[F[_],P,C:Equal,Path <: HList]
+    (implicit D: DialogEditable[C :: Path, C],
+      p: ParentL[F,P,C,Path]): NodeOut[C :: Path,ValSt[P]] =
+    editDialog[C :: Path,C] withIn p.update
 
   val iconBase: NodeOut[String,Nothing] =
     outImpure(_ setIconBaseWithExtension _)
@@ -114,6 +124,11 @@ trait NbNodeFunctions {
   def addNtDialogEs[A,B,C] (f: B ⇒ State[C,Unit])
     (implicit D: DialogEditable[A,B])
     : NodeOut[A,ValSt[C]] = addNtDialog map (f(_).success)
+
+  //def addNtDialogP[F[_],P,C,Path <: HList](bps Path ⇒ List[C])
+  //  (implicit D: DialogEditable[C :: Path, C],
+  //    p: ParentL[F,P,C,Path]): NodeOut[Path,ValSt[P]] =
+  //  addNtDialog[C :: Path,C] withIn p.add
 
   /**
    * All NodeOuts defined for adding new types where defined
