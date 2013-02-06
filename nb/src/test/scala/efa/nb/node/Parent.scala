@@ -21,17 +21,16 @@ object Parent {
     new NamedL[Parent]
     with Default[Parent]
     with UniqueIdL[Parent,Int] 
-    with CParent[List,Parent,FullChild] 
-    with ParentL[List,Parent,Child,ParentPath] {
+    with CParent[List,Parent,FullChild] {
       val T = Traverse[List]
-      val M = MonadPlus[List]
 
       val nameL = Parent.name
       val idL = Parent.id
       val default = Parent(0, "Parent", Nil)
       def children(p: Parent) = p.children map (_ :: p :: HNil)
-      def childrenL(p: ParentPath) = Parent.children
     }
+
+  implicit lazy val PParentL = ParentL mplusRoot children
 
   val name: Parent @> String = Lens.lensu((a,b) ⇒ a.copy(name = b), _.name)
 

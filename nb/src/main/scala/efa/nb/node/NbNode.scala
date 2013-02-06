@@ -55,7 +55,7 @@ trait NbNodeFunctions {
   def destroyEs[A,B] (f: A ⇒ State[B,Unit]): NodeOut[A,ValSt[B]] =
     destroy[A] map (f(_).success)
 
-  def destroyP[F[_],P,C:Equal,Path <: HList](implicit p: ParentL[F,P,C,Path])
+  def destroyP[F[_],P,C,Path <: HList](implicit p: ParentL[F,P,C,Path])
     : NodeOut[C :: Path,ValSt[P]] =
     destroy[C :: Path] map p.delete
 

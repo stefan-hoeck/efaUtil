@@ -19,9 +19,11 @@ import scalaz._, Scalaz._
 trait UniqueId[A,I] {
   def id (a: A): I
 
+  def idPair (a: A): (I, A) = id(a) → a
+
   def idMap (as: List[A]): Map[I,A] = pairs (as) toMap
 
-  def pairs[F[_]:Functor] (as: F[A]): F[(I,A)] = as map (a ⇒ id (a) → a)
+  def pairs[F[_]:Functor] (as: F[A]): F[(I,A)] = as map idPair
 
   def newId[F[_]] (as: F[A])(implicit m:Monoid[I], e:Enum[I], f:Foldable[F])
     : I = e succ f.foldLeft(as, m.zero)((i,a) ⇒ i max id(a))
