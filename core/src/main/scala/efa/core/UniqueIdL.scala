@@ -1,6 +1,6 @@
 package efa.core
 
-import scalaz.{@>, Lens}
+import scalaz._, Scalaz._
 
 /**
   * Type class that allows the editing of a unique identifier
@@ -10,7 +10,16 @@ import scalaz.{@>, Lens}
   */
 trait UniqueIdL[A,I] extends UniqueId[A,I] {
   def idL: A @> I
+
   def id (a: A) = idL get a
+
+  /**
+    * Sets a unique identifier for each value in a container starting
+    * at Monoid zero.
+    */
+  def generateIds[F[_]:Traverse]
+    (fa: F[A])(implicit e: Enum[I], m: Monoid[I]): F[A] =
+    fa traverseS { a ⇒ e succState { idL set (a, _) } } eval m.zero
 }
 
 object UniqueIdL extends UniqueIdLFunctions {
