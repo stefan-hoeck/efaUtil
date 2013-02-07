@@ -25,8 +25,16 @@ trait UniqueId[A,I] {
 
   def pairs[F[_]:Functor] (as: F[A]): F[(I,A)] = as map idPair
 
-  def newId[F[_]] (as: F[A])(implicit m:Monoid[I], e:Enum[I], f:Foldable[F])
-    : I = e succ f.foldLeft(as, m.zero)((i,a) ⇒ i max id(a))
+  /**
+    * Creates a unique identifier from a collection of values.
+    *
+    * If the collection is empty, the identifier is Monoid zero, 
+    * otherwise the maximum identifier is determined and its
+    * successor returned.
+    */
+  def newId[F[_]:Foldable]
+    (as: F[A])(implicit m: Monoid[I], e: Enum[I]): I =
+    e succ as.foldLeft(m.zero) { (i,a) ⇒ i max id(a) }
 }
 
 object UniqueId extends UniqueIdFunctions {

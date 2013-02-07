@@ -2,9 +2,7 @@ package efa.core
 
 import scalaz.Monoid, scalaz.syntax.monoid._
 
-/**
-  * A type class that represents a default value for a given type.
-  *
+/** A type class that represents a default value for a given type.
   */
 trait Default[+A] {
   val default: A

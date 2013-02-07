@@ -57,7 +57,7 @@ trait NbNodeFunctions {
 
   def destroyP[F[_],P,C,Path <: HList](implicit p: ParentL[F,P,C,Path])
     : NodeOut[C :: Path,ValSt[P]] =
-    destroy[C :: Path] map p.delete
+    destroy[C :: Path] map p.deleteV
 
   def destroyOption[A]: NodeOut[Option[A],A] =
     NodeOut((outA, n) ⇒ oa ⇒ n setDestroyer oa.map(outA))
@@ -77,7 +77,7 @@ trait NbNodeFunctions {
   def editDialogP[F[_],P,C:Equal,Path <: HList]
     (implicit D: DialogEditable[C :: Path, C],
       p: ParentL[F,P,C,Path]): NodeOut[C :: Path,ValSt[P]] =
-    editDialog[C :: Path,C] withIn p.update
+    editDialog[C :: Path,C] withIn p.updateV
 
   val iconBase: NodeOut[String,Nothing] =
     outImpure(_ setIconBaseWithExtension _)

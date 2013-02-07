@@ -12,7 +12,7 @@ trait SLens[A] {
   def at[L <: HList, N <: Nat]
     (n : N)
     (implicit iso : Iso[A, L], lens : NthLens[L, N]): A @> lens.Elem =
-    Lensz.lensu[A, lens.Elem] (
+    Lensz.lensu[A, lens.Elem](
       (a, e) ⇒ iso from lens.set(iso to a, e),
       a ⇒ lens get iso.to(a)
     )

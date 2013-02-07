@@ -9,6 +9,9 @@ import scalaz._, Scalaz._
   * See UniqueId for a more thorough explanation about identifiers.
   */
 trait UniqueIdL[A,I] extends UniqueId[A,I] {
+  /**
+    * Lens for accessing and updating the identifier
+    */
   def idL: A @> I
 
   def id (a: A) = idL get a
@@ -20,6 +23,17 @@ trait UniqueIdL[A,I] extends UniqueId[A,I] {
   def generateIds[F[_]:Traverse]
     (fa: F[A])(implicit e: Enum[I], m: Monoid[I]): F[A] =
     fa traverseS { a ⇒ e succState { idL set (a, _) } } eval m.zero
+
+  /**
+    * Creates a unique identifier from a collection of values and
+    * sets it as the new identifier of the given value.
+    *
+    * See UniqueId.newId for implementation details.
+    */
+  def setUniqueId[F[_]:Foldable]
+    (fa: F[A], a: A)(implicit e: Enum[I], m: Monoid[I]): A =
+    idL set (a, newId(fa))
+
 }
 
 object UniqueIdL extends UniqueIdLFunctions {

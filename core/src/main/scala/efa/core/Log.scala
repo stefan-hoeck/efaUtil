@@ -1,7 +1,6 @@
 package efa.core
 
-/**
-  * A basic logging message whose String message is lazily evaluated
+/** A basic logging message whose string message is lazily evaluated
   */
 sealed trait Log {
   def msg: String 
@@ -17,9 +16,13 @@ trait LogFunctions {
   }
 
   def trace (msg: ⇒ String) = log (msg, Trace)
+
   def debug (msg: ⇒ String) = log (msg, Debug)
+
   def info (msg: ⇒ String) = log (msg, Info)
+
   def warning (msg: ⇒ String) = log (msg, Warning)
+
   def error (msg: ⇒ String) = log (msg, Error)
 }
 
