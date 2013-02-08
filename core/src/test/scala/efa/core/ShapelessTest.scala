@@ -1,6 +1,6 @@
 package efa.core
 
-import efa.core.Shapeless._
+import efa.core.Efa._
 import org.scalacheck._, Prop._
 import shapeless._, HList._, Nat._
 import scalaz._, Scalaz._, scalaz.{Lens ⇒ Lensz}
@@ -32,8 +32,8 @@ case class Cc (aString: String, anInt: Int, anOption: Option[Int])
 
 object Cc {
   implicit val CcIso = Iso.hlist(Cc.apply _, Cc.unapply _)
-  implicit val CcEqual: Equal[Cc] = Shapeless.ccEqual
-  implicit val CcArb: Arbitrary[Cc] = Shapeless.ccArbitrary
+  implicit val CcEqual: Equal[Cc] = ccEqual
+  implicit val CcArb: Arbitrary[Cc] = ccArbitrary
 
   val Lenses = SLens[Cc]
 

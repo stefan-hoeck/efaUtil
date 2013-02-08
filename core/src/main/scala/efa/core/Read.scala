@@ -2,25 +2,22 @@ package efa.core
 
 import scalaz._, Scalaz._
 
-/**
-  * A type class similar to the Read type class in Haskell but
+/** A type class similar to the Read type class in Haskell but
   * which returns validated results after parsing a String.
   */
 trait Read[+A] {
-  /**
-    * Tries to read a value from a String. The result is stored
-    * in a Validation.
+
+  /** Tries to read a value from a String. The result is stored
+    * in a `Validation`.
     */
   def read(s: String): ValRes[A] = readD(s).validation
 
-  /**
-    * Tries to read a value from a String. The result is stored
+  /** Tries to read a value from a String. The result is stored
     * in a Disjunction.
     */
   def readD(s: String): DisRes[A] = read(s).disjunction
 
-  /**
-    * Parsing Strings in the Reader Monad
+  /** Parsing Strings in the Reader Monad
     */
   final lazy val validator: Validator[String,A] = Kleisli(readD)
 }

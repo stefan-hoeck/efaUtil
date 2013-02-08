@@ -3,8 +3,7 @@ package efa.core
 import scala.xml.{Node, Text}
 import scalaz.Show
 
-/**
-  * Type class that provides referentially transparent reading from
+/** Type class that provides referentially transparent reading from
   * and writing to xml-format.
   *
   * In addition to ToXml's basic functionality, this type class links

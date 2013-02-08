@@ -3,8 +3,7 @@ package efa.core
 import scala.xml.{Node, MetaData, Null, NamespaceBinding, TopScope, Text, XML}
 import scalaz._, Scalaz._
 
-/**
-  * Type class that provides referentially transparent reading from
+/** Type class that provides referentially transparent reading from
   * and writing to xml-format.
   */
 trait ToXml[A] {
@@ -22,28 +21,25 @@ trait ToXml[A] {
 
   def writeTag(t: String, a: A): Node = writeTag(t, null, a)
 
-  def readTag (
+  def readTag(
     ns: Seq[Node],
     tag: String,
-    default: Option[A] = None
-  ): ValRes[A] = ns \ tag match {
-    case xs if xs.isEmpty ⇒ default toSuccess loc.tagNotFoundMsg(tag).wrapNel
-    case xs ⇒ ToXml adjMessages(tag, fromXml(xs))
-  }
+    default: Option[A] = None): ValRes[A] = ns \ tag match {
+      case xs if xs.isEmpty ⇒ default toSuccess loc.tagNotFoundMsg(tag).wrapNel
+      case xs ⇒ ToXml adjMessages(tag, fromXml(xs))
+    }
 
-  def readTagD (ns: Seq[Node], tag: String): DisRes[A] =
+  def readTagD(ns: Seq[Node], tag: String): DisRes[A] =
     readTag(ns, tag).disjunction
 
-  def readTagV (ns: Seq[Node], tag: String, v: EndoVal[A]): ValRes[A] =
+  def readTagV(ns: Seq[Node], tag: String, v: EndoVal[A]): ValRes[A] =
     readTagD(ns, tag) flatMap v validation
 
-  def readTags (ns: Seq[Node], tag: String): ValRes[Seq[A]] =
+  def readTags(ns: Seq[Node], tag: String): ValRes[Seq[A]] =
     ToXml adjMessages(tag, (ns \ tag toList) traverse fromXml)
 
-  def readTagsD (ns: Seq[Node], tag: String): DisRes[Seq[A]] =
+  def readTagsD(ns: Seq[Node], tag: String): DisRes[Seq[A]] =
     readTags(ns, tag).disjunction
-
-  //def pretty (a: A): String = toXml(a).shows
 }
 
 object ToXml {
@@ -85,23 +81,6 @@ object ToXml {
     def fromXml (ns: Seq[Node]): ValRes[Stream[A]] =
       x fromXml ns map (_.toStream)
    }
-
-  //def treeToXml[A:ToXml] (label: String) = new ToXml[Tree[A]] {
-
-  //  def toXml (as: Tree[A]): Seq[Node] = {
-  //    def lbl = ToXml[A] toXml as.rootLabel
-  //    def forest: Seq[Node] = as.subForest ∘ (label.xml(_)(this))
-
-  //    lbl ++ forest
-  //  }
-
-  //  def fromXml (ns: Seq[Node]): ValRes[Tree[A]] = {
-  //    def lbl = ToXml[A] fromXml ns
-  //    def forest = (ns \ label).toStream traverse fromXml
-
-  //    ^(lbl, forest) {(l,f) ⇒ node (l, f)}
-  //  }
-  //}
 
   private def adjMessages[A](tag: String, v: ValRes[A]): ValRes[A] =
     v.swap ∘ (_ ∘ (tag + ": " + _)) swap

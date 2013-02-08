@@ -17,15 +17,21 @@ import shapeless.{HNil, HList, ::, LastAux, Last}
   * A convenient way to pass all parent objects down from the very
   * root alongside the child object is by using `HList`'s. So, instead
   * of passing just an object of type `Leaf`, we pass an `HList` of type
-  * `Leaf :: Branch :: Root :: HNil` (probably using a convenient
+  * `Leaf :: Branch :: Root :: HNil` (probably using a
   * type alias). That way we not only have access to the whole object
-  * path leading to the actual Leaf, we also have the means to update
-  * the data tree when changing parts of the Leaf object.
+  * path leading to the actual `Leaf`, we also have the means to update
+  * the data tree when changing parts of the `Leaf` object.
   *
-  * This is, what type class `ParentL` is meant for. It provides
-  * create, upadate, and delete functionality for deeply nested
+  * This is what type class `ParentL` is meant for. It provides
+  * create, update, and delete functionality for deeply nested
   * immutable data trees using partial lenses for reading and
   * updating fields in the data structure.
+  *
+  * Two helper functions are provided to go further down the data tree
+  * and create new implementation of `ParentL` out of existing ones:
+  * Function `mapLensed` is used for child objects stored in a `Map`
+  * while `mplusLensed` requires a `Foldable` `MonadPlus` instance
+  * for the container type.
   *
   * @tparam F    The container type in which a parent object
   *              stores its children
@@ -33,14 +39,15 @@ import shapeless.{HNil, HList, ::, LastAux, Last}
   *              data tree
   * @tparam C    The type of child objects
   * @tparam Path Represents the type of the path leading from parent
-  *              to child. This must be a subtype of [[shapeless.HList]]
+  *              to child. This must be a subtype of `shapeless.HList`
   *              and start with the parent type `P`:
   *             `Other :: Parent :: Types :: P :: HNil`
-  * @see [[shapeless.HList]]
-  * @see [[scalaz.PLens]]
+  * @see `shapeless.HList`
+  * @see `scalaz.PLens`
   */
 trait ParentL[F[_],P,C,Path<:HList] extends Parent[F,Path,C] {
-  /** The last type in the `HList` `Path` must be type `P`
+
+  /** The last type in `HList` `Path` must be type `P`
     */
   implicit protected def plast: LastAux[Path,P]
 
@@ -56,7 +63,7 @@ trait ParentL[F[_],P,C,Path<:HList] extends Parent[F,Path,C] {
     */
   def childL(c: C): F[C] @?> C
 
-  /** Returns all children accessable via the given `Path`
+  /** Returns all children accessible via the given `Path`
     */
   final def children(path: Path): F[C] =
     childrenL(path).getOr[F[C]](path.last, empty)
@@ -71,9 +78,25 @@ trait ParentL[F[_],P,C,Path<:HList] extends Parent[F,Path,C] {
     */
   def add(c: C, path: Path): State[P,Unit]
 
+  /** Adds a new child to a given parent by first creating and
+    * setting a new unique identifier for the child
+    */
+  final def addUnique[Id:Enum:Monoid]
+    (c: C, path: Path)
+    (implicit u: UniqueIdL[C,Id]): State[P,Unit] =
+    add(u.setUniqueId(children(path), c), path)
+
   /** Successfully adds a new child to a given parent
     */
   final def addV(c: C, path: Path): ValSt[P] = add(c, path).success
+
+  /** Successfully adds a new child to a given parent by first creating and
+    * setting a new unique identifier for the child
+    */
+  final def addUniqueV[Id:Enum:Monoid]
+    (c: C, path: Path)
+    (implicit u: UniqueIdL[C,Id]): ValSt[P] =
+    addUnique[Id](c, path).success
 
   /** Removes a child from a parent
     */
@@ -92,12 +115,24 @@ trait ParentL[F[_],P,C,Path<:HList] extends Parent[F,Path,C] {
     */
   final def updateV(cp: C :: Path, c: C): ValSt[P] = update(cp, c).success
 
+  /** Creates a new `ParentL` from this instance, with the
+    * same parent type and `C :: Path` as the path type.
+    *
+    * Children are stored in a `Map` from a unique identifier to
+    * the actual data object.
+    */
   def mapLensed[K,V](l: C @> Map[K,V])(implicit u: UniqueId[V,K])
     : ParentL[({type λ[α]=Map[K,α]})#λ,P,V,C :: Path] =
     ParentL map { fullChildL(_) >=> ~l }
 
-  def mplusLensed[F[_]:MonadPlus:Foldable,D:Equal](l: C @> F[D])
-    :ParentL[F,P,D,C :: Path] =
+  /** Creates a new `ParentL` from this instance, with the
+    * same parent type and `C :: Path` as the path type.
+    *
+    * Children are stored in a container for which type classes
+    * `Foldable` and `MonadPlus` must be provided.
+    */
+  def mplusLensed[G[_]:MonadPlus:Foldable,D:Equal](l: C @> G[D])
+    :ParentL[G,P,D,C :: Path] =
     ParentL mplus { fullChildL(_) >=> ~l }
 }
 

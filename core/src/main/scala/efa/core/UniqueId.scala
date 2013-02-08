@@ -2,8 +2,7 @@ package efa.core
 
 import scalaz._, Scalaz._
 
-/**
-  * Type class that links objects of a given type to unique
+/** Type class that links objects of a given type to unique
   * identifiers of another type.
   *
   * That identifiers are indeed unique is the client's responsibility. Also,
@@ -21,12 +20,11 @@ trait UniqueId[A,I] {
 
   def idPair (a: A): (I, A) = id(a) → a
 
-  def idMap (as: List[A]): Map[I,A] = pairs (as) toMap
+  def idMap[F[_]:Foldable](as: F[A]): Map[I,A] = pairs(as.toList) toMap
 
-  def pairs[F[_]:Functor] (as: F[A]): F[(I,A)] = as map idPair
+  def pairs[F[_]:Functor](as: F[A]): F[(I,A)] = as map idPair
 
-  /**
-    * Creates a unique identifier from a collection of values.
+  /** Creates a unique identifier from a collection of values.
     *
     * If the collection is empty, the identifier is Monoid zero, 
     * otherwise the maximum identifier is determined and its

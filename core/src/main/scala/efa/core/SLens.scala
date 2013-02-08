@@ -3,9 +3,8 @@ package efa.core
 import shapeless._, HList._
 import scalaz.{Lens ⇒ Lensz, @>}
 
-/**
-  * Convenient access to scalaz.Lenses via shapless
-  * HList-isomorphisms.
+/** Convenient access to `scalaz.Lens`es via shapless
+  * `HList`-isomorphisms.
   */
 trait SLens[A] {
 
