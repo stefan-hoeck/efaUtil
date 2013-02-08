@@ -82,61 +82,34 @@ trait NbChildrenFunctions {
       (ob,a,m) ⇒ nf (ob,f(a),m)
   }
 
-  /**
-   * Displays a single value of type A in a Node.
-   * If the value changes, no new Node is created, but
-   * the old Node is overwritten. This will keep it
-   * expanded if it was so before.
-   */
+  /** Displays a single value of type `A` in a `Node`.
+    *
+    * If the value changes, no new `Node` is created, but
+    * the existing `Node` is overwritten. This will keep it
+    * expanded if it was so before.
+    */
   def singleF[A,B] (out: NodeOut[A,B]): Factory[A,B] = {
-    implicit def uid = UniqueId.trivial[A]
+    implicit val uid = UniqueId.trivial[A]
 
     uniqueIdF[A,B,Unit,Id](out)
   }
 
-  /**
-   * Displays a list of objects each in a Node.
-   * New nodes are created every time the sequence
-   * changes, therefore this factory is usually not
-   * well suited for Nodes that have themselves children,
-   * since those will be in a collapsed state whenever
-   * a new sequence is displayed, no matter what the
-   * previos state of the nodes where.
-   */
-  def leavesF[A,B,C,F[_]:Traverse] (out: NodeOut[A,B])
-  (get: C ⇒ F[A]): Factory[C,B] = (ob,c, _) ⇒ {
-      def setter (a: A) = create (out)(ob, a)
+  /** Displays a list of objects each in a `Node`.
+    *
+    * New `Node`s are created every time the sequence
+    * changes, therefore this factory is usually not
+    * well suited for `Node`s that have children,
+    * since those will be in a collapsed state whenever
+    * a new sequence is displayed, no matter what the
+    * previos state of the `Node`s was.
+    */
+  def leavesF[A,B,C,F[_]:Traverse] 
+    (out: NodeOut[A,B])
+    (get: C ⇒ F[A]): Factory[C,B] = (ob,c, _) ⇒ {
+      def setter(a: A) = create(out)(ob, a)
 
       get (c) traverse setter map (ss ⇒ (Map.empty, ss.toIndexedSeq))
     }
-
-  /**
-   * Displays a List of values with a unique Long as id number.
-   */
-  def longIdF[A:LongId,B,C,F[_]:Traverse](out: NodeOut[A,B])
-  (get: C ⇒ F[A]): Factory[C,B] = uniqueIdF[A,B,Long,F](out) ∙ get
-
-  /**
-   * Displays a List of values with a unique Int as id number.
-   */
-  def intIdF[A:IntId,B,C,F[_]:Traverse](out: NodeOut[A,B])
-  (get: C ⇒ F[A]): Factory[C,B] = uniqueIdF[A,B,Int,F](out) ∙ get
-
-  /**
-   * Displays a List of values with a unique Long as id number. Values
-   * are sorted by name before being displayed.
-   */
-  def longIdNamedF[A:LongId:Named,B,C,F[_]:Traverse](out: NodeOut[A,B])
-  (get: C ⇒ F[A]): Factory[C,B] =
-    longIdF(out)(get andThen Named[A].nameSortF[F])
-
-  /**
-   * Displays a List of values with a unique Int as id number. Values
-   * are sorted by name before being displayed.
-   */
-  def intIdNamedF[A:IntId:Named,B,C,F[_]:Traverse](out: NodeOut[A,B])
-  (get: C ⇒ F[A]): Factory[C,B] =
-    intIdF(out)(get andThen Named[A].nameSortF[F])
 
   def parentF[F[_],P,C,X,Id](out: NodeOut[C,X])
                             (implicit u: UniqueId[C,Id],
@@ -168,16 +141,16 @@ trait NbChildrenFunctions {
                          (get: A ⇒ Map[B,C]): Factory[A,D] =
     pairsF[B,C,D,List](out) ∙ Named[C].sortedPairs[B] ∙ get
 
-  /**
-   * Displays a collection of key - value pairs in nodes. Existing nodes for
-   * a given key A are reused.
-   *
-   * Note that key values must be unique, otherwise the behavior is
-   * undefined.
-   */
-  def pairsF[A,B,C,F[_]:Traverse] (out: NodeOut[B,C]): Factory[F[(A,B)],C] = 
+  /** Displays a collection of key - value pairs in nodes.
+    *
+    * Existing nodes for a given key A are reused. The order in which
+    * the nodes are displayed is the same as in the given data structure.
+    * Note that keys must be unique, otherwise the behavior of this
+    * fundtion is undefined.
+    */
+  def pairsF[K,A,B,F[_]:Traverse] (out: NodeOut[A,B]): Factory[F[(K,A)],B] = 
     (oc, abs, m) ⇒ {
-      def setterPair (p: (A,B)): IO[(Any,NodeSetter)] = p match {
+      def setterPair (p: (K,A)): IO[(Any,NodeSetter)] = p match {
         case (a,b) ⇒ 
           m get a cata (display (out)(oc, b), create(out)(oc, b)) strengthL a 
       }
