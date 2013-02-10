@@ -20,10 +20,7 @@ object Parent {
   implicit lazy val ParentData = 
     new NamedL[Parent]
     with Default[Parent]
-    with UniqueIdL[Parent,Int] 
-    with CParent[List,Parent,FullChild] {
-      val T = Traverse[List]
-
+    with UniqueIdL[Parent,Int] {
       val nameL = Parent.name
       val idL = Parent.id
       val default = Parent(0, "Parent", Nil)

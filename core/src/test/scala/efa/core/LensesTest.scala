@@ -5,8 +5,8 @@ import scalaz._, Scalaz._
 
 object LensesTest extends Properties("Lenses") {
 
-  property("foldableLookupBy") = forAll{ i: Int ⇒
-    val l: List[Int] @?> Int = Lenses foldableLookupBy { i == _ }
+  property("traverseLookupBy") = forAll{ i: Int ⇒
+    val l: List[Int] @?> Int = Lenses traverseLookupBy { i == _ }
     val is = List(i - 1, i, i + 1)
     val notFound = List(i - 1, i + 1)
 

@@ -1,11 +1,13 @@
 package efa.nb.node
 
-import efa.core.{UniqueId, Efa, ValSt}, Efa._
+import efa.core.{UniqueId, Efa, ValSt, ParentL}, Efa._
 import efa.react._
 import org.scalacheck._, Prop._
 import scalaz._, Scalaz._, effect.IO
 
 object NbChildrenTest extends Properties("NbChildren") {
+  import NbChildren._
+
   private val toChild = (p: (String,Int)) ⇒ Child (p._2, p._1)
 
   //Generators
@@ -15,8 +17,8 @@ object NbChildrenTest extends Properties("NbChildren") {
   implicit val ChildrenArbitrary = Arbitrary (childrenGen)
 
   lazy val nameOut = NbNode.name[Child](_.name)
-  lazy val listFac = NbChildren.leavesF(nameOut)(identity[List[Child]])
-  lazy val seqOut = NbChildren children listFac
+  lazy val listFac = leavesF(nameOut)(identity[List[Child]])
+  lazy val seqOut = children(listFac)
 
   property ("seqFactory") = forAll { cs: List[Child] ⇒ 
     val res = for {
@@ -47,8 +49,8 @@ object NbChildrenTest extends Properties("NbChildren") {
     evalProp (res)
   }
 
-  lazy val uidFac = NbChildren.uniqueIdF[Child,Nothing,Int,List](nameOut)
-  lazy val uidOut = NbChildren children uidFac
+  lazy val uidFac = uidF[Int,Child,Nothing,List](nameOut)
+  lazy val uidOut = children(uidFac)
 
   property ("uidFactory") = Prop.forAll { cs: List[Child] ⇒ 
     val res = for {
@@ -88,8 +90,8 @@ object NbChildrenTest extends Properties("NbChildren") {
     NbNode.editDialogP ⊹ 
     NbNode.named
 
-  val parentOut: NodeOut[Parent,ValSt[Parent]] = 
-    NbChildren.children(NbChildren.parentF(childOut)) ⊹
+  val parentOut: NPOut[ParentPath] = 
+    children(parentF(childOut)) ⊹
     NbNode.named
   
   private def displayNames (n: NbNode): List[String] =

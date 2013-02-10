@@ -60,9 +60,6 @@ trait HListInstances {
 
   implicit def HListUniqueId[H,T<:HList,Id](implicit u: UniqueId[H,Id])
     : UniqueId[H :: T,Id] = UniqueId get { u id _.head }
-
-  implicit def HListParent[H,T<:HList,F[_],B](implicit p: Parent[F,H,B])
-    : Parent[F,H :: T,B] = p contramap { _.head } 
 }
 
 object hList extends HListInstances

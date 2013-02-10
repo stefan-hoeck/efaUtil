@@ -86,7 +86,7 @@ object Cc {
 
   implicit val CcDialogEditable = new DialogEditable[Cc,Cc] {
     type Comp = CcPanel
-    def component (c: Cc) = CcPanel(c)
+    def component (c: Cc, isCreate: Boolean) = CcPanel(c)
     def signalIn (c: Comp) = c.sin
     override def name (c: Cc) = c.name
   }

@@ -8,7 +8,7 @@ package object node {
   type FullChild = Child :: ParentPath
 
   implicit val FullChildDE: DE[FullChild,Child] = new DE[FullChild,Child] {
-    def component(f: FullChild) = ???
+    def component(f: FullChild, isCreate: Boolean) = ???
     def signalIn(c: Comp) = ???
   }
 }

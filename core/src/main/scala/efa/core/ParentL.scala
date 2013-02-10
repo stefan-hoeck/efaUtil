@@ -45,28 +45,26 @@ import shapeless.{HNil, HList, ::, LastAux, Last}
   * @see `shapeless.HList`
   * @see `scalaz.PLens`
   */
-trait ParentL[F[_],P,C,Path<:HList] extends Parent[F,Path,C] {
+trait ParentL[F[_],P,C,Path<:HList] extends Parent[F,Path,C :: Path] {
 
-  /** The last type in `HList` `Path` must be type `P`
-    */
+  /** The last type in `HList` `Path` must be type `P` */
   implicit protected def plast: LastAux[Path,P]
 
-  /** The empty container
-    */
+  /** The empty container */
   protected def empty: F[C]
 
-  /** Partial lens from root to children
-    */
+  /** Partial lens from root to children */
   def childrenL(path: Path): P @?> F[C]
 
-  /** Partial lens used to update a single child
-    */
+  /** Partial lens used to update a single child */
   def childL(c: C): F[C] @?> C
 
-  /** Returns all children accessible via the given `Path`
-    */
-  final def children(path: Path): F[C] =
+  def childrenWithoutPath(path: Path): F[C] =
     childrenL(path).getOr[F[C]](path.last, empty)
+
+  /** Returns all children accessible via the given `Path` */
+  final def children(path: Path): F[C :: Path] =
+    T.map(childrenWithoutPath(path)){ _ :: path }
 
   /** Partial lens to access and update a single
     * child given a parent `P`
@@ -74,45 +72,39 @@ trait ParentL[F[_],P,C,Path<:HList] extends Parent[F,Path,C] {
   final def fullChildL(cp: C :: Path): P @?> C =
     childrenL(cp.tail) >=> childL(cp.head)
 
-  /** Adds a new child to a given parent
-    */
-  def add(c: C, path: Path): State[P,Unit]
+  /** Adds a new child to a given parent */
+  def add(path: Path, c: C): State[P,Unit]
 
   /** Adds a new child to a given parent by first creating and
     * setting a new unique identifier for the child
     */
   final def addUnique[Id:Enum:Monoid]
-    (c: C, path: Path)
+    (path: Path, c: C)
     (implicit u: UniqueIdL[C,Id]): State[P,Unit] =
-    add(u.setUniqueId(children(path), c), path)
+    add(path, u.setUniqueId(childrenWithoutPath(path), c))
 
-  /** Successfully adds a new child to a given parent
-    */
-  final def addV(c: C, path: Path): ValSt[P] = add(c, path).success
+  /** Successfully adds a new child to a given parent */
+  final def addV(path: Path, c: C): ValSt[P] = add(path, c).success
 
   /** Successfully adds a new child to a given parent by first creating and
     * setting a new unique identifier for the child
     */
   final def addUniqueV[Id:Enum:Monoid]
-    (c: C, path: Path)
+    (path: Path, c: C)
     (implicit u: UniqueIdL[C,Id]): ValSt[P] =
-    addUnique[Id](c, path).success
+    addUnique[Id](path, c).success
 
-  /** Removes a child from a parent
-    */
+  /** Removes a child from a parent */
   def delete(c: C :: Path): State[P,Unit]
 
-  /** Successfully removes a child from a parent
-    */
+  /** Successfully removes a child from a parent */
   final def deleteV(c: C :: Path): ValSt[P] = delete(c).success
 
-  /** Updates (replaces) a child with a new one
-    */
+  /** Updates (replaces) a child with a new one */
   def update(cp: C :: Path, c: C): State[P,Unit] =
     fullChildL(cp) %== { _ ⇒ c }
 
-  /** Successfully updates (replaces) a child with a new one
-    */
+  /** Successfully updates (replaces) a child with a new one */
   final def updateV(cp: C :: Path, c: C): ValSt[P] = update(cp, c).success
 
   /** Creates a new `ParentL` from this instance, with the
@@ -131,7 +123,7 @@ trait ParentL[F[_],P,C,Path<:HList] extends Parent[F,Path,C] {
     * Children are stored in a container for which type classes
     * `Foldable` and `MonadPlus` must be provided.
     */
-  def mplusLensed[G[_]:MonadPlus:Foldable,D:Equal](l: C @> G[D])
+  def mplusLensed[G[_]:MonadPlus:Traverse,D:Equal](l: C @> G[D])
     :ParentL[G,P,D,C :: Path] =
     ParentL mplus { fullChildL(_) >=> ~l }
 }
@@ -151,14 +143,14 @@ trait ParentLFunctions {
       def childrenL(path: Path) = l(path)
     }
 
-  def mplus[F[_]:MonadPlus:Foldable,P,C:Equal,Path<:HList]
+  def mplus[F[_]:MonadPlus:Traverse,P,C:Equal,Path<:HList]
     (l: Path ⇒ P @?> F[C])
     (implicit last: LastAux[Path,P]): ParentL[F,P,C,Path] =
     new MPlusParentL[F,P,C,Path] {
       def childrenL(path: Path) = l(path)
     }
 
-  def mplusRoot[F[_]:MonadPlus:Foldable,P,C:Equal]
+  def mplusRoot[F[_]:MonadPlus:Traverse,P,C:Equal]
     (l: P @> F[C]): ParentL[F,P,C,P :: HNil] = mplus { _ ⇒ ~l }
 }
 
@@ -168,12 +160,12 @@ private[core] abstract class MapParentL[P,C,Path<:HList,Id](
     implicit u: UniqueId[C,Id], last: LastAux[Path,P])
   extends ParentL[({type λ[α]=Map[Id,α]})#λ,P,C,Path] {
   protected val plast = last
-  val T = Foldable[({type λ[α]=Map[Id,α]})#λ]
+  val T = Traverse[({type λ[α]=Map[Id,α]})#λ]
   protected def empty = Map.empty
 
   final def childL(c: C): Map[Id,C] @?> C = PLens mapVPLens u.id(c)
 
-  final def add(c: C, path: Path): State[P,Unit] =
+  final def add(path: Path, c: C): State[P,Unit] =
     childrenL(path) %== { _ + u.idPair(c) }
 
   final def delete(c: C :: Path): State[P,Unit] =
@@ -183,15 +175,15 @@ private[core] abstract class MapParentL[P,C,Path<:HList,Id](
 private[core] abstract class MPlusParentL[F[_],P,C:Equal,Path<:HList](
     implicit last: LastAux[Path,P],
     m: MonadPlus[F],
-    f: Foldable[F])
+    t: Traverse[F])
   extends ParentL[F,P,C,Path] {
-  val T = f
+  val T = t
   protected val plast = last
   protected def empty = m.empty
 
-  def childL(c: C): F[C] @?> C = Lenses foldableLookup c
+  def childL(c: C): F[C] @?> C = Lenses traverseLookup c
 
-  def add(c: C, path: Path): State[P,Unit] =
+  def add(path: Path, c: C): State[P,Unit] =
     childrenL(path) %== { c.η[F] <+> _ }
 
   def delete(c: C :: Path): State[P,Unit] = 

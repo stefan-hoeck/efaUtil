@@ -17,7 +17,7 @@ object ParentLTest extends Properties("ParentL") {
     val (r, b) = p
     val id = r.branches.size
     val exp = Root.branches mod (Branch.id.set(b, id) :: _, r)
-    val res = Root.RootParent.addUnique[Int](b, r :: HNil) exec r
+    val res = Root.RootParent.addUnique[Int](r :: HNil, b) exec r
     
     exp ≟ res
   }
@@ -47,7 +47,7 @@ object ParentLTest extends Properties("ParentL") {
     val id = b.leaves.size
     val newBranch = Branch.leaves.mod(_ + (id → Leaf.id.set(l, id)), b)
     val exp = Root.branches.mod(newBranch :: _.tail, r)
-    val res = Branch.BranchParent.addUnique[Int](l, b :: r :: HNil) exec r
+    val res = Branch.BranchParent.addUnique[Int](b :: r :: HNil, l) exec r
 
     exp ≟ res
   }

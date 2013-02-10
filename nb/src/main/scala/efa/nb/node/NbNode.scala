@@ -125,10 +125,49 @@ trait NbNodeFunctions {
     (implicit D: DialogEditable[A,B])
     : NodeOut[A,ValSt[C]] = addNtDialog map (f(_).success)
 
-  //def addNtDialogP[F[_],P,C,Path <: HList](bps Path ⇒ List[C])
-  //  (implicit D: DialogEditable[C :: Path, C],
-  //    p: ParentL[F,P,C,Path]): NodeOut[Path,ValSt[P]] =
-  //  addNtDialog[C :: Path,C] withIn p.add
+  def addNtDialogP[F[_],P,C,Path <: HList](c: Path ⇒ C)
+    (implicit D: DialogEditable[C :: Path, C],
+      p: ParentL[F,P,C,Path]): NodeOut[Path,ValSt[P]] =
+    addNtDialogsP[F,P,C,Path](p ⇒ List(c(p)))
+
+  //@todo: clean up code
+  def addNtDialogsP[F[_],P,C,Path <: HList](cs: Path ⇒ List[C])
+    (implicit D: DialogEditable[C :: Path, C],
+      p: ParentL[F,P,C,Path]): NodeOut[Path,ValSt[P]] = {
+
+      val dialogOut: NodeOut[C :: Path, C] = addNtDialog[C :: Path,C]
+
+      val pathOut: NodeOut[Path,C] = NodeOut((o,n) ⇒ path ⇒ {
+        val cOut = dialogOut run (o, n)
+
+        cs(path) foldMap { c ⇒ cOut apply (c :: path) }
+      })
+
+      pathOut withIn p.addV
+    }
+
+  def createNtDialogP[F[_],P,C,Path <: HList,Id:Enum:Monoid](c: Path ⇒ C)
+    (implicit D: DialogEditable[C :: Path, C],
+      p: ParentL[F,P,C,Path],
+      u: UniqueIdL[C,Id]): NodeOut[Path,ValSt[P]] =
+    createNtDialogsP[F,P,C,Path,Id](p ⇒ List(c(p)))
+
+  //@todo: clean up code
+  def createNtDialogsP[F[_],P,C,Path <: HList,Id:Enum:Monoid](cs: Path ⇒ List[C])
+    (implicit D: DialogEditable[C :: Path, C],
+      p: ParentL[F,P,C,Path],
+      u: UniqueIdL[C,Id]): NodeOut[Path,ValSt[P]] = {
+
+      val dialogOut: NodeOut[C :: Path, C] = addNtDialog[C :: Path,C]
+
+      val pathOut: NodeOut[Path,C] = NodeOut((o,n) ⇒ path ⇒ {
+        val cOut = dialogOut run (o, n)
+
+        cs(path) foldMap { c ⇒ cOut apply (c :: path) }
+      })
+
+      pathOut withIn p.addUniqueV[Id]
+    }
 
   /**
    * All NodeOuts defined for adding new types where defined
