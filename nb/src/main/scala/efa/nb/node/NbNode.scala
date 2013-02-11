@@ -153,6 +153,7 @@ trait NbNodeFunctions {
     createNtDialogsP[F,P,C,Path,Id](p ⇒ List(c(p)))
 
   //@todo: clean up code
+  //@todo: imporve type inference. problems with inferring Id type
   def createNtDialogsP[F[_],P,C,Path <: HList,Id:Enum:Monoid](cs: Path ⇒ List[C])
     (implicit D: DialogEditable[C :: Path, C],
       p: ParentL[F,P,C,Path],
