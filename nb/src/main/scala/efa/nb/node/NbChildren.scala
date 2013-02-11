@@ -165,10 +165,11 @@ trait NbChildrenFunctions {
       p: P ⇒ U pairs P.childrenList(p).sortWith(sorter)
     }
 
-  def uidF[Id,A,B,F[_]:Traverse]
-    (out: NodeOut[A,B])
-    (implicit U: UniqueId[A,Id]): Factory[F[A],B] =
-    pairsF[Id,A,B,F](out) ∙ U.pairs[F]
+  def uidF[Id,A,B,C,F[_]:Traverse]
+    (out: NodeOut[B,C])
+    (get: A ⇒ F[B])
+    (implicit U: UniqueId[B,Id]): Factory[A,C] =
+    pairsF[Id,B,C,F](out) ∙ { a: A ⇒ U pairs get(a) }
 
   /** Displays a collection of key - value pairs in nodes.
     *

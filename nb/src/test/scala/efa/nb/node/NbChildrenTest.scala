@@ -49,7 +49,7 @@ object NbChildrenTest extends Properties("NbChildren") {
     evalProp (res)
   }
 
-  lazy val uidFac = uidF[Int,Child,Nothing,List](nameOut)
+  lazy val uidFac = uidF(nameOut)(identity[List[Child]])
   lazy val uidOut = children(uidFac)
 
   property ("uidFactory") = Prop.forAll { cs: List[Child] ⇒ 
