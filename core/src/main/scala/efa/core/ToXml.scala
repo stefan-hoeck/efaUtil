@@ -61,21 +61,33 @@ object ToXml {
 
   def readShow[A:Read:Show]: ToXml[A] = read(_.shows)
 
-  def listToXml[A:ToXml] (label: String) = new ToXml[List[A]] {
+  def listToXml[A:ToXml](label: String) = new ToXml[List[A]] {
     private[this] val x = seqToXml[A] (label)
     def toXml (as: List[A]): Seq[Node] = x toXml as
     def fromXml (ns: Seq[Node]): ValRes[List[A]] =
       x fromXml ns map (_.toList)
    }
 
-  def seqToXml[A:ToXml] (label: String) = new ToXml[Seq[A]] {
+  def nelToXml[A:ToXml](label: String) = new ToXml[Nel[A]] {
+    private[this] val x = listToXml[A] (label)
+    def toXml(as: Nel[A]): Seq[Node] = x toXml as.list
+    def fromXml(ns: Seq[Node]): ValRes[Nel[A]] =
+      x fromXml ns flatMap toNel
+
+    private def toNel(as: List[A]): ValRes[Nel[A]] = as match {
+      case Nil ⇒ loc.listMustNotBeEmpty.failureNel
+      case x :: xs ⇒ NonEmptyList[A](x, xs: _*).success
+    }
+   }
+
+  def seqToXml[A:ToXml](label: String) = new ToXml[Seq[A]] {
     def toXml (as: Seq[A]): Seq[Node] =
       as map (ToXml[A] writeTag (label, _))
     def fromXml (ns: Seq[Node]): ValRes[Seq[A]] =
       ToXml[A] readTags (ns, label)
    }
 
-  def streamToXml[A:ToXml] (label: String) = new ToXml[Stream[A]] {
+  def streamToXml[A:ToXml](label: String) = new ToXml[Stream[A]] {
     private[this] val x = seqToXml[A] (label)
     def toXml (as: Stream[A]): Seq[Node] = x toXml as
     def fromXml (ns: Seq[Node]): ValRes[Stream[A]] =

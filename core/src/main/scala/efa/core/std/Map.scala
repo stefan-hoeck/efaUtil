@@ -1,6 +1,6 @@
 package efa.core.std
 
-import efa.core.{ToXml, UniqueIdL, UniqueId}
+import efa.core.{TaggedToXml, ToXml, UniqueIdL, UniqueId}
 import org.scalacheck.{Arbitrary, Gen}, Arbitrary.arbitrary
 import scala.xml.Node
 import scalaz._, Scalaz._
@@ -20,14 +20,19 @@ trait MapFunctions {
       as ← Gen listOfN (i, arbitrary[A]) 
     } yield u.generateIdsMap(as)
 
-  def mapToXml[A,K](lbl: String)(implicit a: ToXml[A], u: UniqueId[A,K])
-  : ToXml[Map[K,A]] = new ToXml[Map[K,A]] {
-      val asToXml = ToXml.listToXml[A](lbl)
+  def mapToXml[A,K]
+    (lbl: String)
+    (implicit a: ToXml[A], u: UniqueId[A,K])
+    : ToXml[Map[K,A]] = new ToXml[Map[K,A]] {
+      val asToXml = ToXml listToXml lbl
 
-      def fromXml (ns: Seq[Node]) = asToXml fromXml ns map u.idMap[List]
-
-      def toXml (map: Map[K,A]) = asToXml toXml mapValues (map)
+      def fromXml(ns: Seq[Node]) = asToXml fromXml ns map u.idMap[List]
+      def toXml(map: Map[K,A]) = asToXml toXml mapValues(map)
     }
+
+  def mapToXmlTagged[A,K]
+    (implicit a: TaggedToXml[A], u: UniqueId[A,K])
+    : ToXml[Map[K,A]] = mapToXml(a.tag)
 }
 
 object map extends MapFunctions
