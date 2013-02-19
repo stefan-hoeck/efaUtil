@@ -1,7 +1,7 @@
 package efa.core.std
 
 import efa.core.ValRes
-import scalaz.{Equal, Pointed, Monoid}
+import scalaz.{Equal, Applicative, Monoid}
 import scalaz.syntax.equal._
 import org.scalacheck.Prop
 
@@ -11,7 +11,7 @@ trait PropFunctions {
   def compare[A:Equal](e: A, f: A): Prop =
     Prop.propBoolean(f ≟ e) :| "Expected: %s, but found %s".format(e, f)
 
-  def compareP[F[_],A](e: A, f: F[A])(implicit P:Pointed[F], E:Equal[F[A]])
+  def compareP[F[_],A](e: A, f: F[A])(implicit P:Applicative[F], E:Equal[F[A]])
     : Prop = compare(P point e, f)
 }
 

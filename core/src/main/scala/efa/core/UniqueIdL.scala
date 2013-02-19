@@ -52,7 +52,7 @@ trait UniqueIdLFunctions {
 
   def stringIdL[A] (l: A @> String): StringIdL[A] = lens (l)
 
-  def idL[A]: UniqueIdL[A, A] = lens (Lens.self)
+  def idL[A]: UniqueIdL[A, A] = lens (Lens.lensId)
 
   def lens[A,I] (l: A @> I): UniqueIdL[A,I] = new UniqueIdL[A,I] {
     val idL = l

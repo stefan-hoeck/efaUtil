@@ -11,7 +11,7 @@ trait Lenses {
 
   /** Provides a shortcut to the self-Lens
     */
-  def L[A]: A @> A = Lens.self
+  def L[A]: A @> A = Lens.lensId
 
   /** Provides a shortcut to the self partial Lens
     */

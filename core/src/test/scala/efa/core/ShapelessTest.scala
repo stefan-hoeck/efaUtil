@@ -6,7 +6,7 @@ import shapeless._, HList._, Nat._
 import scalaz._, Scalaz._, scalaz.{Lens ⇒ Lensz}
 
 object ShapelessTest extends Properties ("Shapeless") {
-  val L = Lensz.self[Cc]
+  val L = Lensz.lensId[Cc]
   val LO = ~L
 
   property("arbitrary_and_equal") = forAll {p: (Cc, Cc) ⇒ 

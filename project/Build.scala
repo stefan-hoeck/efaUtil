@@ -63,9 +63,9 @@ object Dependencies {
   val nbModulesOptions = orgNb % "org-netbeans-modules-options-api" % nbV
 
   val shapeless = "com.chuusai" %% "shapeless" % "1.2.3"
-  val scalaz_core = "org.scalaz" %% "scalaz-core" % "7.0.0-M7"
-  val scalaz_effect = "org.scalaz" %% "scalaz-effect" % "7.0.0-M7"
-  val scalaz_scalacheck = "org.scalaz" %% "scalaz-scalacheck-binding" % "7.0.0-M7"
+  val scalaz_core = "org.scalaz" %% "scalaz-core" % "7.0.0-M8"
+  val scalaz_effect = "org.scalaz" %% "scalaz-effect" % "7.0.0-M8"
+  val scalaz_scalacheck = "org.scalaz" %% "scalaz-scalacheck-binding" % "7.0.0-M8"
 
   val scalacheck = "org.scalacheck" %% "scalacheck" % "1.10.0"
   val scalacheckT = scalacheck % "test"
