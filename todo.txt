@@ -1,0 +1,7 @@
+# vim:sw=4:ts=4:syntax=todo:nowrap
+
+0000 #Medium  Remove all remainders from Netbeans (nbm folder, pom.xml)
+
+0001 #High    Replace module installer for efa.nb
+
+0002 #Medium  Remove unneeded wrappers from scalaSuite

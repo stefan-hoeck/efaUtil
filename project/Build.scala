@@ -1,12 +1,13 @@
 import sbt._
 import Keys._
+import com.typesafe.sbt.osgi.SbtOsgi._
 
 object BuildSettings {
   import Resolvers._
 
   val sv = "2.10.0"
   val buildOrganization = "efa"
-  val buildVersion = "0.2.0-SNAPSHOT"
+  val buildVersion = "0.2.1-SNAPSHOT"
   val buildScalaVersion = sv
 
   val buildSettings = Defaults.defaultSettings ++ Seq (
@@ -14,10 +15,12 @@ object BuildSettings {
     version := buildVersion,
     scalaVersion := buildScalaVersion,
     resolvers ++= repos,
+    publishTo := Some(Resolver.file("file", 
+      new File(Path.userHome.absolutePath+"/.m2/repository"))),
     scalacOptions ++= Seq ("-deprecation", "-feature",
       "-language:postfixOps", "-language:implicitConversions",
       "-language:higherKinds")
-  )
+  ) ++ osgiSettings
 } 
 
 object Resolvers {
@@ -79,8 +82,11 @@ object UtilBuild extends Build {
   import Dependencies._
   import BuildSettings._
 
-  def addDeps (ds: Seq[ModuleID]) =
-    BuildSettings.buildSettings ++ Seq (libraryDependencies ++= ds)
+  def addDeps (ds: Seq[ModuleID], exports: Seq[String]) =
+    BuildSettings.buildSettings ++ Seq(
+      libraryDependencies ++= ds,
+      OsgiKeys.exportPackage := exports
+    )
 
   lazy val util = Project (
     "efa-util",
@@ -91,29 +97,33 @@ object UtilBuild extends Build {
   lazy val core = Project (
     "efa-core",
     file("core"),
-    settings = addDeps (Seq (nbUtil, nbLookup, scalacheck, scalaz_core,
-                             scalaz_effect, scalaz_scalacheck, shapeless))
+    settings = addDeps(
+      Seq (nbUtil, nbLookup, scalacheck, scalaz_core,
+          scalaz_effect, scalaz_scalacheck, shapeless),
+      Seq("efa.core.*")
+    )
   )
 
   lazy val io = Project (
     "efa-io",
     file("io"),
-    settings = addDeps (scalazCheckET :+ scalaSwing)
+    settings = addDeps(scalazCheckET :+ scalaSwing, Seq("efa.io.*"))
   ) dependsOn (core)
 
   lazy val nb = Project (
     "efa-nb",
     file("nb"),
-    settings = addDeps (scalazCheckET ++
+    settings = addDeps(scalazCheckET ++
       Seq (nbUtil, nbLookup, nbDialogs, nbNodes, nbExplorer, nbModules,
            nbOptions, nbFilesystems, nbLoaders, scalaSwing, react, react_swing,
-           shapeless))
+           shapeless), 
+      Seq("efa.nb.*"))
   ) dependsOn (core, io)
 
   lazy val localDe = Project (
     "efa-localDe",
     file("localDe"),
-    settings = addDeps (scalazCheckT)
+    settings = addDeps(scalazCheckT, Nil)
   ) dependsOn (core, nb, io)
 }
 
