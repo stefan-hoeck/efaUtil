@@ -118,7 +118,7 @@ object UtilBuild extends Build {
     settings = addDeps(scalazCheckET ++
       Seq (nbUtil, nbLookup, nbDialogs, nbNodes, nbExplorer, nbModules,
            nbOptions, nbFilesystems, nbLoaders, scalaSwing, react, react_swing,
-           osgi_core, shapeless), 
+           nbWindows, nbAwt, nbOutline, nbActions, osgi_core, shapeless), 
       Seq("efa.nb.*")) ++ Seq(
         OsgiKeys.bundleActivator := Option("efa.nb.tc.install.Installer")
       )
