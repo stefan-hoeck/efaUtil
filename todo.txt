@@ -5,3 +5,7 @@
 0001 #High    Replace module installer for efa.nb
 
 0002 #Medium  Remove unneeded wrappers from scalaSuite
+
+0003 #High    Move module nb to separate maven module
+
+0004 #High    Create git project for nb module and osgiWrappers module
