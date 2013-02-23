@@ -44,7 +44,9 @@ object Dependencies {
   val react = "efa.react" %% "react-core" % "0.2.0-SNAPSHOT" changing
 
   val react_swing = "efa.react" %% "react-swing" % "0.2.0-SNAPSHOT" changing
- 
+
+  val osgi_core = "org.osgi" % "org.osgi.core" % "4.2.0" % "provided"
+
   val nbAnnotations = orgNb % "org-netbeans-api-annotations-common" % nbV
   val nbUtil = orgNb % "org-openide-util" % nbV
   val nbLookup = orgNb % "org-openide-util-lookup" % nbV
@@ -116,8 +118,10 @@ object UtilBuild extends Build {
     settings = addDeps(scalazCheckET ++
       Seq (nbUtil, nbLookup, nbDialogs, nbNodes, nbExplorer, nbModules,
            nbOptions, nbFilesystems, nbLoaders, scalaSwing, react, react_swing,
-           shapeless), 
-      Seq("efa.nb.*"))
+           osgi_core, shapeless), 
+      Seq("efa.nb.*")) ++ Seq(
+        OsgiKeys.bundleActivator := Option("efa.nb.tc.install.Installer")
+      )
   ) dependsOn (core, io)
 
   lazy val localDe = Project (
@@ -127,4 +131,4 @@ object UtilBuild extends Build {
   ) dependsOn (core, nb, io)
 }
 
-// vim: set ts=2 sw=2 et:
+// vim: set ts=2 sw=2 nowrap et:
