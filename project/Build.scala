@@ -92,7 +92,10 @@ object UtilBuild extends Build {
   lazy val localDe = Project (
     "efa-localDe",
     file("localDe"),
-    settings = addDeps(scalacheck +: coolness, Nil)
+    settings = addDeps(
+      scalacheck +: coolness, 
+      Seq("efa.local.de") //needed for netbeans
+    )
   ) dependsOn (core, io)
 }
 
