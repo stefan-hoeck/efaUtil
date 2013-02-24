@@ -3,18 +3,17 @@ import Keys._
 import com.typesafe.sbt.osgi.SbtOsgi._
 
 object BuildSettings {
-  import Resolvers._
-
   val sv = "2.10.0"
   val buildOrganization = "efa"
   val buildVersion = "0.2.1-SNAPSHOT"
   val buildScalaVersion = sv
+  val netbeansRepo = "Netbeans" at "http://bits.netbeans.org/maven2/"
 
   val buildSettings = Defaults.defaultSettings ++ Seq (
     organization := buildOrganization,
     version := buildVersion,
     scalaVersion := buildScalaVersion,
-    resolvers ++= repos,
+    resolvers += netbeansRepo,
     publishTo := Some(Resolver.file("file", 
       new File(Path.userHome.absolutePath+"/.m2/repository"))),
     scalacOptions ++= Seq ("-deprecation", "-feature",
@@ -23,43 +22,40 @@ object BuildSettings {
   ) ++ osgiSettings
 } 
 
-object Resolvers {
- val netbeansRepo = "Netbeans" at "http://bits.netbeans.org/maven2/"
-
- val repos = Seq (netbeansRepo)
-}
-
 object Dependencies {
   import BuildSettings.sv
 
   val nbV = "RELEASE71"
-  val orgNb = "org.netbeans.api"
+  val reactV = "0.2.1-SNAPSHOT"
+  val scalazV = "7.0.0-M8"
+
+  val nb = "org.netbeans.api"
+  val react = "efa.react"
+  val scalaz = "org.scalaz"
 
   val scalaSwing = "org.scala-lang" % "scala-swing" % sv
 
-  val react = "efa.react" %% "react-core" % "0.2.0-SNAPSHOT" changing
+  val react_core = react %% "react-core" % reactV changing
 
-  val react_swing = "efa.react" %% "react-swing" % "0.2.0-SNAPSHOT" changing
+  val react_swing = react %% "react-swing" % reactV changing
 
   val osgi_core = "org.osgi" % "org.osgi.core" % "4.2.0" % "provided"
 
-  val nbUtil = orgNb % "org-openide-util" % nbV
-  val nbLookup = orgNb % "org-openide-util-lookup" % nbV
+  val nbUtil = nb % "org-openide-util" % nbV
+  val nbLookup = nb % "org-openide-util-lookup" % nbV
 
   val shapeless = "com.chuusai" %% "shapeless" % "1.2.3"
-  val scalaz_core = "org.scalaz" %% "scalaz-core" % "7.0.0-M8"
-  val scalaz_effect = "org.scalaz" %% "scalaz-effect" % "7.0.0-M8"
-  val scalaz_scalacheck = "org.scalaz" %% "scalaz-scalacheck-binding" % "7.0.0-M8"
+  val scalaz_core = scalaz %% "scalaz-core" % scalazV
+  val scalaz_effect = scalaz %% "scalaz-effect" % scalazV
+  val scalaz_scalacheck = scalaz %% "scalaz-scalacheck-binding" % scalazV
 
   val scalacheck = "org.scalacheck" %% "scalacheck" % "1.10.0"
   val scalacheckT = scalacheck % "test"
-  val scalazCheckT = Seq(scalaz_core, scalaz_effect, scalaz_scalacheck, scalacheckT, shapeless)
 
-  val scalazCheckET = scalazCheckT :+ scalaz_effect
+  val coolness = Seq(scalaz_core, scalaz_effect, scalaz_scalacheck, shapeless)
 }
 
 object UtilBuild extends Build {
-  import Resolvers._
   import Dependencies._
   import BuildSettings._
 
@@ -73,14 +69,13 @@ object UtilBuild extends Build {
     "efa-util",
     file("."),
     settings = buildSettings
-  ) aggregate (core, io, nb, localDe)
+  ) aggregate (core, io, localDe)
 
   lazy val core = Project (
     "efa-core",
     file("core"),
     settings = addDeps(
-      Seq (nbUtil, nbLookup, scalacheck, scalaz_core,
-          scalaz_effect, scalaz_scalacheck, shapeless),
+      Seq (nbUtil, nbLookup, scalacheck) ++ coolness,
       Seq("efa.core.*")
     )
   )
@@ -88,13 +83,16 @@ object UtilBuild extends Build {
   lazy val io = Project (
     "efa-io",
     file("io"),
-    settings = addDeps(scalazCheckET :+ scalaSwing, Seq("efa.io.*"))
+    settings = addDeps(
+      Seq(scalacheckT, scalaSwing) ++ coolness,
+      Seq("efa.io.*")
+    )
   ) dependsOn (core)
 
   lazy val localDe = Project (
     "efa-localDe",
     file("localDe"),
-    settings = addDeps(scalazCheckT, Nil)
+    settings = addDeps(scalacheck +: coolness, Nil)
   ) dependsOn (core, io)
 }
 
