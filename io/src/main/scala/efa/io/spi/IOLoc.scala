@@ -154,4 +154,4 @@ object IOLoc extends IOLoc {
   def xmlWritten (s: String) = "Wrote xml to " + s
 }
 
-// vim: set ts=2 sw=2 et:
+// vim: set ts=2 sw=2 et, nowrap:

@@ -1,11 +1,25 @@
 package efa.io
 
-import java.io.{File}
+import java.io._
 import valLogIO._
 import scalaz._, Scalaz._
 
-trait AsFile[-A] {
+trait AsFile[-A] extends AsInput[A] with AsOutput[A] {
   import AsFile.FileAsFile
+
+  override def inputStream(a: A): ValLogIO[InputStream] = for {
+    f  ← file(a)
+    is ← except(success(new FileInputStream(f)), _ ⇒ readError(a))
+  } yield is
+
+  override def outputStream(a: A): ValLogIO[OutputStream] = for {
+    f  ← create(a)
+    is ← except(success(new FileOutputStream(f)), _ ⇒ writeError(a))
+  } yield is
+
+  override def readError(a: A): String = loc fileReadError path(a)
+
+  override def writeError(a: A): String = loc fileWriteError path(a)
 
   /** Tries to create a `java.io.File` from an `A` */
   def file(a: A): ValLogIO[File]

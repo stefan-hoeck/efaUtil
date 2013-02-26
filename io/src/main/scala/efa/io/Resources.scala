@@ -19,6 +19,8 @@ trait ResourceInstances {
 
   implicit val ReaderResource = r[Reader](_.close())
 
+  implicit val BufferedReaderResource = r[BufferedReader](_.close())
+
   implicit val WriterResource = r[Writer](_.close())
 }
 

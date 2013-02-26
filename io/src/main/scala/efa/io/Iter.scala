@@ -1,6 +1,6 @@
 package efa.io
 
-import efa.core.{Level, Log}
+import efa.core.{Level, Log, Logs, DisRes}
 import scalaz.{Reader ⇒ _, Writer ⇒ _, _}, Scalaz._, std.indexedSeq._
 import scalaz.iteratee._, Iteratee._
 import scalaz.effect._
@@ -33,6 +33,13 @@ trait IterFunctions {
       }
       
       vIter(create >>= go)
+    }
+
+  def resourceEnum[E,R:Resource]
+    (r: ValLogIO[R])
+    (enum: R ⇒ VLIOEnum[E]): VLIOEnum[E] = new EnumeratorT[E,ValLogIO] {
+      def apply[A] = (s: VLIOStep[E,A]) ⇒
+        vIter(r >>= { x ⇒ ensure(enum(x) apply s value, close(x)) })
     }
 
   def throbber[E](inc: Int, out: (Int, Long) ⇒ IO[Unit])

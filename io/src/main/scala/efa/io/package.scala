@@ -9,8 +9,11 @@ package object io {
   lazy val loc = Service.unique[IOLoc](IOLoc)
 
   type LogIO[+A] = WriterT[IO,Logs,A]
+
   type ValLogIO[+A] = EitherT[LogIO,NonEmptyList[String],A]
+
   type LogIOR[+A] = IO[(Logs,A)]
+
   type ValLogIOR[+A] = LogIOR[DisRes[A]]
 
   type VLIOEnum[A] = EnumeratorT[A,ValLogIO]
