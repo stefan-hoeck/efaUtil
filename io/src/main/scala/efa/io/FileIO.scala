@@ -7,12 +7,7 @@ import java.io.{IOException, OutputStream, InputStream, Reader,
   InputStreamReader}
 
 object FileIO {
-  import valLogIO._
-
-  implicit val InputStreamResource = resource[InputStream](_.close())
-  implicit val OutputStreamResource = resource[OutputStream](_.close())
-  implicit val OutputStreamWriterResource = resource[OutputStreamWriter](_.close())
-  implicit val WriterResource = resource[Writer](_.close())
+  import valLogIO._, resource._
 
   def file (path: String): ValLogIO[File] = success (new File(path))
 

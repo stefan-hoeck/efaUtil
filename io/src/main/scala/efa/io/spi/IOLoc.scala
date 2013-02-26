@@ -30,6 +30,7 @@ trait IOLoc {
   def resourceNotFound (nameExt: String, cl: Class[_], t: Throwable): String
   def resourceOpened (nameExt: String, cl: Class[_]): String
   def stringWritten (s: String): String
+  def throbberMsg(i: Int, millis: Long): String
   def txtExt: String
   def txtFiles: String
   def xmlRead (s: String): String
@@ -141,6 +142,8 @@ object IOLoc extends IOLoc {
       nameExt, cl.getCanonicalName)
 
   def stringWritten (s: String) = "Wrote string to " + s
+
+  def throbberMsg(i: Int, millis: Long) = s"Processed $i items in $millis ms"
 
   def txtExt = "txt"
 

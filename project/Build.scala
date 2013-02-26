@@ -47,6 +47,7 @@ object Dependencies {
   val shapeless = "com.chuusai" %% "shapeless" % "1.2.3"
   val scalaz_core = scalaz %% "scalaz-core" % scalazV
   val scalaz_effect = scalaz %% "scalaz-effect" % scalazV
+  val scalaz_iteratee = scalaz %% "scalaz-iteratee" % scalazV
   val scalaz_scalacheck = scalaz %% "scalaz-scalacheck-binding" % scalazV
 
   val scalacheck = "org.scalacheck" %% "scalacheck" % "1.10.0"
@@ -84,7 +85,7 @@ object UtilBuild extends Build {
     "efa-io",
     file("io"),
     settings = addDeps(
-      Seq(scalacheckT, scalaSwing) ++ coolness,
+      Seq(scalacheckT, scalaSwing, scalaz_iteratee) ++ coolness,
       Seq("efa.io.*")
     )
   ) dependsOn (core)

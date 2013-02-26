@@ -7,7 +7,12 @@ import efa.core._, Efa._
 import java.io.{InputStream, OutputStream, Writer, ByteArrayOutputStream,
   ByteArrayInputStream, CharArrayWriter, CharArrayReader}
 
-object FileIOTest extends Properties("FileIO") with ValLogIOFunctions {
+object FileIOTest 
+  extends Properties("FileIO") 
+  with ValLogIOFunctions 
+  with ResourceInstances 
+  with ResourceFunctions {
+
   implicit def PropBoolean (b: Boolean): Prop = Prop.propBoolean(b)
   implicit val CloseStubResource = resource[CloseStub](_.close())
   implicit val ErrorCloseStubResource = resource[ErrorCloseStub](_.close())

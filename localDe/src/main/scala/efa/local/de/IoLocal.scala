@@ -65,6 +65,8 @@ class IoLocal extends IOLoc {
 
   def stringWritten (s: String) = "Text geschrieben nach " + s
 
+  def throbberMsg(i: Int, millis: Long) = s"$i Elemente in $millis ms verarbeitet"
+
   def txtExt = "txt"
 
   def txtFiles = "Textdateien [.txt]"
@@ -72,6 +74,6 @@ class IoLocal extends IOLoc {
   def xmlRead (s: String) = "Xml gelesen von " + s
 
   def xmlWritten (s: String) = "Xml geschrieben nach " + s
-} /// end of IoLocal
+}
 
-// vim: set ts=2 sw=2 et:
+// vim: set ts=2 sw=2 et nowrap:
