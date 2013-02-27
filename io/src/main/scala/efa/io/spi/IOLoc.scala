@@ -7,6 +7,7 @@ trait IOLoc {
   def allFiles: String
   def closed (s: String): String
   def dataReadError: String
+  def dataWriteError: String
   def fileNotFound (s: String): String
   def fileCopied (s: String): String
   def fileCopyError (s: String): String
@@ -86,6 +87,8 @@ object IOLoc extends IOLoc {
   def closed (s: String) = "Closed " + s
 
   def dataReadError = "Error when reading data."
+
+  def dataWriteError = "Error when writing data."
 
   def fileNotFound (s: String) = "File not found: " + s
 

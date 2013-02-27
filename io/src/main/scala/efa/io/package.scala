@@ -22,13 +22,15 @@ package object io {
 
   type VLIOIter[E,A] = IterateeT[E,ValLogIO,A]
 
-  type DisIO[A] = EitherT[IO,Nel[String],A]
+  type DisIO[+A] = EitherT[IO,Nel[String],A]
 
-  type EnumIO[A] = EnumeratorT[A,DisIO]
+  type LogToDisIO[A] = Kleisli[DisIO,LoggerIO,A]
 
-  type IterIO[E,A] = IterateeT[E,DisIO,A]
+  type EnumIO[A] = EnumeratorT[A,LogToDisIO]
 
-  type StepIO[E,A] = StepT[E,DisIO,A]
+  type IterIO[E,A] = IterateeT[E,LogToDisIO,A]
+
+  type StepIO[E,A] = StepT[E,LogToDisIO,A]
 }
 
 // vim: set ts=2 sw=2 et:

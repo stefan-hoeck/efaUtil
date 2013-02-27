@@ -34,14 +34,24 @@ trait IterFunctions {
 //      
 //      vIter(create >>= go)
 //    }
-//
-//  def resourceEnum[E,R:Resource]
-//    (r: ValLogIO[R])
-//    (enum: R ⇒ VLIOEnum[E]): VLIOEnum[E] = new EnumeratorT[E,ValLogIO] {
-//      def apply[A] = (s: VLIOStep[E,A]) ⇒
-//        vIter(r >>= { x ⇒ ensure(enum(x) apply s value, close(x)) })
-//    }
-//
+
+  def resourceEnum[E,R:Resource]
+    (r: ValLogIO[R])
+    (enum: R ⇒ EnumIO[E]): EnumIO[E] = new EnumeratorT[E,LogToDisIO] {
+      def apply[A] = (s: StepIO[E,A]) ⇒ {
+        def valStep: EffectStep[E,A] = Kleisli(l ⇒ 
+          l logValV (
+            for {
+              x ← r
+              s ← ensure(fromLogKleisli(enum(x) apply s value, l), close(x))
+            } yield s
+          )
+        )
+
+        vIter(valStep)
+      }
+    }
+
 //  def throbber[E](inc: Int, out: (Int, Long) ⇒ IO[Unit])
 //    : IterateeT[E,IO,Unit] = {
 //    type ToIter = Input[E] ⇒ IterateeT[E,IO,Unit]
@@ -65,8 +75,8 @@ trait IterFunctions {
 //    icont(step(0, inc - 1, now))
 //  }
 
-  def vIter[E,A](s: EffectStep[E,A])(implicit L: LoggerIO): IterIO[E,A] = 
-    iterateeT[E,DisIO,A](L logValV s)
+  def vIter[E,A](s: EffectStep[E,A]): IterIO[E,A] = 
+    iterateeT[E,LogToDisIO,A](s)
 }
 
 trait IterInstances {
@@ -108,7 +118,7 @@ trait IterInstances {
 }
 
 object iter extends IterFunctions with IterInstances {
-  type EffectStep[E,A] = ValLogIO[StepIO[E,A]]
+  type EffectStep[E,A] = LogToDisIO[StepIO[E,A]]
 }
 
 // vim: set ts=2 sw=2 et:

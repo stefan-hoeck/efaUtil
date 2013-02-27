@@ -1,7 +1,7 @@
 package efa.io
 
 import efa.core._
-import scalaz._, Scalaz._, effect._
+import scalaz._, Scalaz._, effect._, iteratee.IterateeT
 
 trait ValLogIOFunctions {
   val logM = Monad[LogIO]
@@ -58,12 +58,25 @@ trait ValLogIOFunctions {
     mapIO(e)(ens)
   }
 
-  def fail[A] (s: ⇒ String): ValLogIO[A] = failNel(s.wrapNel)
+  def fail[A](s: ⇒ String): ValLogIO[A] = failNel(s.wrapNel)
 
-  def failNel[A] (s: ⇒ NonEmptyList[String]): ValLogIO[A] =
+  def failK[A](s: ⇒ String): LogToDisIO[A] = failNelK(s.wrapNel)
+
+  def failNel[A](s: ⇒ NonEmptyList[String]): ValLogIO[A] =
     EitherT left logM.point(s)
 
+  def failNelK[A](s: ⇒ NonEmptyList[String]): LogToDisIO[A] =
+    toLogKleisli(failNel(s))
+
+  def failIter[E,A](s: ⇒ String): IterIO[E,A] = failNelIter(s.wrapNel)
+
+  def failNelIter[E,A](s: ⇒ NonEmptyList[String]): IterIO[E,A] =
+    IterateeT.iterateeT[E,LogToDisIO,A](failNelK(s))
+      
+
   def success[A] (a: ⇒ A): ValLogIO[A] = EitherT right logM.point(a)
+
+  def successK[A] (a: ⇒ A): LogToDisIO[A] = toLogKleisli(success(a))
 
   def validate[A,B](vli: ValLogIO[A])(v: Validator[A,B]): ValLogIO[B] =
     lift (vli.run.run map {case(a,b) ⇒ (a, b flatMap v.run)})
@@ -86,7 +99,12 @@ trait ValLogIOFunctions {
     (c: ⇒ C, msg: ⇒ String)
     (f: C ⇒ ValLogIO[A]): ValLogIO[A] =
     ensure(except(f(c), t ⇒ s"${msg}: ${t.toString}"), close(c))
-    
+
+  def toLogKleisli[A](v: ValLogIO[A]): LogToDisIO[A] =
+    Kleisli[DisIO,LoggerIO,A](_ logValV v)
+
+  def fromLogKleisli[A](v: LogToDisIO[A], l: LoggerIO): ValLogIO[A] =
+    liftDisIO(v run l run)
 }
 
 trait ValLogIOInstances {

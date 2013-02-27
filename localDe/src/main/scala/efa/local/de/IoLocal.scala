@@ -9,6 +9,8 @@ class IoLocal extends IOLoc {
 
   def dataReadError = "Fehler beim Lesen von Daten"
 
+  def dataWriteError = "Fehler beim Schreiben von Daten"
+
   def fileNotFound (s: String) = "Datei nicht gefunden: " + s
 
   def fileCopied (s: String) = "Datei kopiert " + s
