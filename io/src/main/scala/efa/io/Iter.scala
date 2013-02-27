@@ -36,14 +36,15 @@ trait IterFunctions {
 //    }
 
   def resourceEnum[E,R:Resource]
-    (r: ValLogIO[R])
+    (r: ValLogIO[R], name: String)
     (enum: R ⇒ EnumIO[E]): EnumIO[E] = new EnumeratorT[E,LogToDisIO] {
       def apply[A] = (s: StepIO[E,A]) ⇒ {
         def valStep: EffectStep[E,A] = Kleisli(l ⇒ 
           l logValV (
             for {
               x ← r
-              s ← ensure(fromLogKleisli(enum(x) apply s value, l), close(x))
+              s ← ensure(fromLogKleisli(enum(x) apply s value, l),
+                         close(x, name))
             } yield s
           )
         )

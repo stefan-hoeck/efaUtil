@@ -11,15 +11,15 @@ import scala.xml.XML
 trait AsInput[-A] {
   /** Returns an `InputStream` from an A
     *
-    * It is OK for this IO-action to throw an exception when
-    * it is being run. The exception will be caught and
+    * It is OK for this IO-action to throw an exception when being run.
+    * The exception will be caught and
     * transeferred to a DisRes by the public functions of this
     * type class.
     */
   protected def is(a: A): IO[InputStream]
 
   final def inputStream(a: A): ValLogIO[InputStream] =
-    except(liftIO(is(a)), openError(a))
+    except(liftIO(is(a)) >>= (i ⇒ debug(opened(a)) as i), openError(a))
 
   def reader(a: A): ValLogIO[Reader] = for {
     is ← inputStream(a)
@@ -31,31 +31,31 @@ trait AsInput[-A] {
     br ← except(success(new BufferedReader(r)), openError(a))
   } yield br
 
-  def readXml[B:ToXml](a: A): LogToDisIO[B] =
-    (IterateeT.head[B,LogToDisIO] &= xml(a) run) map { _.get }
+//  def readXml[B:ToXml](a: A): LogToDisIO[B] =
+//    (IterateeT.head[B,LogToDisIO] &= xml(a) run) map { _.get }
+//
+//  def allLines(a: A): LogToDisIO[IxSq[String]] =
+//    consume[String,LogToDisIO,IxSq] &= lines(a) run
+//
+//  def xml[B:ToXml](a: A): EnumIO[B] =
+//    iter.resourceEnum(inputStream(a))(xmlR[B](a))
+//
+//  def lines(a: A): EnumIO[String] =
+//    iter.resourceEnum(bufferedReader(a))(lineR(a))
+//
+//  def allBytes(a: A): LogToDisIO[Array[Byte]] =  {
+//    val consIter = Iteratee.fold[Array[Byte],LogToDisIO,Array[Byte]](
+//      Array.empty){ _ ++ _ }
+//
+//    consIter &= bytes(a) run
+//  }
+//
+//  def bytes(a: A, buffer: Int = 8192): EnumIO[Array[Byte]] =
+//    iter.resourceEnum(inputStream(a))(bytesR(a, buffer))
 
-  def allLines(a: A): LogToDisIO[IxSq[String]] =
-    consume[String,LogToDisIO,IxSq] &= lines(a) run
-
-  def xml[B:ToXml](a: A): EnumIO[B] =
-    iter.resourceEnum(inputStream(a))(xmlR[B](a))
-
-  def lines(a: A): EnumIO[String] =
-    iter.resourceEnum(bufferedReader(a))(lineR(a))
-
-  def allBytes(a: A): LogToDisIO[Array[Byte]] =  {
-    val consIter = Iteratee.fold[Array[Byte],LogToDisIO,Array[Byte]](
-      Array.empty){ _ ++ _ }
-
-    consIter &= bytes(a) run
-  }
-
-  def bytes(a: A, buffer: Int = 8192): EnumIO[Array[Byte]] =
-    iter.resourceEnum(inputStream(a))(bytesR(a, buffer))
-
-  private def xmlR[B:ToXml](a: A)(in: InputStream): EnumIO[B] =
+  private def xmlR[B:ToXml](a: A)(i: InputStream): EnumIO[B] =
     new SingleEnumIO[B](readError(a)) {
-      protected def load() = XML.load(in).readD[B]
+      protected def load() = XML.load(i).readD[B]
     }
 
   private def lineR(a: A)(r: BufferedReader): EnumIO[String] =
@@ -63,40 +63,40 @@ trait AsInput[-A] {
       protected def next() = Option(r.readLine)
     }
 
-  private def bytesR(a: A, buffer: Int)(is: InputStream)
+  private def bytesR(a: A, buffer: Int)(i: InputStream)
     : EnumIO[Array[Byte]] = new RecursiveEnumIO[Array[Byte]](readError(a)) {
     protected def next() = {
       val bytes = new Array[Byte](buffer)
 
-      is read bytes match {
+      i read bytes match {
         case -1 ⇒ None
         case x  ⇒ Some(bytes take x)
       }
     }
   }
 
-  def readError(a: A)(t: Throwable): String
+  def name(a: A): String
 
-  def openError(a: A)(t: Throwable): String
+  def opened(a: A): String = loc opened name(a)
+
+  def readError(a: A)(t: Throwable): String = loc readError (name(a), t)
+
+  def openError(a: A)(t: Throwable): String = loc openError (name(a), t)
 }
 
 trait AsInputInstances {
-  //implicit val IsAsInput: AsInput[InputStream] = new AsInput[InputStream] {
-  //  def inputStream(is: InputStream) = success(is)
-  //  def readError(is: InputStream)(t: Throwable): String = loc.dataReadError
-  //}
+  implicit val IsAsInput: AsInput[InputStream] = new AsInput[InputStream] {
+    protected def is(i: InputStream) = IO(i)
+    def name(i: InputStream) = i.toString
+  }
 
-  //implicit val ClassAsInput: AsInput[(String,Class[_])] =
-  //  new AsInput[(String,Class[_])] {
-  //    def inputStream(p: (String,Class[_])) = 
-  //    for {
-  //      is ← success(p._2 getResourceAsStream p._1)
-  //      _  ← debug(loc.resourceOpened(p._1, p._2))
-  //    } yield is
+  implicit val ClassAsInput: AsInput[(String,Class[_])] =
+    new AsInput[(String,Class[_])] {
+      protected def is(p: (String,Class[_])) = 
+        IO(p._2 getResourceAsStream p._1)
 
-  //    def readError(p: (String,Class[_]))(t: Throwable): String =
-  //      loc.dataReadError
-  //  }
+      def name(p: (String,Class[_])) = p._1
+    }
 }
 
 object AsInput {

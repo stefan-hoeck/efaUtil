@@ -84,21 +84,11 @@ trait ValLogIOFunctions {
   /**
     * Closes a resource
     */
-   def close[A:Resource](c: A): ValLogIO[Unit] = {
-     def cl: IO[Unit] = Resource[A] close c except (_ ⇒ IO.ioUnit)
+  def close[A:Resource](c: A, name: String): ValLogIO[Unit] = {
+    def cl: IO[Unit] = Resource[A] close c except (_ ⇒ IO.ioUnit)
 
-     liftIO(cl) >> debug(loc closed c.toString)
-   }
-
-  /**
-    * Performs some action with a given Resource. Exceptions are caught and
-    * wrapped as messages in a DisRes. The given Close is closed in
-    * the end, no matter whether an exception was raised or not.
-    */
-  def withClose[C:Resource,A]
-    (c: ⇒ C, msg: ⇒ String)
-    (f: C ⇒ ValLogIO[A]): ValLogIO[A] =
-    ensure(except(f(c), t ⇒ s"${msg}: ${t.toString}"), close(c))
+    liftIO(cl) >> debug(loc closed name)
+  }
 
   def toLogKleisli[A](v: ValLogIO[A]): LogToDisIO[A] =
     Kleisli[DisIO,LoggerIO,A](_ logValV v)
