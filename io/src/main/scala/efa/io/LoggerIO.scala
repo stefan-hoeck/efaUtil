@@ -31,14 +31,14 @@ sealed trait LoggerIO {
     
   def logValZ[A:Monoid] (i: ValLogIO[A]): IO[A] = logVal (i, ∅[A])
 
-  def logValV[A] (i: ValLogIO[A]): EitherT[IO,NonEmptyList[String],A] = {
+  def logValV[A] (i: ValLogIO[A]): DisIO[A] = {
     def res = for {
       p ← i.run.run
       _ ← self logs p._1
       _ ← logDisRes (p._2)
     } yield p._2
 
-    EitherT (res)
+    EitherT(res)
   }
 
 }
