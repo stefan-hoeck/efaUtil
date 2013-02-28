@@ -3,78 +3,31 @@ package efa.local.de
 import efa.io.spi.IOLoc
 
 class IoLocal extends IOLoc {
-  def closed(s: String) = s"$s geschlossen"
-  def opened(s: String) = s"$s geöffnet"
-  def openError(s: String, t: Throwable) = s"Fehler beim Öffnen von $s: $t"
-  def readError(s: String, t: Throwable) = s"Fehler beim Lesen von $s: $t"
-  def writeError(s: String, t: Throwable) = s"Fehler beim Schreiben nach $s: $t"
   def allFiles = "Alle Dateien"
-//
-//  def fileNotFound (s: String) = "Datei nicht gefunden: " + s
-//
-//  def fileCopied (s: String) = "Datei kopiert " + s
-//
+  def closed(s: String) = s"$s geschlossen"
+  def deleteError(s: String, t: Throwable) = s"Fehler beim Löschen von $s: $t"
+  def fileCreateError(s: String, t: Throwable) = s"Fehler beim Erstellen von Datei $s: $t"
+  def fileCreateUnable(s: String) = s"Erstellen von Datei %s nicht möglich."
+  def fileCreated(s: String) = s"Datei $s wurde erstellt."
+  def fileDeleteUnable(s: String) = s"Löschen von Datei $s nicht möglich."
+  def fileDeleted(s: String) = s"Datei $s wurde gelöscht"
+  def fileError(s: String, t: Throwable) = s"Fehler beim Zuweisen von Datei $s: $t"
+  def fileNotFound(s: String) = s"Datei nicht gefunden: $s"
+  def folderCreateError(s: String, t: Throwable) = s"Fehler beim Erstellen von Ordner $s: $t"
+  def folderCreateUnable(s: String) = s"Erstellen von Ordner $s unmöglich."
+  def folderCreated(s: String) = s"Ordner $s wurde erstellt."
+  def folderDeleteUnable(s: String) = "Löschen von Ordner %s unmöglich." format s
+  def folderDeleted(s: String) = s"Ordner $s wurde gelöscht."
+  def folderNotFound(s: String) = s"Ordner nicht gefunden: $s"
+  def openError(s: String, t: Throwable) = s"Fehler beim Öffnen von $s: $t"
+  def opened(s: String) = s"$s geöffnet"
+  def readError(s: String, t: Throwable) = s"Fehler beim Lesen von $s: $t"
+  def throbberMsg(i: Int, millis: Long) = s"$i Elemente in $millis ms verarbeitet"
+  def txtExt = "txt"
+  def txtFiles = "Textdateien [.txt]"
+  def writeError(s: String, t: Throwable) = s"Fehler beim Schreiben nach $s: $t"
+//  def fileCopied (s: String) = s"Datei kopiert: $s" + s
 //  def fileCopyError (s: String) = "Fehler beim Kopieren von Datei " + s
-//
-//  def fileCreated (s: String) = "Datei erstellt: " + s
-//
-//  def fileCreateError (t: Throwable, s: String) =
-//    "Fehler beim Erstellen von Datei %s: %s" format (s, t.toString)
-//
-//  def fileCreateUnable (s: String) = "Erstellen von Datei %s unmöglich." format s
-//
-//  def fileDeleted (s: String) = "Datei gelöscht: " + s
-//
-//  def fileDeleteError (t: Throwable, s: String) =
-//    "Fehler beim Löschen von Datei %s: %s" format (s, t.toString)
-//
-//  def fileDeleteUnable (s: String) = "Löschen von Datei %s unmöglich." format s
-//
-//  def fileOpenError (s: String) = "Fehler beim Öffnen von Datei " + s
-//
-//  def fileReadError (s: String) = "Fehler beim Lesen von Datei " + s
-//
-//  def fileWriteError (s: String) = "Fehler beim Schreiben von Datei " + s
-//
-//  def folderNotFound (s: String) = "Ordner nicht gefunden: " + s
-//
-//  def folderCreated (s: String) = "Ordner erstellt: " + s
-//
-//  def folderCreateError (t: Throwable, s: String) =
-//    "Fehler beim Erstellen von Ordner %s: %s" format (s, t.toString)
-//
-//  def folderCreateUnable (s: String) = "Erstellen von Ordner %s unmöglich." format s
-//
-//  def folderDeleted (s: String) = "Ordner gelöscht: " + s
-//
-//  def folderDeleteError (t: Throwable, s: String) =
-//    "Fehler beim Löschen von Ordner %s: %s" format (s, t.toString)
-//
-//  def folderDeleteUnable (s: String) = "Löschen von Ordner %s unmöglich." format s
-//
-//  def inputStreamOpened (s: String): String = "InputStream für %s geöffnet" format s
-//
-//  def outputStreamOpened (s: String): String = "OutputStream für %s geöffnet" format s
-//
-//  def resourceNotFound (nameExt: String, cl: Class[_], t: Throwable) =
-//    "Resourse %s in Klasse %s nicht gefunden: %s" format (
-//      nameExt, cl.getCanonicalName, t.toString)
-//
-//  def resourceOpened (nameExt: String, cl: Class[_]) =
-//    "InputStream für %s in Klasse %s geöffnet." format (
-//      nameExt, cl.getCanonicalName)
-//
-//  def stringWritten (s: String) = "Text geschrieben nach " + s
-//
-//  def throbberMsg(i: Int, millis: Long) = s"$i Elemente in $millis ms verarbeitet"
-//
-//  def txtExt = "txt"
-//
-//  def txtFiles = "Textdateien [.txt]"
-//
-//  def xmlRead (s: String) = "Xml gelesen von " + s
-//
-//  def xmlWritten (s: String) = "Xml geschrieben nach " + s
 }
 
 // vim: set ts=2 sw=2 et nowrap:

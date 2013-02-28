@@ -22,6 +22,8 @@ trait ResourceInstances {
   implicit val BufferedReaderResource = r[BufferedReader](_.close())
 
   implicit val WriterResource = r[Writer](_.close())
+
+  implicit val PrintWriterResource = r[PrintWriter](_.close())
 }
 
 object resource extends ResourceInstances with ResourceFunctions

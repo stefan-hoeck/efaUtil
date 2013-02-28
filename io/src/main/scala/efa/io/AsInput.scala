@@ -18,8 +18,10 @@ trait AsInput[-A] {
     */
   protected def is(a: A): IO[InputStream]
 
-  final def inputStream(a: A): ValLogIO[InputStream] =
-    except(liftIO(is(a)) >>= (i ⇒ debug(opened(a)) as i), openError(a))
+  def inputStream(a: A): ValLogIO[InputStream] = for {
+    i ← except(liftIO(is(a)), openError(a))
+    _ ← debug(opened(a))
+  } yield i
 
   def reader(a: A): ValLogIO[Reader] = for {
     is ← inputStream(a)
@@ -31,27 +33,32 @@ trait AsInput[-A] {
     br ← except(success(new BufferedReader(r)), openError(a))
   } yield br
 
-//  def readXml[B:ToXml](a: A): LogToDisIO[B] =
-//    (IterateeT.head[B,LogToDisIO] &= xml(a) run) map { _.get }
-//
-//  def allLines(a: A): LogToDisIO[IxSq[String]] =
-//    consume[String,LogToDisIO,IxSq] &= lines(a) run
-//
-//  def xml[B:ToXml](a: A): EnumIO[B] =
-//    iter.resourceEnum(inputStream(a))(xmlR[B](a))
-//
-//  def lines(a: A): EnumIO[String] =
-//    iter.resourceEnum(bufferedReader(a))(lineR(a))
-//
-//  def allBytes(a: A): LogToDisIO[Array[Byte]] =  {
-//    val consIter = Iteratee.fold[Array[Byte],LogToDisIO,Array[Byte]](
-//      Array.empty){ _ ++ _ }
-//
-//    consIter &= bytes(a) run
-//  }
-//
-//  def bytes(a: A, buffer: Int = 8192): EnumIO[Array[Byte]] =
-//    iter.resourceEnum(inputStream(a))(bytesR(a, buffer))
+  def readXml[B:ToXml](a: A): LogToDisIO[B] =
+    (IterateeT.head[B,LogToDisIO] &= xml(a) run) map { _.get }
+
+  def allLines(a: A): LogToDisIO[IxSq[String]] =
+    consume[String,LogToDisIO,IxSq] &= lines(a) run
+
+  def xml[B:ToXml](a: A): EnumIO[B] =
+    iter.resourceEnum(inputStream(a), name(a))(xmlR[B](a))
+
+  def lines(a: A): EnumIO[String] =
+    iter.resourceEnum(bufferedReader(a), name(a))(lineR(a))
+
+  def allBytes(a: A): LogToDisIO[Array[Byte]] =  {
+    type Bytes = Array[Byte]
+
+    val consIter = 
+      Iteratee.fold[Bytes,LogToDisIO,Bytes](Array.empty){ _ ++ _ }
+
+    consIter &= bytes(a) run
+  }
+
+  def copy[B:AsOutput](a: A, b: B): LogToDisIO[Unit] =
+    AsOutput[B].bytesOut(b) &= bytes(a) run
+
+  def bytes(a: A, buffer: Int = 8192): EnumIO[Array[Byte]] =
+    iter.resourceEnum(inputStream(a), name(a))(bytesR(a, buffer))
 
   private def xmlR[B:ToXml](a: A)(i: InputStream): EnumIO[B] =
     new SingleEnumIO[B](readError(a)) {
@@ -77,11 +84,11 @@ trait AsInput[-A] {
 
   def name(a: A): String
 
-  def opened(a: A): String = loc opened name(a)
+  private def opened(a: A): String = loc opened name(a)
 
-  def readError(a: A)(t: Throwable): String = loc readError (name(a), t)
+  private def readError(a: A)(t: Throwable): String = loc readError (name(a), t)
 
-  def openError(a: A)(t: Throwable): String = loc openError (name(a), t)
+  private def openError(a: A)(t: Throwable): String = loc openError (name(a), t)
 }
 
 trait AsInputInstances {

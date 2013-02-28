@@ -16,12 +16,6 @@ package object io {
 
   type ValLogIOR[+A] = LogIOR[DisRes[A]]
 
-  type VLIOEnum[A] = EnumeratorT[A,ValLogIO]
-
-  type VLIOStep[E,A] = StepT[E,ValLogIO,A]
-
-  type VLIOIter[E,A] = IterateeT[E,ValLogIO,A]
-
   type DisIO[+A] = EitherT[IO,Nel[String],A]
 
   type LogToDisIO[A] = Kleisli[DisIO,LoggerIO,A]
