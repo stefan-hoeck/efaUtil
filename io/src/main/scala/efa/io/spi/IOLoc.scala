@@ -5,6 +5,7 @@ import java.io.File
 trait IOLoc {
   def allFiles: String
   def closed(s: String): String
+  def copied(from: String, to: String): String
   def deleteError(s: String, t: Throwable): String
   def fileCreateError(s: String, t: Throwable): String
   def fileCreateUnable(s: String): String
@@ -38,6 +39,7 @@ trait IOLoc {
 object IOLoc extends IOLoc {
   def allFiles = "All Files"
   def closed(s: String) = s"Closed $s"
+  def copied(from: String, to: String) = s"Copied $from to $to"
   def deleteError (s: String, t: Throwable) = s"Error when deleting $s: $t"
   def fileCreateError (s: String, t: Throwable) = s"Error when creating file $s: $t"
   def fileCreateUnable (s: String) = s"Unable to create file $s"
@@ -59,10 +61,6 @@ object IOLoc extends IOLoc {
   def txtExt = "txt"
   def txtFiles = "Text Files [.txt]"
   def writeError(s: String, t: Throwable) = s"Error when writing to $s: $t"
-
-  //def fileCopied (s: String) = "Copied file " + s
-
-  //def fileCopyError (s: String) = "Error when copying file " + s
 }
 
 // vim: set ts=2 sw=2 et nowrap:

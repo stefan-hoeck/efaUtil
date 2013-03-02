@@ -6,7 +6,7 @@ import scalaz.iteratee._, Iteratee._
 import scalaz.effect._
 
 trait IterFunctions {
-  import iter.EffectStep, valLogIO._
+  import iter.EffectStep, logDisIO._
 
   def logThrobber[E](
     inc: Int,
@@ -17,38 +17,33 @@ trait IterFunctions {
     throbber[E](inc, (i,l) ⇒ logger log lvl.log(msg(i,l)))
 
   def contK[E,A](f: Input[E] ⇒ IterIO[E,A]): EffectStep[E,A] =
-    successK(scont(f))
+    success(scont(f))
 
   def resourceIter[E,R:Resource]
-    (create: ValLogIO[R], name: String)
-    (out: (E,R) ⇒ ValLogIO[Unit]): IterIO[E,Unit] = {
+    (create: LogDisIO[R], name: String)
+    (out: (E,R) ⇒ LogDisIO[Unit]): IterIO[E,Unit] = {
       def go(r: R): EffectStep[E,Unit] = contK { i ⇒ 
         vIter(
           i.fold(
             empty = go(r),
-            el    = e ⇒ toLogKleisli(out(e, r)) >> go(r),
-            eof   = toLogKleisli(close(r, name)) >>
-                    successK[StepIO[E,Unit]](sdone((), eofInput))
+            el    = e ⇒ out(e, r) >> go(r),
+            eof   = close(r, name) >>
+                    success[StepIO[E,Unit]](sdone((), eofInput))
           )
         )
       }
       
-      vIter(toLogKleisli(create) >>= go)
+      vIter(create >>= go)
     }
 
   def resourceEnum[E,R:Resource]
-    (r: ValLogIO[R], name: String)
-    (enum: R ⇒ EnumIO[E]): EnumIO[E] = new EnumeratorT[E,LogToDisIO] {
+    (r: LogDisIO[R], name: String)
+    (enum: R ⇒ EnumIO[E]): EnumIO[E] = new EnumeratorT[E,LogDisIO] {
       def apply[A] = (s: StepIO[E,A]) ⇒ {
-        def valStep: EffectStep[E,A] = Kleisli(l ⇒ 
-          l logValV (
-            for {
-              x ← r
-              s ← ensure(fromLogKleisli(enum(x) apply s value, l),
-                         close(x, name))
-            } yield s
-          )
-        )
+        def valStep: EffectStep[E,A] = for {
+          x ← r
+          s ← ensure(enum(x) apply s value, close(x, name))
+        } yield s
 
         vIter(valStep)
       }
@@ -78,7 +73,7 @@ trait IterFunctions {
   }
 
   def vIter[E,A](s: EffectStep[E,A]): IterIO[E,A] = 
-    iterateeT[E,LogToDisIO,A](s)
+    iterateeT[E,LogDisIO,A](s)
 }
 
 trait IterInstances {
@@ -120,7 +115,7 @@ trait IterInstances {
 }
 
 object iter extends IterFunctions with IterInstances {
-  type EffectStep[E,A] = LogToDisIO[StepIO[E,A]]
+  type EffectStep[E,A] = LogDisIO[StepIO[E,A]]
 }
 
 // vim: set ts=2 sw=2 et:

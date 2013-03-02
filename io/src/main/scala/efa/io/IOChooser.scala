@@ -6,18 +6,18 @@ import java.io._
 import javax.swing.filechooser.FileNameExtensionFilter
 import scala.swing.FileChooser
 import scala.swing.FileChooser.Result
-import valLogIO._
+import logDisIO._
 
-case class IOChooser(chooser: ValLogIO[FileChooser]) {
-  def saveFile: ValLogIO[Option[File]] = for {
+case class IOChooser(chooser: LogDisIO[FileChooser]) {
+  def saveFile: LogDisIO[Option[File]] = for {
     c ← chooser
-    r ←  c.showSaveDialog(null) match {
-           case Result.Approve ⇒ AsFile[File] create c.selectedFile map (_.some)
-           case _ ⇒ none[File].η[ValLogIO]
-         }
+    r ← c.showSaveDialog(null) match {
+          case Result.Approve ⇒ AsFile[File] create c.selectedFile map (_.some)
+          case _ ⇒ none[File].η[LogDisIO]
+        }
   } yield r
 
-  def loadFile: ValLogIO[Option[File]] = for {
+  def loadFile: LogDisIO[Option[File]] = for {
     c ← chooser
     r ← point (
           c.showOpenDialog(null) match {
@@ -25,7 +25,7 @@ case class IOChooser(chooser: ValLogIO[FileChooser]) {
             case _ ⇒ none[File]
           }
         )
-  } yield r
+    } yield r
 }
 
 object IOChooser {

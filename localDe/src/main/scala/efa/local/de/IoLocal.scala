@@ -5,6 +5,7 @@ import efa.io.spi.IOLoc
 class IoLocal extends IOLoc {
   def allFiles = "Alle Dateien"
   def closed(s: String) = s"$s geschlossen"
+  def copied(from: String, to: String) = s"$from nach $to kopiert."
   def deleteError(s: String, t: Throwable) = s"Fehler beim Löschen von $s: $t"
   def fileCreateError(s: String, t: Throwable) = s"Fehler beim Erstellen von Datei $s: $t"
   def fileCreateUnable(s: String) = s"Erstellen von Datei %s nicht möglich."
@@ -26,8 +27,6 @@ class IoLocal extends IOLoc {
   def txtExt = "txt"
   def txtFiles = "Textdateien [.txt]"
   def writeError(s: String, t: Throwable) = s"Fehler beim Schreiben nach $s: $t"
-//  def fileCopied (s: String) = s"Datei kopiert: $s" + s
-//  def fileCopyError (s: String) = "Fehler beim Kopieren von Datei " + s
 }
 
 // vim: set ts=2 sw=2 et nowrap:

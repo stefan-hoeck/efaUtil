@@ -1,10 +1,10 @@
 package efa.io
 
 import java.io._
-import valLogIO._
+import logDisIO._
 import scalaz._, Scalaz._, effect.IO
 
-trait AsFile[-A] extends AsInput[A] with AsOutput[A] {
+trait AsFile[A] extends AsInput[A] with AsOutput[A] {
   import AsFile.FileAsFile
 
   override protected def is(a: A) = 
@@ -23,25 +23,26 @@ trait AsFile[-A] extends AsInput[A] with AsOutput[A] {
   protected def fileIO(a: A): IO[File]
 
   /** Creates a `java.io.File` from an `A` */
-  final def file(a: A): ValLogIO[File] =
+  final def file(a: A): LogDisIO[File] =
     except(liftIO(fileIO(a)), fileError(a))
 
-  final def fileError(a: A)(t: Throwable): String =
+  private def fileError(a: A)(t: Throwable): String =
     loc fileError (name(a), t)
+
   /** Checks whether a `File` exists and returns either
     * the `File` or an error message
     */
-  def existingFile(a: A): ValLogIO[File] = for {
+  def existingFile(a: A): LogDisIO[File] = for {
     f ← file(a)
     r ← f.exists ? success(f) | fail(loc fileNotFound name(a))
   } yield r
 
   /** Returns a file from an existing file and a relative path
     */
-  def file(a: A, path: String): ValLogIO[File] =
+  def file(a: A, path: String): LogDisIO[File] =
     file(a) >>= { f ⇒ AsFile[File].file(new File(f, path)) }
 
-  def create(a: A): ValLogIO[File] = {
+  def create(a: A): LogDisIO[File] = {
     def run(f: File) = for {
       b ← success(f.createNewFile)
       _ ← b ? debug(loc fileCreated name(a)) |
@@ -54,7 +55,7 @@ trait AsFile[-A] extends AsInput[A] with AsOutput[A] {
   /** Returns a file from a given folder. Both, File and Folder are
     * created on disk if they don't exist.
     */
-  def addFile(folder: A, nameExt: String): ValLogIO[File] = for {
+  def addFile(folder: A, nameExt: String): LogDisIO[File] = for {
     fo ← mkdirs(folder)
     fi ← AsFile[File].file(fo, nameExt) >>= AsFile[File].create
   } yield fi
@@ -62,12 +63,12 @@ trait AsFile[-A] extends AsInput[A] with AsOutput[A] {
   /** Returns a given folder from within another folder. Any folder
     * that does not already exist is created on disk.
     */
-  def addDirs(folder: A, path: String): ValLogIO[File] = for {
+  def addDirs(folder: A, path: String): LogDisIO[File] = for {
     fo ← mkdirs(folder)
     fi ← AsFile[File].file(fo, path) >>= AsFile[File].mkdirs
   } yield fi
 
-  def delete(a: A): ValLogIO[Unit] = {
+  def delete(a: A): LogDisIO[Unit] = {
     def run(f: File) = for {
       b ← success(f.delete())
       _ ← b ? debug(loc deleted f) | warning(loc deleteUnable f)
@@ -80,7 +81,7 @@ trait AsFile[-A] extends AsInput[A] with AsOutput[A] {
    * Creates the folders for the given A recursively and returns the
    * file wrapped in the IO-Monad.
    */
-  def mkdirs(a: A): ValLogIO[File] = {
+  def mkdirs(a: A): LogDisIO[File] = {
     def run(f: File) = for {
       b ← success(f.mkdirs)
       _ ← b ? debug(loc folderCreated name(a)) |
@@ -91,14 +92,34 @@ trait AsFile[-A] extends AsInput[A] with AsOutput[A] {
   }
 
   def tryWithFile[B](
-    f: File ⇒ ValLogIO[B],
-    a: A, msg: (String, Throwable) ⇒ String): ValLogIO[B] =
-    file(a) >>= { fi ⇒ except(f(fi), msg.curried(name(a))) }
+    f: File ⇒ LogDisIO[B],
+  a: A, msg: (String, Throwable) ⇒ String): LogDisIO[B] =
+  file(a) >>= { fi ⇒ except(f(fi), msg.curried(name(a))) }
 
-  def tryWithNonExisting
-    (f: File ⇒ ValLogIO[File], a: A, msg: (String, Throwable) ⇒ String)
-    : ValLogIO[File] =
-    tryWithFile(fi ⇒ if (fi.exists) success(fi) else f(fi), a, msg)
+def tryWithNonExisting
+  (f: File ⇒ LogDisIO[File], a: A, msg: (String, Throwable) ⇒ String)
+  : LogDisIO[File] =
+  tryWithFile(fi ⇒ if (fi.exists) success(fi) else f(fi), a, msg)
+}
+
+trait AsFileSyntax extends AsInputSyntax with AsOutputSyntax {
+  implicit class AsFileOps[A](a: A)(implicit F:AsFile[A]) {
+    def file: LogDisIO[File] = F file a
+
+    def existingFile: LogDisIO[File] = F existingFile a
+
+    def fileAt(path: String): LogDisIO[File] = F.file(a, path)
+
+    def create: LogDisIO[File] = F create a
+
+    def addFile(nameExt: String): LogDisIO[File] = F.addFile(a, nameExt)
+
+    def addDirs(path: String): LogDisIO[File] = F.addDirs(a, path)
+
+    def delete: LogDisIO[Unit] = F delete a
+
+    def mkdirs: LogDisIO[File] = F mkdirs a
+  }
 }
 
 trait AsFileInstances {
@@ -115,6 +136,8 @@ trait AsFileInstances {
 
 object AsFile extends AsFileInstances {
   def apply[A:AsFile]: AsFile[A] = implicitly
+
+  object syntax extends AsFileSyntax
 }
 
 // vim: set ts=2 sw=2 et:

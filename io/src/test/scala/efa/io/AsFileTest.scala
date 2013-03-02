@@ -1,11 +1,12 @@
 package efa.io
 
-import scalaz._, Scalaz._//, effect.IO
-import org.scalacheck._, Prop._
 import efa.core._, Efa._
+import EfaIO._
 import java.io.File
+import org.scalacheck._, Prop._
+import scalaz._, Scalaz._
 
-object AsFileTest extends Properties("AsFile") with AsFileInstances {
+object AsFileTest extends Properties("AsFile") {
 
   private lazy val fs = System.getProperty("file.separator")
   private lazy val home = System.getProperty("user.home")
@@ -17,22 +18,20 @@ object AsFileTest extends Properties("AsFile") with AsFileInstances {
 
   lazy val logger = ∅[LoggerIO]
 
-  private val AF: AsFile[String] = implicitly
-
-  def testIO[A] (i: ValLogIO[A]): DisRes[A] =
-    logger.logValV (i).run.unsafePerformIO
+  def testIO[A](i: LogDisIO[A]): DisRes[A] =
+    logger.logDisV(i).run.unsafePerformIO
 
   property("file_string") = forAll(nGen) {s ⇒ 
-    testIO(AF file s map (_.getPath)) ≟ s.right
+    testIO(s.file map (_.getPath)) ≟ s.right
   }
 
   property("fileInputStream_error") = forAll(nGen) {s ⇒
-    testIO(AF inputStream s) isLeft
+    testIO(s.inputStream) isLeft
   }
   
   property("createFile_String_Success") = forAll(nGen) { s ⇒ 
     val path = root + fs + s
-    testIO((AF create path) >> (AF delete path))≟ ().right
+    testIO(path.create >> path.delete)≟ ().right
   }
 }
 
