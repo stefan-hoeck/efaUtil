@@ -12,16 +12,22 @@ sealed trait LoggerIO {
 
   def logs(ls: Logs) = ls.toList foldMap log
 
-  def trace(msg: ⇒ String) = log (Log trace msg)
-  def debug(msg: ⇒ String) = log (Log debug msg)
-  def info(msg: ⇒ String) = log (Log info msg)
-  def warn(msg: ⇒ String) = log (Log warning msg)
-  def error(msg: ⇒ String) = log (Log error msg)
+  def trace(msg: ⇒ String) = log(Log trace msg)
+
+  def debug(msg: ⇒ String) = log(Log debug msg)
+
+  def info(msg: ⇒ String) = log(Log info msg)
+
+  def warn(msg: ⇒ String) = log(Log warning msg)
+
+  def error(msg: ⇒ String) = log(Log error msg)
 
   def filter (max: Level) =
-    LoggerIO (l ⇒ (l.level >= max) ? self.log (l) | IO.ioUnit, logNel)
+    LoggerIO(l ⇒ (l.level >= max) ? self.log (l) | IO.ioUnit, logNel)
 
   def logDisRes[A](v: DisRes[A]): IO[Unit] = v fold (logNel, _ ⇒ IO.ioUnit)
+
+  def logValRes[A](v: ValRes[A]): IO[Unit] = logDisRes(v.disjunction)
 
   def logDis[A](i: LogDisIO[A], default: A): IO[A] = logDisV(i) | default
     

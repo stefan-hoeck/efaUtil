@@ -6,6 +6,8 @@ import scalaz._, Scalaz._, effect._, scalaz.iteratee.IterateeT
 trait LogDisIOFunctions {
   val logM = Monad[LogDisIO]
 
+  val ldiUnit: LogDisIO[Unit] = point(())
+
   def point[A](a: ⇒ A): LogDisIO[A] = logM point a
 
   def lift[A](a: LoggerIO ⇒ IO[DisRes[A]]): LogDisIO[A] =
