@@ -6,5 +6,7 @@ object EfaIO
   with AsInputInstances
   with AsOutputInstances
   with ResourceInstances
+  with LogDisIOFunctions
+  with LogDisIOInstances
 
 // vim: set ts=2 sw=2 et:
