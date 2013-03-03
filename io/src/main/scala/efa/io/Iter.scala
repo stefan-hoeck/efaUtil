@@ -49,6 +49,22 @@ trait IterFunctions {
       }
     }
 
+  def resourceEnumO[E,R:Resource]
+    (r: LogDisIO[Option[R]])
+    (enum: R ⇒ EnumIO[E]): EnumIO[E] = new EnumeratorT[E,LogDisIO] {
+      def apply[A] = (s: StepIO[E,A]) ⇒ {
+        def valStep: EffectStep[E,A] = for {
+          ox ← r
+          s  ← ox cata (
+                 x ⇒ ensure(enum(x) apply s value, close(x, x.toString)),
+                 success(s)
+               )
+        } yield s
+
+        vIter(valStep)
+      }
+    }
+
   def throbber[E](inc: Int, out: (Int, Long) ⇒ IO[Unit])
     : IterateeT[E,IO,Unit] = {
     type ToIter = Input[E] ⇒ IterateeT[E,IO,Unit]

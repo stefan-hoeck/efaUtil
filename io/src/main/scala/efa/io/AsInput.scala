@@ -18,6 +18,8 @@ trait AsInput[A] extends Named[A] {
     */
   protected def is(a: A): IO[InputStream]
 
+  final protected def isO(a: A) = is(a) map (_.some)
+
   def inputStream(a: A): LogDisIO[InputStream] = for {
     i ← except(liftIO(is(a)), openError(a))
     _ ← debug(opened(a))
@@ -134,27 +136,5 @@ object AsInput extends AsInputInstances {
 
   object syntax extends AsInputSyntax
 }
-
-private abstract class RecursiveEnumIO[E](msg: Throwable ⇒ String)
-  extends EnumeratorT[E,LogDisIO] {
-    protected def next(): Option[E]
-
-    def apply[A] = (s: StepIO[E,A]) ⇒ s mapCont { k ⇒
-      try {
-        next() cata (e ⇒ k(elInput(e)) >>== apply[A], s.pointI)
-      } catch { case NonFatal(e) ⇒ failIter(msg(e)) }
-    }
-  }
-
-private abstract class SingleEnumIO[E](msg: Throwable ⇒ String)
-  extends EnumeratorT[E,LogDisIO] {
-    protected def load(): DisRes[E]
-
-    def apply[A] = (s: StepIO[E,A]) ⇒ s mapCont { k ⇒
-      try {
-        load() fold (failNelIter[E,A](_), e ⇒ k(elInput(e)) >>== apply[A])
-      } catch { case NonFatal(e) ⇒ failIter(msg(e)) }
-    }
-  }
 
 // vim: set ts=2 sw=2 et:

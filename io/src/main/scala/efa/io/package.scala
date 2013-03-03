@@ -19,6 +19,12 @@ package object io {
   type StepIO[E,A] = StepT[E,LogDisIO,A]
 
   type ClassResource = (String,Class[_])
+
+  def opened(s: String): String = loc opened s
+
+  def readError(s: String)(t: Throwable): String = loc readError (s, t)
+
+  def openError(s: String)(t: Throwable): String = loc openError (s, t)
 }
 
 // vim: set ts=2 sw=2 et:

@@ -1,6 +1,6 @@
 package efa.io
 
-import efa.core.{TaggedToXml, Efa, Named}, Efa._
+import efa.core.{TaggedToXml, ToXml, Efa, Named}, Efa._
 import java.io._
 import scala.xml.{PrettyPrinter, XML}
 import scalaz.{Writer ⇒ _, _}, Scalaz._, effect.IO
@@ -54,20 +54,33 @@ trait AsOutput[A] extends Named[A] {
   def writeString(a: A, s: String, c: CharSet = UTF8): LogDisIO[Unit] =
     stringI(a, c) &= enumOne(s) run
 
-  def writeXml[B:TaggedToXml](
-    a: A, 
-    b: B,
-    pretty: Option[PrettyPrinter] = None,
-    c: CharSet = UTF8): LogDisIO[Unit] =
-    xmlI[B](a, pretty, c) &= enumOne(b) run
+  def writeXml[B:TaggedToXml](a: A, 
+                              b: B,
+                              pretty: Option[PrettyPrinter] = None,
+                              c: CharSet = UTF8): LogDisIO[Unit] =
+    writeXmlTag(a, b, TaggedToXml[B].tag, pretty, c)
+
+  def writeXmlTag[B:ToXml](a: A, 
+                           b: B,
+                           tag: String,
+                           pretty: Option[PrettyPrinter] = None,
+                           c: CharSet = UTF8): LogDisIO[Unit] =
+    xmlTagI[B](a, tag, pretty, c) &= enumOne(b) run
     
 
-  def xmlI[B](a: A, 
-                pretty: Option[PrettyPrinter] = None,
-                c: CharSet = UTF8)
-                (implicit T:TaggedToXml[B]): IterIO[B,Unit] = {
+  def xmlI[B:TaggedToXml](a: A, 
+                          pretty: Option[PrettyPrinter] = None,
+                          c: CharSet = UTF8): IterIO[B,Unit] =
+    xmlTagI(a, TaggedToXml[B].tag, pretty, c)
+
+  def xmlTagI[B](a: A, 
+                 tag: String,
+                 pretty: Option[PrettyPrinter] = None,
+                 c: CharSet = UTF8)
+                 (implicit T:ToXml[B]): IterIO[B,Unit] = {
+
     def write(b: B, w: Writer): LogDisIO[Unit] = {
-      def x: scala.xml.Node = T write b
+      def x: scala.xml.Node = T writeTag (tag, b)
       def run = pretty cata (p ⇒  w.write(p format x),
                              XML.write(w, x, c, true, null))
 
@@ -117,11 +130,22 @@ trait AsOutputSyntax {
                                 pretty: Option[PrettyPrinter] = None,
                                 c: CharSet = UTF8): LogDisIO[Unit] =
       O.writeXml(a, b, pretty, c)
+
+    def writeXmlTag[B:ToXml](b: B,
+                             tag: String,
+                             pretty: Option[PrettyPrinter] = None,
+                             c: CharSet = UTF8): LogDisIO[Unit] =
+      O.writeXmlTag(a, b, tag, pretty, c)
       
 
     def xmlI[B:TaggedToXml](pretty: Option[PrettyPrinter] = None,
                             c: CharSet = UTF8): IterIO[B,Unit] =
       O.xmlI(a, pretty, c)
+
+    def xmlTagI[B:ToXml](tag: String,
+                         pretty: Option[PrettyPrinter] = None,
+                         c: CharSet = UTF8): IterIO[B,Unit] =
+      O.xmlTagI(a, tag, pretty, c)
   }
 }
 
