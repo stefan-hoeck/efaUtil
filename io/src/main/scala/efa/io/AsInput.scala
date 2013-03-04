@@ -137,4 +137,37 @@ object AsInput extends AsInputInstances {
   object syntax extends AsInputSyntax
 }
 
+abstract class RecursiveEnumIO[E](msg: Throwable ⇒ String)
+  extends EnumeratorT[E,LogDisIO] {
+    protected def next(): Option[E]
+
+    def apply[A] = (s: StepIO[E,A]) ⇒ s mapCont { k ⇒
+      try {
+        next() cata (e ⇒ k(elInput(e)) >>== apply[A], s.pointI)
+      } catch { case NonFatal(e) ⇒ 
+        //call k with eof in order to close open resources.
+        //k will be discarded afterwards and never be called again
+        iter.vIter(k(eofInput).value >> fail(msg(e)))
+      }
+    }
+  }
+
+abstract class SingleEnumIO[E](msg: Throwable ⇒ String)
+  extends EnumeratorT[E,LogDisIO] {
+    protected def load(): DisRes[E]
+
+    def apply[A] = (s: StepIO[E,A]) ⇒ s mapCont { k ⇒
+      try {
+        load() fold (
+          nel ⇒ iter.vIter(k(eofInput).value >> failNel(nel)),
+          e ⇒ k(elInput(e))
+        )
+      } catch { case NonFatal(e) ⇒ 
+        //call k with eof in order to close open resources.
+        //k will be discarded afterwards and never be called again
+        iter.vIter(k(eofInput).value >> fail(msg(e)))
+      }
+    }
+  }
+
 // vim: set ts=2 sw=2 et:

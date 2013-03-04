@@ -57,7 +57,8 @@ object AsInputTest extends Properties("AsInput") {
     val res = testIO(in copyTo out)
 
     res.isRight :| "copying successful" &&
-    out.isClosed :| "closed out" &&
+    (bytes.isEmpty || out.isClosed) :| "closed out if non empty input" &&
+    (bytes.nonEmpty || !(out.wasOpened)) :| "opened out only if non empty input" &&
     in.isClosed :| "closed in" &&
     (out.toByteArray.toList ≟ bytes) :| "actually copied data"
   }

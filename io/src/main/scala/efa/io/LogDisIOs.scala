@@ -25,8 +25,24 @@ trait LogDisIOFunctions {
   def mapIO[A](a: LogDisIO[A])(f: IO[DisRes[A]] ⇒ IO[DisRes[A]])
     : LogDisIO[A] = lift(l ⇒ f(a run l run))
 
+  /** Tries to carry out the given IO action and - in case of
+    * a failure, returns an error message wrapped in a left.
+    */
   def except[A](e: LogDisIO[A], msg: Throwable ⇒ String): LogDisIO[A] =
     mapIO(e)(_ except (t ⇒ IO(msg(t).wrapNel.left[A])))
+
+  /** Runs the first IO-action and in case of a failure,
+    * also the second.
+    */
+  def onFail[A,B](e: LogDisIO[A], ex: LogDisIO[B]): LogDisIO[A] = {
+    def onEx(l: LoggerIO): IO[DisRes[A]] = for {
+      v ← e.run(l).run
+      _ ← debug(s"on fail called: $v").run(l).run
+      _ ← v fold (_ ⇒ ex as (), (a: A) ⇒ ldiUnit) run l run
+    } yield v
+
+    lift(onEx)
+  }
 
   def ensure[A](e: LogDisIO[A], f: LogDisIO[Unit]): LogDisIO[A] = {
     def ens(l: LoggerIO): IO[DisRes[A]] = for {

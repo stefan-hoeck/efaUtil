@@ -8,77 +8,151 @@ import scalaz.effect._
 trait IterFunctions {
   import iter.EffectStep, logDisIO._
 
-  def logThrobber[E](
-    inc: Int,
-    logger: LoggerIO = LoggerIO.consoleLogger,
-    lvl: Level = Level.Info,
-    msg: (Int, Long) ⇒ String = (i: Int, l: Long) ⇒ loc.throbberMsg(i, l))
-  : IterateeT[E,IO,Unit] = 
-    throbber[E](inc, (i,l) ⇒ logger log lvl.log(msg(i,l)))
+  /** Helper function to create cont-Steps */
+  private[io] def contI[E,A](el: E ⇒ EffectStep[E,A], eof: LogDisIO[A])
+    : EffectStep[E,A] =
+    success[StepIO[E,A]](
+      scont[E,LogDisIO,A] { i ⇒ 
+        vIter[E,A] (
+          i.fold[EffectStep[E,A]] (
+            empty = contI(el, eof),
+            el    = el(_),
+            eof   = eof map { sdone(_, eofInput) }
+          )
+        )
+      }
+    )
 
-  def contK[E,A](f: Input[E] ⇒ IterIO[E,A]): EffectStep[E,A] =
-    success(scont(f))
-
-  /** This can be used to implement Enumerators for resources that
-    * have first to be selected by the user.
+  /** Can be used to implement Enumerators for resources that
+    * have first to be selected by the user and are therefore
+    * optional.
     *
     * For a couple of use cases see the enumerators defined
-    * on [[efa.io.IOChooser]].
+    * on [[efa.io.IOChooser]]. First, the user is asked to
+    * select an input resource (a file for instance), and then
+    * data is loaded from this resource. Note that the
+    * resource is not closed automatically. This (if necessary) is
+    * the responsibility of the inner Enumerator returned
+    * by function parameter `f`.
+    *
+    * @tparam In type of the input resource
+    * @tparam E  input (element-) type of the enumerator
+    * @param  g Loads an input resource as a logged, validated
+    *           IO-Action. Such a resource might be selected by
+    *           the user of a GUI and is therefore optional.
+    * @param  f Creates an enumerator from an `In`
     */
   def optionEnum[In,E](g: LogDisIO[Option[In]])
                       (f: In ⇒ EnumIO[E]): EnumIO[E] = 
     new EnumeratorT[E,LogDisIO] {
-      def apply[A] = ???
+      def apply[A] = (s: StepIO[E,A]) ⇒ {
+        def step: EffectStep[E,A] = for {
+          oi ← g
+          st ← oi.cata[IterIO[E,A]](
+                 f(_) apply s, s mapCont { _ apply emptyInput }
+               ).value
+        } yield st
+          
+        s mapCont { _ ⇒ vIter(step) }
+      }
     }
 
   def optionIter[Out,E,A](g: LogDisIO[Option[Out]])
                          (f: Out ⇒ IterIO[E,A])
-                         (a: ⇒ A): IterIO[E,A] = 
-    vIter(
-      for {
-        o ← g
-        x ← o.cata[EffectStep[E,A]](
-               f apply _ value,
-               success(sdone(a, emptyInput))
-             )
-      } yield x
-    )
+                         (a: ⇒ A): IterIO[E,A] = ???
+    //vIter(
+    //  for {
+    //    o ← g
+    //    x ← o.cata[EffectStep[E,A]](
+    //          f apply _ value,
+    //          success(sdone(a, emptyInput))
+    //        )
+    //  } yield x
+    //)
 
   def optionIterM[Out,E,A](g: LogDisIO[Option[Out]])
                           (f: Out ⇒ IterIO[E,A])
                           (implicit M: Monoid[A]): IterIO[E,A] = 
     optionIter(g)(f)(M.zero)
 
+  /** Returns an Iteratee that feeds values to a resource R.
+    *
+    * The resource is automatically closed, when no more values
+    * are available (upon EOF input), and if output to the
+    * resource fails (that is, param `out` returns a left).
+    * Enumerator must therefore make sure, that if they themselves
+    * produce erroneous input, they at least call the iteratee
+    * with EOF before returning the failure. See [[efa.io.RecursiveEnumIO]]
+    * for an example.
+    *
+    * @tparam E the element type to be consumed
+    * @tparam R the type of the resource
+    * @param  create an IO action that creates a resource of type R
+    * @param  name a `String` representation of the resource
+    *              (a file path for instance) used for logging
+    *              and error messages
+    * @param  out writes an `E` to a resource of type `R`. This
+    *             action might fail, in which case the resource
+    *             is closed and no more values are accepted.
+    */
   def resourceIter[E,R:Resource]
     (create: LogDisIO[R], name: String)
     (out: (E,R) ⇒ LogDisIO[Unit]): IterIO[E,Unit] = {
-      def go(r: R): EffectStep[E,Unit] = contK { i ⇒ 
-        vIter(
-          i.fold(
-            empty = go(r),
-            el    = e ⇒ out(e, r) >> go(r),
-            eof   = close(r, name) >>
-                    success[StepIO[E,Unit]](sdone((), eofInput))
-          )
-        )
-      }
+      def ex(e: E, r: R): EffectStep[E,Unit] =
+        onFail(out(e, r) >> goR(r), close(r, name))
+
+      def goR(r: R): EffectStep[E,Unit] = contI(ex(_, r), close(r, name))
+
+      def go: EffectStep[E,Unit] = 
+        contI(e ⇒ create >>= { ex(e, _) }, ldiUnit)
       
-      vIter(create >>= go)
+      vIter(go)
     }
 
+  /** Creates an enumerator for a closable resource, guaranteeing
+    * that the resource is released when it is no longer needed.
+    *
+    * The resulting enumerator will open (create) the resource if
+    * required, create an underlying enumerator from it, and return
+    * all of its elements. If no more elements are available or
+    * needed, the resource is closed automatically.
+    *
+    * @tparam E the element type of the enumerator
+    * @tparam R the type of the resource
+    * @param  r an IO action that creates a resource of type R
+    * @param  name a `String` representation of the resource
+    *              (a file path for instance) used for logging
+    *              and error messages
+    * @param  enum creates an (unmanaged) enumerator from the resource
+    */
   def resourceEnum[E,R:Resource]
     (r: LogDisIO[R], name: String)
     (enum: R ⇒ EnumIO[E]): EnumIO[E] = new EnumeratorT[E,LogDisIO] {
       def apply[A] = (s: StepIO[E,A]) ⇒ {
-        def valStep: EffectStep[E,A] = for {
-          x ← r
-          s ← ensure(enum(x) apply s value, close(x, name))
-        } yield s
+        def step: EffectStep[E,A] =
+          r >>= { x ⇒ ensure(enum(x) apply s value, close(x, name)) }
 
-        vIter(valStep)
+        //open resource only if s is not in 'done' state already
+        s mapCont { _ ⇒ vIter(step) } 
       }
     }
 
+  /** Counts elements together with the time (in ms) used
+    * to accumulate them and performs an IO action with this
+    * data at regular intervals.
+    *
+    * Iteratees like this one can be used to regularely
+    * update a progress bar in a user interface, or print
+    * logging messages about the progress of a lengthy procedure
+    * to the console.
+    *
+    * @tparam E the element type the throbber consumes
+    * @param inc the number of elements to be processed
+    *            between each IO action
+    * @param out an IO action that consumes the number of
+    *            elements accumulated so far plus the
+    *            time taken (in milliseconds) to do so
+    */
   def throbber[E](inc: Int, out: (Int, Long) ⇒ IO[Unit])
     : IterateeT[E,IO,Unit] = {
     type ToIter = Input[E] ⇒ IterateeT[E,IO,Unit]
@@ -102,8 +176,33 @@ trait IterFunctions {
     icont(step(0, inc - 1, now))
   }
 
-  def vIter[E,A](s: EffectStep[E,A]): IterIO[E,A] = 
+  /** A throbber that outputs its accumulated information
+    * to a [[efa.io.LoggerIO]].
+    *
+    * @tparam E the element type the throbber consumes
+    * @param inc the number of elements to be processed
+    *            between each IO action
+    * @param logger the [[efa.io.LoggerIO]] used to process the
+    *               throbber's messages
+    * @param lbl the logging level used for the messages
+    * @param msg a function to compose the logging message from
+    *            the number of processed elements and the time
+    *            (in ms) take to do so
+    */
+  def logThrobber[E](
+    inc: Int,
+    logger: LoggerIO = LoggerIO.consoleLogger,
+    lvl: Level = Level.Info,
+    msg: (Int, Long) ⇒ String = (i: Int, l: Long) ⇒ loc.throbberMsg(i, l))
+  : IterateeT[E,IO,Unit] = 
+    throbber[E](inc, (i,l) ⇒ logger log lvl.log(msg(i,l)))
+
+  /** Helper function to create iteratees */
+  private[io] def vIter[E,A](s: EffectStep[E,A]): IterIO[E,A] =
     iterateeT[E,LogDisIO,A](s)
+
+  private[io] def doneIter[E,A](a: ⇒ A): IterIO[E,A] =
+    vIter[E,A](success(sdone(a, emptyInput)))
 }
 
 trait IterInstances {
