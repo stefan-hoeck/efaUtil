@@ -1,6 +1,6 @@
 package efa.io
 
-import scalaz._, Scalaz._, effect._
+import scalaz._, Scalaz._, effect._, iteratee.Iteratee.{sdone, emptyInput}
 import efa.core._
 import java.io._
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -26,6 +26,15 @@ case class IOChooser(chooser: LogDisIO[FileChooser]) {
           }
         )
     } yield r
+
+  import AsFile._, AsFile.syntax._
+
+  def lines: EnumIO[String] = iter.optionEnum(loadFile)(_.lines)
+
+  def bytes(buffer: Int): EnumIO[Array[Byte]] = 
+    iter.optionEnum(loadFile)(_ bytes buffer)
+
+  def xml[A:ToXml]: EnumIO[A] = iter.optionEnum(loadFile)(_.xmlIn)
 }
 
 object IOChooser {

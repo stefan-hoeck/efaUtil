@@ -19,6 +19,36 @@ trait IterFunctions {
   def contK[E,A](f: Input[E] ⇒ IterIO[E,A]): EffectStep[E,A] =
     success(scont(f))
 
+  /** This can be used to implement Enumerators for resources that
+    * have first to be selected by the user.
+    *
+    * For a couple of use cases see the enumerators defined
+    * on [[efa.io.IOChooser]].
+    */
+  def optionEnum[In,E](g: LogDisIO[Option[In]])
+                      (f: In ⇒ EnumIO[E]): EnumIO[E] = 
+    new EnumeratorT[E,LogDisIO] {
+      def apply[A] = ???
+    }
+
+  def optionIter[Out,E,A](g: LogDisIO[Option[Out]])
+                         (f: Out ⇒ IterIO[E,A])
+                         (a: ⇒ A): IterIO[E,A] = 
+    vIter(
+      for {
+        o ← g
+        x ← o.cata[EffectStep[E,A]](
+               f apply _ value,
+               success(sdone(a, emptyInput))
+             )
+      } yield x
+    )
+
+  def optionIterM[Out,E,A](g: LogDisIO[Option[Out]])
+                          (f: Out ⇒ IterIO[E,A])
+                          (implicit M: Monoid[A]): IterIO[E,A] = 
+    optionIter(g)(f)(M.zero)
+
   def resourceIter[E,R:Resource]
     (create: LogDisIO[R], name: String)
     (out: (E,R) ⇒ LogDisIO[Unit]): IterIO[E,Unit] = {
@@ -43,22 +73,6 @@ trait IterFunctions {
         def valStep: EffectStep[E,A] = for {
           x ← r
           s ← ensure(enum(x) apply s value, close(x, name))
-        } yield s
-
-        vIter(valStep)
-      }
-    }
-
-  def resourceEnumO[E,R:Resource]
-    (r: LogDisIO[Option[R]])
-    (enum: R ⇒ EnumIO[E]): EnumIO[E] = new EnumeratorT[E,LogDisIO] {
-      def apply[A] = (s: StepIO[E,A]) ⇒ {
-        def valStep: EffectStep[E,A] = for {
-          ox ← r
-          s  ← ox cata (
-                 x ⇒ ensure(enum(x) apply s value, close(x, x.toString)),
-                 success(s)
-               )
         } yield s
 
         vIter(valStep)
