@@ -17,17 +17,31 @@ object IterTest extends Properties("IterFunctions") with IterFunctions {
   //fails upon first call
   val error: IterIO[String,List[String]] = vIter(fail(Boo))
 
+  //consumes one element and fails
+  val errorInBetween: IterIO[String,List[String]] = 
+    vIter(contI[String,List[String]](_ ⇒ fail(Boo), fail(Boo)))
+
+  //generates no input
   val noLines: EnumIO[String] = empty[String,LogDisIO]
 
+  //generates lines in ls
   def lines(ls: List[String]): EnumIO[String] = enumList(ls)
 
+  //fails upon generating first line
   val errorEnum: EnumIO[String] = new EnumeratorT[String,LogDisIO] {
     def apply[A] = (s: StepIO[String,A]) ⇒ vIter(fail(Boo))
   }
 
-  //consumes one element and fails
-  val errorInBetween: IterIO[String,List[String]] = 
-    vIter(contI[String,List[String]](_ ⇒ fail(Boo), fail(Boo)))
+  //fails after generating ten lines
+  def errorInBetweenEnum: EnumIO[String] =
+    new RecursiveEnumIO[String](_ ⇒ Boo) {
+      private[this] var count = 0
+      protected def next(): Option[String] = {
+        if (count < 10) { count += 1; Boo.some }
+        else throw new IllegalArgumentException(Boo)
+      }
+    }
+
 
   val linesG = Gen listOf Gen.identifier
 
@@ -197,17 +211,9 @@ object IterTest extends Properties("IterFunctions") with IterFunctions {
 
   //checks that resource is closed if an error occurs in the enumerator
   property("resourceIter_errorInBetween") = {
-    val errorInBetween: EnumIO[String] = new RecursiveEnumIO[String](_ ⇒ Boo) {
-      var count = 0
-      protected def next(): Option[String] = {
-        if (count < 10) { count += 1; Boo.some }
-        else throw new IllegalArgumentException(Boo)
-      }
-    }
-
     val bs = new BytesOut
 
-    val res = testIO(bs.linesI() &= errorInBetween run)
+    val res = testIO(bs.linesI() &= errorInBetweenEnum run)
 
     (res.isLeft) :| "error occured" &&
     (bs.wasOpened) :| "resource was opened" &&
@@ -231,6 +237,67 @@ object IterTest extends Properties("IterFunctions") with IterFunctions {
     (res.isLeft) :| "error occured" &&
     (bs.wasOpened) :| "resource was opened" &&
     (bs.isClosed) :| "resource was closed"
+  }
+
+  //checks that resource is closed after processing input
+  property("optionIter_all") = forAll(linesG) { ls ⇒ 
+    val bs = new BytesOut
+
+    val get = success{ bs.some }
+    val it = optionIterM(get)(_.linesI()) 
+    val res = testIO(it &= lines(ls) run)
+
+    (res.isRight) :| "no error occured" &&
+    (bs.getLines ≟ ls) :| "lines processed correctly" &&
+    (bs.wasOpened ≟ ls.nonEmpty) :| "resource was opened" &&
+    (bs.isClosed ≟ ls.nonEmpty) :| "resource was closed"
+  }
+
+  //checks that resource is not opened nor closed if no input is available
+  property("optionIter_empty") = {
+    val bs = new BytesOut
+    var init = false
+
+    val get = success{ init = true; bs.some }
+    val it = optionIterM(get)(_.linesI()) 
+    val res = testIO(it &= noLines run)
+
+    (res.isRight) :| "no error occured" &&
+    (bs.getLines ≟ Nil) :| "lines processed correctly" &&
+    (!bs.wasOpened) :| "resource was never opened" &&
+    (!bs.isClosed) :| "resource was never closed" &&
+    (!init) :| "resource was never initialized"
+  }
+
+  //checks that resource is not opened nor closed if error happens
+  //at first input
+  property("resourceIter_error") = {
+    val bs = new BytesOut
+    var init = false
+
+    val get = success{ init = true; bs.some }
+    val it = optionIterM(get)(_.linesI()) 
+    val res = testIO(it &= errorEnum run)
+
+    (res.isLeft) :| "error occured" &&
+    (!bs.wasOpened) :| "resource was never opened" &&
+    (!bs.isClosed) :| "resource was never closed" &&
+    (!init) :| "resource was never initialized"
+  }
+
+  //checks that resource is closed if an error occurs in the enumerator
+  property("resourceIter_errorInBetween") = {
+    val bs = new BytesOut
+    var init = false
+
+    val get = success{ init = true; bs.some }
+    val it = optionIterM(get)(_.linesI()) 
+    val res = testIO(it &= errorInBetweenEnum run)
+
+    (res.isLeft) :| "error occured" &&
+    (bs.wasOpened) :| "resource was opened" &&
+    (bs.isClosed) :| "resource was closed" &&
+    (init) :| "resource was initialized"
   }
 }
 

@@ -59,16 +59,19 @@ trait IterFunctions {
 
   def optionIter[Out,E,A](g: LogDisIO[Option[Out]])
                          (f: Out ⇒ IterIO[E,A])
-                         (a: ⇒ A): IterIO[E,A] = ???
-    //vIter(
-    //  for {
-    //    o ← g
-    //    x ← o.cata[EffectStep[E,A]](
-    //          f apply _ value,
-    //          success(sdone(a, emptyInput))
-    //        )
-    //  } yield x
-    //)
+                         (a: ⇒ A): IterIO[E,A] = {
+
+    def step(o: Option[Out], e: E): EffectStep[E,A] =
+      o.cata[EffectStep[E,A]](
+        f(_).foldT[StepIO[E,A]](
+          cont = k ⇒ k(elInput(e)).value,
+          done = (a,i) ⇒ doneIter(a).value
+        ),
+        doneIter(a).value
+      )
+
+    vIter(contI(e ⇒ g >>= { step(_, e) }, success(a)))
+  }
 
   def optionIterM[Out,E,A](g: LogDisIO[Option[Out]])
                           (f: Out ⇒ IterIO[E,A])
