@@ -1,19 +1,22 @@
 package efa.io
 
 import efa.core._
+import EfaIO._
 import java.io._
 import javax.swing.filechooser.FileNameExtensionFilter
-import logDisIO._
 import scala.swing.FileChooser, FileChooser.Result
 import scala.xml.PrettyPrinter
 import scalaz._, Scalaz._, effect._, iteratee.Iteratee.{sdone, emptyInput}
 import scalaz.CharSet.UTF8
 
-case class IOChooser(chooser: LogDisIO[FileChooser]) {
+case class IOChooser(
+  chooser: LogDisIO[FileChooser],
+  adjustPath: String ⇒ String = (s: String) ⇒ s) {
   def saveFile: LogDisIO[Option[File]] = for {
     c ← chooser
     r ← c.showSaveDialog(null) match {
-          case Result.Approve ⇒ AsFile[File] create c.selectedFile map (_.some)
+          case Result.Approve ⇒ 
+            adjustPath(c.selectedFile.getPath).create map (_.some)
           case _              ⇒ point(none[File])
         }
   } yield r
@@ -57,6 +60,15 @@ case class IOChooser(chooser: LogDisIO[FileChooser]) {
 object IOChooser {
   val noFilter: IOChooser = IOChooser(point(new FileChooser))
 
+  /** A file chooser that filters files according to their
+    * extension.
+    *
+    * If the list of possible extensions is not empty and
+    * the file selected by the user does not end on one
+    * of the extensions in the list, the first extension
+    * in the list is automatically appended to the file
+    * name.
+    */
   def filter(
     desc: String,
     selected: Option[String],
@@ -75,16 +87,23 @@ object IOChooser {
           }
         }
       }
-    )
+    ),
+    adjustEnding(exts)
   )
 
-  def txtOnly (selected: Option[String]): IOChooser = 
+  private[io] def adjustEnding(exts: Seq[String])(p: String): String =
+    exts.headOption cata (
+      h ⇒ exts find { e ⇒ p endsWith s".$e" } cata (_ ⇒ p, s"$p.$h"),
+      p
+    )
+
+  def txtOnly(selected: Option[String]): IOChooser = 
     filter(loc.txtFiles, selected, loc.txtExt)
 
-  def all (selected: Option[String]): IOChooser = 
+  def all(selected: Option[String]): IOChooser = 
     filter(loc.allFiles, selected)
 
-  def folders (selected: Option[String]): IOChooser = IOChooser (
+  def folders(selected: Option[String]): IOChooser = IOChooser (
     point(
       new FileChooser {
         selected foreach {
