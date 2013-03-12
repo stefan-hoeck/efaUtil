@@ -1,6 +1,7 @@
 package efa.io
 
 import efa.core.{Level, Log, Logs, DisRes}
+import scala.util.control.NonFatal
 import scalaz.{Reader ⇒ _, Writer ⇒ _, _}, Scalaz._, std.indexedSeq._
 import scalaz.iteratee._, Iteratee._
 import scalaz.effect._
@@ -139,6 +140,40 @@ trait IterFunctions {
         s mapCont { _ ⇒ vIter(step) } 
       }
     }
+
+  /** Create an Enumerator that reads input through a side-effecting
+    * method until this method returns `None`
+    */
+  def readerEnum[E](read: () ⇒ Option[DisRes[E]],
+                    msg: Throwable ⇒ String): EnumIO[E] =
+    new EnumeratorT[E,LogDisIO] {
+      def apply[A] = (s: StepIO[E,A]) ⇒ s mapCont { k ⇒
+        try {
+          read() cata (
+            _ fold (
+              nel ⇒ iter.vIter(k(eofInput).value >> failNel(nel)),
+              e ⇒ k(elInput(e)) >>== apply[A]
+            ),
+            s.pointI
+          )
+        } catch { case NonFatal(e) ⇒ 
+          //call k with eof in order to close open resources.
+          //k will be discarded afterwards and never be called again
+          vIter(k(eofInput).value >> fail(msg(e)))
+        }
+      }
+    }
+
+  /** Create an Enumerator that produces input through a side-effecting
+    * method only once
+    */
+  def singleEnum[E](read: () ⇒ DisRes[E],
+                    msg: Throwable ⇒ String): EnumIO[E] = {
+    var done = false
+    def r() = if (done) None else Some(read())
+
+    readerEnum(r, msg)
+  }
 
   /** Counts elements together with the time (in ms) used
     * to accumulate them and performs an IO action with this

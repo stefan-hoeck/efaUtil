@@ -64,14 +64,10 @@ trait AsInput[A] extends Named[A] {
     iter.resourceEnum(inputStream(a), name(a))(bytesR(a, buffer))
 
   private def xmlR[B:ToXml](a: A)(i: InputStream): EnumIO[B] =
-    new SingleEnumIO[B](readError(a)) {
-      protected def load() = XML.load(i).readD[B]
-    }
+    iter.singleEnum[B](() ⇒ XML.load(i).readD[B], readError(a))
 
   private def lineR(a: A)(r: BufferedReader): EnumIO[String] =
-    new RecursiveEnumIO[String](readError(a)) {
-      protected def next() = Option(r.readLine)
-    }
+    iter.readerEnum(() ⇒ Option(r.readLine) map { _.right }, readError(a))
 
   private def bytesR(a: A, buffer: Int)(i: InputStream)
     : EnumIO[Array[Byte]] = new RecursiveEnumIO[Array[Byte]](readError(a)) {
@@ -144,24 +140,6 @@ abstract class RecursiveEnumIO[E](msg: Throwable ⇒ String)
     def apply[A] = (s: StepIO[E,A]) ⇒ s mapCont { k ⇒
       try {
         next() cata (e ⇒ k(elInput(e)) >>== apply[A], s.pointI)
-      } catch { case NonFatal(e) ⇒ 
-        //call k with eof in order to close open resources.
-        //k will be discarded afterwards and never be called again
-        iter.vIter(k(eofInput).value >> fail(msg(e)))
-      }
-    }
-  }
-
-abstract class SingleEnumIO[E](msg: Throwable ⇒ String)
-  extends EnumeratorT[E,LogDisIO] {
-    protected def load(): DisRes[E]
-
-    def apply[A] = (s: StepIO[E,A]) ⇒ s mapCont { k ⇒
-      try {
-        load() fold (
-          nel ⇒ iter.vIter(k(eofInput).value >> failNel(nel)),
-          e ⇒ k(elInput(e))
-        )
       } catch { case NonFatal(e) ⇒ 
         //call k with eof in order to close open resources.
         //k will be discarded afterwards and never be called again

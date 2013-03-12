@@ -59,7 +59,7 @@ object IterTest extends Properties("IterFunctions") with IterFunctions {
     //consumes all lines in bs
     val res = testIO(all &= bs.lines run)
 
-    (res ≟ ls.right) :| "lines read correctly" &&
+    (res ≟ ls.right) :| s"lines read correctly" &&
     (bs.wasOpened) :| "resource was opened" &&
     (bs.isClosed) :| "resource was closed"
   }
