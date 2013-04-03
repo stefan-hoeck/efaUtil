@@ -3,7 +3,7 @@ import Keys._
 import com.typesafe.sbt.osgi.SbtOsgi._
 
 object BuildSettings {
-  val sv = "2.10.0"
+  val sv = "2.10.1"
   val buildOrganization = "efa"
   val buildVersion = "0.2.1-SNAPSHOT"
   val buildScalaVersion = sv
@@ -27,7 +27,7 @@ object Dependencies {
 
   val nbV = "RELEASE71"
   val reactV = "0.2.1-SNAPSHOT"
-  val scalazV = "7.0.0-M8"
+  val scalazV = "7.0.0-RC1"
 
   val nb = "org.netbeans.api"
   val react = "efa.react"

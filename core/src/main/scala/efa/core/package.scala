@@ -1,6 +1,6 @@
 package efa
 
-import scalaz.{Kleisli, \/, ValidationNEL, DList, NonEmptyList, State}
+import scalaz.{Kleisli, \/, Validation, DList, NonEmptyList, State}
 import efa.core.spi.UtilLoc
 
 package object core {
@@ -13,7 +13,7 @@ package object core {
 
   type DisRes[+A] = Nel[String] \/ A
 
-  type ValRes[+A] = ValidationNEL[String,A]
+  type ValRes[+A] = Validation[Nel[String],A]
 
   type Validator[-R,+A] = Kleisli[DisRes,R,A]
 

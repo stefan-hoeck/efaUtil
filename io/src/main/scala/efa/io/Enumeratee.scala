@@ -22,6 +22,9 @@ trait EnumerateeFunctions {
       }
     }
 
+  def parMap[O,I,F[_]:Monad](f: O ⇒ I): EnumerateeT[IxSq[O],IxSq[I],F] =
+    mapper(_.par map f toIndexedSeq)
+
   /** Map through a validator */
   def mapDis[O,I](f: O ⇒ DisRes[I]): EnumerateeT[O,I,LogDisIO] =
     new EnumerateeT[O,I,LogDisIO] {
@@ -32,6 +35,20 @@ trait EnumerateeFunctions {
         case s@Done(a, i) ⇒ sdone[O,LogDisIO,Stp[A]](s, emptyInput).pointI
         case Cont(g)      ⇒ scont[O,LogDisIO,Stp[A]](io ⇒ 
           io traverse f fold (logDisIO failNelIter _, g(_) >>== apply[A])
+        ).pointI
+      }
+    }
+
+  def reduceDis[O]: EnumerateeT[DisRes[O],O,LogDisIO] =
+    new EnumerateeT[DisRes[O],O,LogDisIO] {
+      type DR[A] = DisRes[A]
+      type Stp[A] = StepT[O,LogDisIO,A]
+      type It[A,B] = IterateeT[A,LogDisIO,B]
+
+      def apply[A]: Stp[A] ⇒ It[DR[O],Stp[A]] = _ match {
+        case s@Done(a, i) ⇒ sdone[DR[O],LogDisIO,Stp[A]](s, emptyInput).pointI
+        case Cont(g)      ⇒ scont[DR[O],LogDisIO,Stp[A]](io ⇒ 
+          io.sequence fold (logDisIO failNelIter _, g(_) >>== apply[A])
         ).pointI
       }
     }
