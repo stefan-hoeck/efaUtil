@@ -6,6 +6,7 @@ class CoreLocal extends efa.core.spi.UtilLoc {
   def desc = "Beschreibung"
   def descShort = "Besch."
   def isEmptyMsg = "Leere Eingabe"
+  def listMustNotBeEmpty = "Die Liste muss mindestens ein Element enthalten"
   def logLevelMsg (value: String): String = "Unbekannter Loglevel: %s" format value
   def maxStringLengthMsg (length: Int) = "Maximal %d Zeichen" format length
   def mustBeEmptyMsg = "Eingabe muss leer sein"

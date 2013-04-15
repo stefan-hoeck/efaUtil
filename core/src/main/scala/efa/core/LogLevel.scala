@@ -2,9 +2,13 @@ package efa.core
 
 import scalaz._, Scalaz._
 
+/** Describes the severity of a logging message.
+  */
 sealed abstract class Level (val level: Int) extends Ordered[Level] {
   def name = toString.toLowerCase
   override def compare (that: Level) = this.level compare that.level
+
+  def log(msg: ⇒ String): Log = Log log (msg, this)
 }
 
 object Level {

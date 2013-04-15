@@ -2,6 +2,8 @@ package efa.core
 
 import scalaz._, Scalaz._
 
+/** Some useful Validators
+  */
 trait Validators {
 
   private def kl[A,B](f: A ⇒ DisRes[B]): Validator[A,B] =
@@ -17,33 +19,29 @@ trait Validators {
   private def check[A](p: A ⇒ Boolean, msg: A ⇒ String): EndoVal[A] =
     kl(a ⇒ p(a) ? a.right[Nel[String]] | msg(a).wrapNel.left)
 
-  /**
-   * A dummy validator that returns Valid no matter what kind of value
-   * is passed to it.
-   */
+  /** A dummy validator that returns Valid no matter what kind of value
+    * is passed to it.
+    */
    def dummy[A]: EndoVal[A] = kl(_.right)
 
-  /**
-   * This validator checks whether a String consists only of white-space
-   * characters. It returns an invalid ValidationInfo object, if this is
-   * the case.
-   */
+  /** This validator checks whether a String consists only of white-space
+    * characters. It returns an invalid ValidationInfo object, if this is
+    * the case.
+    */
   val notEmptyString: EndoVal[String] =
     check(_.trim.nonEmpty,_ ⇒ loc.isEmptyMsg)
 
-  /**
-   * This is a Validator that is typically used in combination with other String
-   * validators when a String either can be empty, or, if it is not empty, must
-   * be validated according to other rules. Use the following syntax in that case:
-   * MustBeEmptyString(value) || OtherValidator(value) &&...
-   */
+  /** This is a Validator that is typically used in combination with other String
+    * validators when a String either can be empty, or, if it is not empty, must
+    * be validated according to other rules. Use the following syntax in that case:
+    * MustBeEmptyString(value) || OtherValidator(value) &&...
+    */
   val mustBeEmptyString: EndoVal[String] =
     check(_.isEmpty, _ ⇒ loc.mustBeEmptyMsg)
 
-  /**
-   * This Validator returns ValidationInfo.Valid iff the passed
-   * value != notAllowed
-   */
+  /** This Validator returns ValidationInfo.Valid iff the passed
+    * value != notAllowed
+    */
   def not[A:Equal] (notAllowed: A): EndoVal[A] =
     check (notAllowed ≠, loc notAllowedMsg _.toString) 
 
@@ -56,10 +54,9 @@ trait Validators {
     )
   }
 
-  /**
-   * Returns a Validator that checks that a passed String's length does
-   * not exceed param length.
-   */
+  /** Returns a Validator that checks that a passed String's length does
+   .* not exceed param length.
+   .*/
   def maxStringLength (length: Int): Validator[String,String] = {
     require (length >= 0)
 

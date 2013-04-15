@@ -18,6 +18,7 @@ trait UtilLoc {
   def desc: String
   def descShort: String
   def isEmptyMsg: String
+  def listMustNotBeEmpty: String
   def logLevelMsg (value: String): String
   def maxStringLengthMsg (length: Int): String
   def mustBeEmptyMsg: String
@@ -43,6 +44,7 @@ object UtilLoc extends UtilLoc {
   def desc = "Description"
   def descShort = "Desc."
   def isEmptyMsg = "Requires a non-empty string"
+  def listMustNotBeEmpty = "List must not be empty"
   def logLevelMsg (value: String): String = "Unknown log level: %s" format value
   def maxStringLengthMsg (length: Int) = "Maximum string length is %d" format length
   def mustBeEmptyMsg = "Requires an empty string"

@@ -1,0 +1,16 @@
+# vim:sw=4:ts=4:syntax=todo:nowrap
+
+0000 #Medium  Remove all remainders from Netbeans (nbm folder, pom.xml)
+
+0001 #High    Replace module installer for efa.nb
+
+0002 #Medium  Remove unneeded wrappers from scalaSuite
+
+0003 #High    Move module nb to separate maven module
+
+0004 #High    Create git project for nb module and osgiWrappers module
+              and copy it to memory stick
+
+0005 #High    Add dependency to localDe of nb to dsa-tool
+
+0006 #High    Adjust pom.xml of projects in nb

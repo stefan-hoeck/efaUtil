@@ -1,17 +1,15 @@
 package efa.core.std
 
-import efa.core.{Read, loc, UniqueId, ToXml, Default}
+import efa.core.{Read, loc, ToXml, Default}
 import scalaz._, Scalaz._
 
 trait AnyValInstances {
   private def inst[A](
     v: String ⇒ Validation[Exception, A],
     msg: String ⇒ String
-  ): Read[A] with UniqueId[A,A] = new Read[A] with UniqueId[A,A]{
+  ): Read[A] = new Read[A] {
     override def read(s: String) =
       ((_: Exception) ⇒ msg(s).wrapNel) <-: v(s.trim)
-
-    def id (a: A) = a
   }
 
   implicit val booleanInst =

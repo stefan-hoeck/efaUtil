@@ -2,18 +2,27 @@ package efa.core
 
 import scalaz._, Scalaz._
 
+/** A type class similar to the Read type class in Haskell but
+  * which returns validated results after parsing a String.
+  */
 trait Read[+A] {
-  def read (s: String): ValRes[A] = readD(s).validation
 
-  def readD (s: String): DisRes[A] = read(s).disjunction
+  /** Tries to read a value from a String. The result is stored
+    * in a `Validation`.
+    */
+  def read(s: String): ValRes[A] = readD(s).validation
 
-  final lazy val validator: Validator[String,A] =
-    Kleisli(readD)
+  /** Tries to read a value from a String. The result is stored
+    * in a Disjunction.
+    */
+  def readD(s: String): DisRes[A] = read(s).disjunction
+
+  /** Parsing Strings in the Reader Monad
+    */
+  final lazy val validator: Validator[String,A] = Kleisli(readD)
 }
 
-object Read {
-  @inline def apply[A:Read]: Read[A] = implicitly
-
+trait ReadFunctions {
   def read[A] (v: Validator[String,A]): Read[A] = new Read[A] {
     override def readD(s: String) = v run s
   }
@@ -35,6 +44,10 @@ object Read {
   }
 }
 
+object Read extends ReadFunctions {
+  @inline def apply[A:Read]: Read[A] = implicitly
+}
+
 trait ReadSpecs {
   import org.scalacheck.Prop, Prop._
   import efa.core.syntax.string._
@@ -49,8 +62,9 @@ trait ReadSpecs {
   def localizedRead[A:Localized:Read:Equal]: A ⇒ Prop =
     a ⇒ Localized[A].names(a) foldMap (s ⇒ compareP(a, s.read[A]))
 
-  def readAll[A:Read]: String ⇒ Prop =
-    s ⇒ try{val r = s.read[A]; true} catch {case e: Throwable ⇒ false}
+  def readAll[A:Read]: String ⇒ Prop = s ⇒ try{
+    val r = s.read[A]; true
+  } catch { case util.control.NonFatal(e) ⇒ false }
 }
 
 object ReadSpecs extends ReadSpecs

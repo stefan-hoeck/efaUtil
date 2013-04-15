@@ -5,8 +5,6 @@ import scalaz.{Scalaz, NonEmptyList}, Scalaz._
 import scala.xml._
 
 trait StringInstances {
-  implicit val StringUniqueId = UniqueId.unique[String]
-
   implicit val StringRead = Read read Validators.dummy[String]
 
   implicit val StringToXml: ToXml[String] = ToXml read identity
