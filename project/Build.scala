@@ -5,11 +5,7 @@ import com.typesafe.sbt.osgi.SbtOsgi._
 object BuildSettings {
   val sv = "2.10.1"
   val buildOrganization = "efa"
-<<<<<<< HEAD
-  val buildVersion = "0.1.2"
-=======
   val buildVersion = "0.2.1-SNAPSHOT"
->>>>>>> 0.2.0
   val buildScalaVersion = sv
   val netbeansRepo = "Netbeans" at "http://bits.netbeans.org/maven2/"
 
