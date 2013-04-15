@@ -37,7 +37,7 @@ trait LogDisIOFunctions {
   def onFail[A,B](e: LogDisIO[A], ex: LogDisIO[B]): LogDisIO[A] = {
     def onEx(l: LoggerIO): IO[DisRes[A]] = for {
       v ← e.run(l).run
-      _ ← debug(s"on fail called: $v").run(l).run
+      _ ← trace(s"on fail called: $v").run(l).run
       _ ← v fold (_ ⇒ ex as (), (a: A) ⇒ ldiUnit) run l run
     } yield v
 
@@ -89,6 +89,10 @@ trait LogDisIOFunctions {
 
   def validate[A,B](vli: LogDisIO[A])(v: Validator[A,B]): LogDisIO[B] =
     lift(l ⇒ vli.run(l).run map { _ flatMap v.run })
+
+  val ioTo = new (IO ~> LogDisIO) {
+    def apply[A](i: IO[A]) = liftIO(i)
+  }
 }
 
 trait LogDisIOInstances {

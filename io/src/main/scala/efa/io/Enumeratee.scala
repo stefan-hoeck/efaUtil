@@ -22,6 +22,27 @@ trait EnumerateeFunctions {
       }
     }
 
+  def accumMap[E,F[_]:Monad,S](p: E ⇒ State[S,E])(s: S)
+    : EnumerateeT[E, E, F] = new EnumerateeT[E, E, F] {
+    def apply[A] = {
+      def loop(s: S) = step(s) andThen cont[E, F, StepT[E, F, A]]
+      def step(s: S): (Input[E] ⇒ IterateeT[E, F, A]) ⇒ 
+                      (Input[E] ⇒ IterateeT[E, F, StepT[E, F, A]]) = {
+        k ⇒ in ⇒
+          in(
+            el = e ⇒ {
+              val (newS, newE) = p(e) apply s
+              k(elInput(newE)) >>== doneOr(loop(newS))
+            }
+            , empty = cont(step(s)(k))
+            , eof = done(scont(k), in)
+          )
+        }
+
+      EnumerateeT.doneOr(loop(s))
+    }
+  }
+
   def parMap[O,I,F[_]:Monad](f: O ⇒ I): EnumerateeT[IxSq[O],IxSq[I],F] =
     mapper(_.par map f toIndexedSeq)
 
