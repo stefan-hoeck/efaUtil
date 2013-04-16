@@ -1,6 +1,5 @@
 import sbt._
 import Keys._
-import com.typesafe.sbt.osgi.SbtOsgi._
 
 object BuildSettings {
   val sv = "2.10.1"
@@ -19,7 +18,7 @@ object BuildSettings {
     scalacOptions ++= Seq ("-deprecation", "-feature",
       "-language:postfixOps", "-language:implicitConversions",
       "-language:higherKinds")
-  ) ++ osgiSettings
+  )
 } 
 
 object Dependencies {
@@ -27,7 +26,7 @@ object Dependencies {
 
   val nbV = "RELEASE71"
   val reactV = "0.2.1-SNAPSHOT"
-  val scalazV = "7.0.0-RC1"
+  val scalazV = "7.0.0-RC2"
 
   val nb = "org.netbeans.api"
   val react = "efa.react"
@@ -60,11 +59,9 @@ object UtilBuild extends Build {
   import Dependencies._
   import BuildSettings._
 
-  def addDeps (ds: Seq[ModuleID], exports: Seq[String]) =
-    BuildSettings.buildSettings ++ Seq(
-      libraryDependencies ++= ds,
-      OsgiKeys.exportPackage := exports
-    )
+  def addDeps (ds: ModuleID*) =
+    BuildSettings.buildSettings :+
+      (libraryDependencies ++= (coolness ++ ds))
 
   lazy val util = Project (
     "efa-util",
@@ -75,28 +72,19 @@ object UtilBuild extends Build {
   lazy val core = Project (
     "efa-core",
     file("core"),
-    settings = addDeps(
-      Seq (nbUtil, nbLookup, scalacheck) ++ coolness,
-      Seq("efa.core.*")
-    )
+    settings = addDeps(nbUtil, nbLookup, scalacheck)
   )
 
   lazy val io = Project (
     "efa-io",
     file("io"),
-    settings = addDeps(
-      Seq(scalacheckT, scalaSwing, scalaz_iteratee) ++ coolness,
-      Seq("efa.io.*")
-    )
+    settings = addDeps(scalacheckT, scalaSwing, scalaz_iteratee)
   ) dependsOn (core)
 
   lazy val localDe = Project (
     "efa-localDe",
     file("localDe"),
-    settings = addDeps(
-      scalacheck +: coolness, 
-      Seq("efa.local.de") //needed for netbeans
-    )
+    settings = addDeps(scalacheck)
   ) dependsOn (core, io)
 }
 
