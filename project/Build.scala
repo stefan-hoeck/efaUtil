@@ -26,7 +26,7 @@ object Dependencies {
 
   val nbV = "RELEASE71"
   val reactV = "0.2.1-SNAPSHOT"
-  val scalazV = "7.0.0-RC2"
+  val scalazV = "7.0.0"
 
   val nb = "org.netbeans.api"
   val react = "efa.react"
