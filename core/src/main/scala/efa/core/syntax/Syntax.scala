@@ -5,5 +5,6 @@ trait Syntaxes
   with ToLookupOps
   with ToNodeSeqOps
   with ToStringOps
+  with ToApplyOps
 
 // vim: set ts=2 sw=2 et:
