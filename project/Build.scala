@@ -2,7 +2,7 @@ import sbt._
 import Keys._
 
 object BuildSettings {
-  val sv = "2.10.1"
+  val sv = "2.10.2"
   val buildOrganization = "efa"
   val buildVersion = "0.2.1-SNAPSHOT"
   val buildScalaVersion = sv
@@ -25,20 +25,12 @@ object Dependencies {
   import BuildSettings.sv
 
   val nbV = "RELEASE71"
-  val reactV = "0.2.1-SNAPSHOT"
   val scalazV = "7.0.0"
 
   val nb = "org.netbeans.api"
-  val react = "efa.react"
   val scalaz = "org.scalaz"
 
   val scalaSwing = "org.scala-lang" % "scala-swing" % sv
-
-  val react_core = react %% "react-core" % reactV changing
-
-  val react_swing = react %% "react-swing" % reactV changing
-
-  val osgi_core = "org.osgi" % "org.osgi.core" % "4.2.0" % "provided"
 
   val nbUtil = nb % "org-openide-util" % nbV
   val nbLookup = nb % "org-openide-util-lookup" % nbV
