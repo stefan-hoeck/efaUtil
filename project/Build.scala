@@ -4,7 +4,7 @@ import Keys._
 object BuildSettings {
   val sv = "2.10.2"
   val buildOrganization = "efa"
-  val buildVersion = "0.2.1-SNAPSHOT"
+  val buildVersion = "0.2.2-SNAPSHOT"
   val buildScalaVersion = sv
   val netbeansRepo = "Netbeans" at "http://bits.netbeans.org/maven2/"
 
@@ -29,8 +29,6 @@ object Dependencies {
 
   val nb = "org.netbeans.api"
   val scalaz = "org.scalaz"
-
-  val scalaSwing = "org.scala-lang" % "scala-swing" % sv
 
   val nbUtil = nb % "org-openide-util" % nbV
   val nbLookup = nb % "org-openide-util-lookup" % nbV
@@ -70,7 +68,7 @@ object UtilBuild extends Build {
   lazy val io = Project (
     "efa-io",
     file("io"),
-    settings = addDeps(scalacheckT, scalaSwing, scalaz_iteratee)
+    settings = addDeps(scalacheckT, scalaz_iteratee)
   ) dependsOn (core)
 
   lazy val localDe = Project (
