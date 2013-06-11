@@ -3,20 +3,22 @@ package efa.io
 import efa.core._
 import EfaIO._
 import java.io._
+import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
-import scala.swing.FileChooser, FileChooser.Result
 import scala.xml.PrettyPrinter
 import scalaz._, Scalaz._, effect._, iteratee.Iteratee.{sdone, emptyInput}
 import scalaz.CharSet.UTF8
 
 case class IOChooser(
-  chooser: LogDisIO[FileChooser],
+  chooser: LogDisIO[JFileChooser],
   adjustPath: String ⇒ String = (s: String) ⇒ s) {
+  import IOChooser.Approve
+
   def saveFile: LogDisIO[Option[File]] = for {
     c ← chooser
     r ← c.showSaveDialog(null) match {
-          case Result.Approve ⇒ 
-            adjustPath(c.selectedFile.getPath).create map (_.some)
+          case Approve ⇒ 
+            adjustPath(c.getSelectedFile.getPath).create map (_.some)
           case _              ⇒ point(none[File])
         }
   } yield r
@@ -24,8 +26,8 @@ case class IOChooser(
   def loadFile: LogDisIO[Option[File]] = for {
     c ← chooser
     r ← c.showOpenDialog(null) match {
-          case Result.Approve ⇒ point(c.selectedFile.some)
-          case _              ⇒ point(none[File])
+          case Approve ⇒ point(c.getSelectedFile.some)
+          case _       ⇒ point(none[File])
         }
     } yield r
 
@@ -58,7 +60,9 @@ case class IOChooser(
 }
 
 object IOChooser {
-  val noFilter: IOChooser = IOChooser(point(new FileChooser))
+  val Approve = JFileChooser.APPROVE_OPTION
+
+  val noFilter: IOChooser = IOChooser(point(new JFileChooser))
 
   /** A file chooser that filters files according to their
     * extension.
@@ -74,20 +78,21 @@ object IOChooser {
     selected: Option[String],
     exts: String*
   ): IOChooser = IOChooser (
-    point(
-      new FileChooser {
-        if (exts.nonEmpty)
-          fileFilter = new FileNameExtensionFilter(desc, exts: _*)
+    point {
+      val c = new JFileChooser
+      if (exts.nonEmpty)
+        c.setFileFilter(new FileNameExtensionFilter(desc, exts: _*))
 
-        selected foreach {
-          new java.io.File(_) match {
-            case f if (f.exists && f.isDirectory) ⇒ peer.setCurrentDirectory(f)
-            case f if (f.exists)                  ⇒ selectedFile = f
-            case _                                ⇒ 
-          }
+      selected foreach {
+        new java.io.File(_) match {
+          case f if (f.exists && f.isDirectory) ⇒ c.setCurrentDirectory(f)
+          case f if (f.exists)                  ⇒ c.setSelectedFile(f)
+          case _                                ⇒ 
         }
       }
-    ),
+
+      c
+    },
     adjustEnding(exts)
   )
 
@@ -104,18 +109,20 @@ object IOChooser {
     filter(loc.allFiles, selected)
 
   def folders(selected: Option[String]): IOChooser = IOChooser (
-    point(
-      new FileChooser {
-        selected foreach {
-          new java.io.File(_) match {
-            case f if (f.exists && f.isDirectory) ⇒ peer.setCurrentDirectory(f)
-            case _                                ⇒ 
-          }
-        }
+    point {
+      val c = new JFileChooser
 
-        fileSelectionMode = FileChooser.SelectionMode.DirectoriesOnly
+      selected foreach {
+        new java.io.File(_) match {
+          case f if (f.exists && f.isDirectory) ⇒ c.setCurrentDirectory(f)
+          case _                                ⇒ 
+        }
       }
-    )
+
+      c.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)
+
+      c
+    }
   )
 }
 
