@@ -97,7 +97,7 @@ trait AsInputSyntax {
 
     def bufferedReader: LogDisIO[BufferedReader] = I bufferedReader a
 
-    def readXml[B:ToXml]: LogDisIO[B] = I readXml a
+    def readXml[B:ToXml]: LogDisIO[B] = I.readXml[B](a)
 
     def allLines: LogDisIO[IxSq[String]] = I allLines a
 
