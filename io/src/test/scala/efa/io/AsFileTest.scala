@@ -31,7 +31,8 @@ object AsFileTest extends Properties("AsFile") {
   
   property("createFile_String_Success") = forAll(nGen) { s ⇒ 
     val path = root + fs + s
-    testIO(path.create >> path.delete)≟ ().right
+    val res = testIO(root.mkdirs >> path.create >> path.delete)
+    res ≟ ().right :| s"$res"
   }
 }
 
