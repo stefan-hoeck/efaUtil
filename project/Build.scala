@@ -25,7 +25,7 @@ object Dependencies {
   import BuildSettings.sv
 
   val nbV = "RELEASE71"
-  val scalazV = "7.0.3"
+  val scalazV = "7.0.4"
 
   val nb = "org.netbeans.api"
   val scalaz = "org.scalaz"
