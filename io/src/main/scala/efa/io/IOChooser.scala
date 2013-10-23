@@ -14,14 +14,24 @@ case class IOChooser(
   adjustPath: String ⇒ String = (s: String) ⇒ s) {
   import IOChooser.Approve
 
-  def saveFile: LogDisIO[Option[File]] = for {
-    c ← chooser
-    r ← c.showSaveDialog(null) match {
-          case Approve ⇒ 
-            adjustPath(c.getSelectedFile.getPath).create map (_.some)
-          case _              ⇒ point(none[File])
-        }
-  } yield r
+  def saveFile: LogDisIO[Option[File]] = saveConfirm(_ ⇒ IO(true))
+
+  def saveConfirm(confirm: String ⇒ IO[Boolean])
+    : LogDisIO[Option[File]] = for {
+      c ← chooser
+      r ← c.showSaveDialog(null) match {
+            case Approve ⇒ {
+              val p = adjustPath(c.getSelectedFile.getPath)
+              val f = new File(p)
+              if (f.exists) liftIO(confirm(p)) map {
+                case true ⇒ f.some
+                case false ⇒ none[File]
+              }
+              else f.create map (_.some)
+            }
+            case _              ⇒ point(none[File])
+          }
+    } yield r
 
   def loadFile: LogDisIO[Option[File]] = for {
     c ← chooser
