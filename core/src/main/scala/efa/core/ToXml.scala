@@ -40,6 +40,15 @@ trait ToXml[A] {
 
   def readTagsD(ns: Seq[Node], tag: String): DisRes[Seq[A]] =
     readTags(ns, tag).disjunction
+
+  def readTagO(ns: Seq[Node], tag: String): Option[A] =
+    readTagD(ns, tag).toOption
+
+  def readTagWithDefault(ns: Seq[Node], tag: String)(implicit A: Default[A])
+    :A = readTagD(ns, tag).fold(_ ⇒ A.default, identity)
+
+  def readTagZ(ns: Seq[Node], tag: String)(implicit A: Monoid[A])
+    :A = readTagD(ns, tag).fold(_ ⇒ A.zero, identity)
 }
 
 object ToXml {
