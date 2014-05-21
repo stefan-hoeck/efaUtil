@@ -50,7 +50,7 @@ object Read extends ReadFunctions {
 
 trait ReadSpecs {
   import org.scalacheck.Prop, Prop._
-  import efa.core.syntax.string._
+  import efa.core.syntax.StringOps
   import efa.core.std.prop._
   
   def showRead[A:Show:Read:Equal]: A ⇒ Prop =

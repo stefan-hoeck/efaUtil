@@ -2,7 +2,7 @@ import sbt._
 import Keys._
 
 object BuildSettings {
-  val sv = "2.10.3"
+  val sv = "2.10.4"
   val buildOrganization = "efa"
   val buildVersion = "0.2.3-SNAPSHOT"
   val buildScalaVersion = sv
@@ -25,24 +25,29 @@ object Dependencies {
   import BuildSettings.sv
 
   val nbV = "RELEASE71"
-  val scalazV = "7.0.4"
+  val scalazV = "7.0.6"
+  val contribV = "0.2"
 
   val nb = "org.netbeans.api"
   val scalaz = "org.scalaz"
+  val typelevel = "org.typelevel"
 
   val nbUtil = nb % "org-openide-util" % nbV
   val nbLookup = nb % "org-openide-util-lookup" % nbV
 
-  val shapeless = "com.chuusai" %% "shapeless" % "1.2.3"
+  val shapeless = "com.chuusai" % "shapeless_2.10.4" % "2.0.0"
   val scalaz_core = scalaz %% "scalaz-core" % scalazV
   val scalaz_effect = scalaz %% "scalaz-effect" % scalazV
   val scalaz_iteratee = scalaz %% "scalaz-iteratee" % scalazV
   val scalaz_scalacheck = scalaz %% "scalaz-scalacheck-binding" % scalazV
+  val scalacheck_contrib = typelevel %% "shapeless-scalacheck" % contribV
+  val scalaz_contrib = typelevel %% "shapeless-scalaz" % contribV
 
   val scalacheck = "org.scalacheck" %% "scalacheck" % "1.10.0"
   val scalacheckT = scalacheck % "test"
 
-  val coolness = Seq(scalaz_core, scalaz_effect, scalaz_scalacheck, shapeless)
+  val coolness = Seq(scalaz_core, scalaz_effect, scalaz_scalacheck, shapeless,
+                     scalacheck_contrib, scalaz_contrib)
 }
 
 object UtilBuild extends Build {

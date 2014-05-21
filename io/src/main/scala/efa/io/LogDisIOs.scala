@@ -38,7 +38,7 @@ trait LogDisIOFunctions {
     def onEx(l: LoggerIO): IO[DisRes[A]] = for {
       v ← e.run(l).run
       _ ← trace(s"on fail called: $v").run(l).run
-      _ ← v fold (_ ⇒ ex as (), (a: A) ⇒ ldiUnit) run l run
+      _ ← v fold (_ ⇒ ex.as(()), (a: A) ⇒ ldiUnit) run l run
     } yield v
 
     lift(onEx)

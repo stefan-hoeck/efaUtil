@@ -1,8 +1,9 @@
 package efa.core
 
+import Efa._
+import efa.core.syntax.{NodeSeqOps, StringOps}
 import scalaz._, Scalaz._, scalacheck.ScalaCheckBinding._
 import org.scalacheck._, Arbitrary.arbitrary
-import Efa._
 import scala.xml.Node
 
 object ToXmlTest extends Properties("ToXml") with ToXmlSpecs {
