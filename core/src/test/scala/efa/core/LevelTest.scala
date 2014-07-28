@@ -1,6 +1,6 @@
 package efa.core
 
-import Efa._
+import Efa._, syntax._
 import org.scalacheck._, Prop._
 import scalaz._, Scalaz._
 

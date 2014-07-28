@@ -2,7 +2,7 @@ package efa.core
 
 import efa.core.Efa._
 import org.scalacheck._, Prop._
-import shapeless._, HList._, Nat._
+import shapeless._, HList._
 import scalaz._, Scalaz._, scalaz.{Lens ⇒ Lensz}
 
 object ShapelessTest extends Properties ("Shapeless") {
@@ -31,22 +31,26 @@ object ShapelessTest extends Properties ("Shapeless") {
 case class Cc (aString: String, anInt: Int, anOption: Option[Int])
 
 object Cc {
-  implicit val CcIso = Iso.hlist(Cc.apply _, Cc.unapply _)
-  implicit val CcEqual: Equal[Cc] = ccEqual
-  implicit val CcArb: Arbitrary[Cc] = ccArbitrary
+  import shapeless.contrib.scalaz._
 
-  val Lenses = SLens[Cc]
+  implicit val equal: Equal[Cc] = deriveEqual
+  implicit val arbitrary: Arbitrary[Cc] = deriveArbitrary
 
-  implicit class CcLenses[A] (val l: A @> Cc) extends AnyVal {
-    def aString = l >=> Lenses.at(_0)
-    def anInt = l >=> Lenses.at(_1)
-    def anOption = l >=> Lenses.at(_2)
+  val Lenses = lens[Cc]
+  val aString = (Lenses >> 'aString).asScalaz
+  val anInt = (Lenses >> 'anInt).asScalaz
+  val anOption = (Lenses >> 'anOption).asScalaz
+
+  implicit class CcLenses[A](val l: A @> Cc) extends AnyVal {
+    def aString = l >=> Cc.aString
+    def anInt = l >=> Cc.anInt
+    def anOption = l >=> Cc.anOption
   }
 
-  implicit class CcLensesO[A] (val l: A @?> Cc) extends AnyVal {
-    def aString = l >=> ~Lenses.at(_0)
-    def anInt = l >=> ~Lenses.at(_1)
-    def anOption = l >=> ~Lenses.at(_2)
+  implicit class CcLensesO[A](val l: A @?> Cc) extends AnyVal {
+    def aString = l >=> ~Cc.aString
+    def anInt = l >=> ~Cc.anInt
+    def anOption = l >=> ~Cc.anOption
   }
 }
 

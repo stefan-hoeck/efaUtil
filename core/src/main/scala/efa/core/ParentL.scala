@@ -1,7 +1,8 @@
 package efa.core
 
 import scalaz._, Scalaz._
-import shapeless.{HNil, HList, ::, LastAux, Last}
+import shapeless.{HNil, HList, ::}
+import shapeless.ops.hlist.Last
 
 /** Type class that provides create, update, and delete operations
   * for deeply nested immutable data structures.
@@ -48,7 +49,7 @@ import shapeless.{HNil, HList, ::, LastAux, Last}
 trait ParentL[F[_],P,C,Path<:HList] extends Parent[F,Path,C :: Path] {
 
   /** The last type in `HList` `Path` must be type `P` */
-  implicit protected def plast: LastAux[Path,P]
+  implicit protected def plast: Last.Aux[Path,P]
 
   /** The empty container */
   protected def empty: F[C]
@@ -137,7 +138,7 @@ trait ParentLFunctions {
   def map[P,C,Path<:HList,Id]
     (l: Path ⇒ P @?> Map[Id,C])
     (implicit u: UniqueId[C,Id],
-      last: LastAux[Path,P])
+      last: Last.Aux[Path,P])
     : ParentL[({type λ[α]=Map[Id,α]})#λ,P,C,Path] =
     new MapParentL[P,C,Path,Id] {
       def childrenL(path: Path) = l(path)
@@ -145,7 +146,7 @@ trait ParentLFunctions {
 
   def mplus[F[_]:MonadPlus:Traverse,P,C:Equal,Path<:HList]
     (l: Path ⇒ P @?> F[C])
-    (implicit last: LastAux[Path,P]): ParentL[F,P,C,Path] =
+    (implicit last: Last.Aux[Path,P]): ParentL[F,P,C,Path] =
     new MPlusParentL[F,P,C,Path] {
       def childrenL(path: Path) = l(path)
     }
@@ -157,7 +158,7 @@ trait ParentLFunctions {
 object ParentL extends ParentLFunctions
 
 private[core] abstract class MapParentL[P,C,Path<:HList,Id](
-    implicit u: UniqueId[C,Id], last: LastAux[Path,P])
+    implicit u: UniqueId[C,Id], last: Last.Aux[Path,P])
   extends ParentL[({type λ[α]=Map[Id,α]})#λ,P,C,Path] {
   protected val plast = last
   val T = Traverse[({type λ[α]=Map[Id,α]})#λ]
@@ -173,7 +174,7 @@ private[core] abstract class MapParentL[P,C,Path<:HList,Id](
 }
 
 private[core] abstract class MPlusParentL[F[_],P,C:Equal,Path<:HList](
-    implicit last: LastAux[Path,P],
+    implicit last: Last.Aux[Path,P],
     m: MonadPlus[F],
     t: Traverse[F])
   extends ParentL[F,P,C,Path] {

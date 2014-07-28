@@ -2,6 +2,7 @@ package efa.io
 
 import scalaz._, Scalaz._, scalacheck.ScalaCheckBinding._
 import efa.core._, Efa._
+import efa.core.syntax._
 import org.scalacheck._
 import Arbitrary._
 

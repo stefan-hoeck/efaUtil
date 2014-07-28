@@ -7,7 +7,8 @@ import shapeless.{HNil, ::}
 object ParentLTest extends Properties("ParentL") {
   property("uniqueness") = forAll { r: Root ⇒ 
     def uniqueLeaves (b: Branch) = 
-      b.leaves.map { _._2.id }.toSet ≟ b.leaves.keySet
+      b.leaves.toList.map { _._2.id }.sorted ≟ 
+      b.leaves.keySet.toList.sorted
 
     (r.branches.map { _.id }.toSet.size ≟ r.branches.size) &&
     (r.branches ∀ uniqueLeaves)

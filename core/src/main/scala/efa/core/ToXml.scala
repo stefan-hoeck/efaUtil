@@ -108,7 +108,7 @@ object ToXml {
 }
 
 trait ToXmlSpecs {
-  import Efa._
+  import Efa._, syntax._
   import org.scalacheck.Prop
 
   def writeReadXml[A:Equal:ToXml]: A ⇒ Prop = a ⇒

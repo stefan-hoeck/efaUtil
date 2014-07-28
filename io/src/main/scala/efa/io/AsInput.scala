@@ -1,6 +1,8 @@
 package efa.io
 
-import efa.core.{DisRes, ToXml, Efa, Named}, Efa._
+import efa.core.{DisRes, ToXml, Named}
+import efa.core.syntax.NodeSeqOps
+
 import java.io._
 import logDisIO._, resource._
 import scala.util.control.NonFatal

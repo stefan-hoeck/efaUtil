@@ -1,7 +1,7 @@
 package efa.core
 
 import org.openide.util.Lookup
-import efa.core.syntax.lookup._
+import efa.core.syntax._
 import scalaz._, Scalaz._, effect._
 
 /** Provides one instance of a given service that is accessed via the default

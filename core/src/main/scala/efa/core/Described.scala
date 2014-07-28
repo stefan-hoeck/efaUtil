@@ -72,7 +72,7 @@ object Described extends DescribedFunctions {
     */
   type Tag = (String, String)
 
-  type Tags = IndexedSeq[Tag]
+  type Tags = Vector[Tag]
 }
 
 // vim: set ts=2 sw=2 et:
