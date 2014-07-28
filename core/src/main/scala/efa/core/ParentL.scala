@@ -61,7 +61,7 @@ trait ParentL[F[_],P,C,Path<:HList] extends Parent[F,Path,C :: Path] {
   def childL(c: C): F[C] @?> C
 
   def childrenWithoutPath(path: Path): F[C] =
-    childrenL(path).getOr[F[C]](path.last, empty)
+    childrenL(path).getOr(path.last, empty)
 
   /** Returns all children accessible via the given `Path` */
   final def children(path: Path): F[C :: Path] =

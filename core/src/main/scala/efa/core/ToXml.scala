@@ -81,11 +81,11 @@ object ToXml {
     private[this] val x = listToXml[A] (label)
     def toXml(as: Nel[A]): Seq[Node] = x toXml as.list
     def fromXml(ns: Seq[Node]): ValRes[Nel[A]] =
-      x fromXml ns flatMap toNel
+      (x fromXml ns).disjunctioned (_ flatMap toNel)
 
-    private def toNel(as: List[A]): ValRes[Nel[A]] = as match {
-      case Nil ⇒ loc.listMustNotBeEmpty.failureNel
-      case x :: xs ⇒ NonEmptyList[A](x, xs: _*).success
+    private def toNel(as: List[A]): DisRes[Nel[A]] = as match {
+      case Nil ⇒ loc.listMustNotBeEmpty.wrapNel.left
+      case x :: xs ⇒ NonEmptyList[A](x, xs: _*).right
     }
    }
 

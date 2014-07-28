@@ -7,15 +7,15 @@ package object core {
 
   lazy val loc = Service.unique[UtilLoc](UtilLoc)
 
-  type Nel[+A] = NonEmptyList[A]
+  type Nel[A] = NonEmptyList[A]
 
   type Logs = DList[Log]
 
-  type DisRes[+A] = Nel[String] \/ A
+  type DisRes[A] = Nel[String] \/ A
 
-  type ValRes[+A] = Validation[Nel[String],A]
+  type ValRes[A] = Validation[Nel[String],A]
 
-  type Validator[-R,+A] = Kleisli[DisRes,R,A]
+  type Validator[R,A] = Kleisli[DisRes,R,A]
 
   type ValSt[A] = ValRes[State[A,Unit]]
   

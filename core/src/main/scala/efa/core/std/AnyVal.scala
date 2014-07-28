@@ -57,13 +57,13 @@ trait AnyValInstances {
   
   implicit val LongDefault: Default[Long] = Default.monoid[Long]
 
-  implicit val DoubleDefault: Default[Double] = Default.monoid[Double]
+  implicit val DoubleDefault: Default[Double] = Default default 0D
 
   implicit val ByteDefault: Default[Byte] = Default.monoid[Byte]
 
   implicit val ShortDefault: Default[Short] = Default.monoid[Short]
 
-  implicit val FloatDefault: Default[Float] = Default.monoid[Float]
+  implicit val FloatDefault: Default[Float] = Default default 0f
 }
 
 object anyVal extends AnyValInstances

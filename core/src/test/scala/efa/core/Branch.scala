@@ -1,12 +1,20 @@
 package efa.core
 
+import Efa._
 import org.scalacheck._, Prop._
 import scalaz._, Scalaz._
+import shapeless.lens
 
 case class Branch(id: Int, name: String, leaves: Map[Int,Leaf])
 
 object Branch {
-  implicit lazy val BranchEqual = Equal.equalA[Branch]
+  lazy val l = lens[Branch]
+
+  lazy val id = l >> 'id asZ
+
+  lazy val leaves = l >> 'leaves asZ
+
+  implicit lazy val BranchEqual = deriveEqual[Branch]
 
   implicit lazy val BranchUId = UniqueIdL lens id
 
@@ -18,12 +26,6 @@ object Branch {
   )
 
   implicit lazy val BranchParent = Root.RootParent mapLensed leaves
-
-  val id: Branch @> Int = Lens.lensu((a,b) ⇒ a.copy(id = b), _.id)
-
-  val leaves: Branch @> Map[Int,Leaf] =
-    Lens.lensu((a,b) ⇒ a.copy(leaves = b), _.leaves)
-  
 }
 
 // vim: set ts=2 sw=2 et:

@@ -6,5 +6,6 @@ trait AllFunctions
    with PropFunctions
    with StateFunctions
    with MapFunctions
+   with ShapelessFunctions
 
 // vim: set ts=2 sw=2 et:

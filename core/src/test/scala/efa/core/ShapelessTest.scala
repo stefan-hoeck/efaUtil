@@ -31,15 +31,13 @@ object ShapelessTest extends Properties ("Shapeless") {
 case class Cc (aString: String, anInt: Int, anOption: Option[Int])
 
 object Cc {
-  import shapeless.contrib.scalaz._
-
   implicit val equal: Equal[Cc] = deriveEqual
   implicit val arbitrary: Arbitrary[Cc] = deriveArbitrary
 
   val Lenses = lens[Cc]
-  val aString = (Lenses >> 'aString).asScalaz
-  val anInt = (Lenses >> 'anInt).asScalaz
-  val anOption = (Lenses >> 'anOption).asScalaz
+  val aString = (Lenses >> 'aString).asZ
+  val anInt = (Lenses >> 'anInt).asZ
+  val anOption = (Lenses >> 'anOption).asZ
 
   implicit class CcLenses[A](val l: A @> Cc) extends AnyVal {
     def aString = l >=> Cc.aString

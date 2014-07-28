@@ -5,6 +5,12 @@ import scalaz._, Scalaz._
 import shapeless.{HNil, ::}
 
 object ParentLTest extends Properties("ParentL") {
+  property("leaf_equal") = forAll { l: Leaf ⇒ l ≟ l }
+
+  property("branch_equal") = forAll { l: Branch ⇒ l ≟ l }
+
+  property("root_equal") = forAll { l: Root ⇒ l ≟ l }
+
   property("uniqueness") = forAll { r: Root ⇒ 
     def uniqueLeaves (b: Branch) = 
       b.leaves.toList.map { _._2.id }.sorted ≟ 

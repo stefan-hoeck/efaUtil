@@ -47,8 +47,10 @@ object Dependencies {
 
   val scalacheck        = "org.scalacheck" %% "scalacheck" % "1.11.4"
   val scalacheckT       = scalacheck % "test"
+  val reflect           = "org.scala-lang" % "scala-reflect" % sv
 
-  val deps              = Seq(scalaz_core, scalaz_effect, scalaz_scalacheck, shapeless)
+  val deps              = Seq(scalaz_core, scalaz_effect, scalaz_scalacheck,
+                              shapeless, reflect)
 }
 
 object UtilBuild extends Build {
