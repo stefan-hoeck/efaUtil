@@ -30,8 +30,10 @@ object BuildSettings {
 object Dependencies {
   import BuildSettings.sv
 
-  val nbV               = "RELEASE71"
+  val nbV               = "RELEASE80"
+  val scalacheckV       = "1.11.4"
   val scalazV           = "7.1.0-RC2"
+  val shapelessV        = "2.0.0"
 
   val nb                = "org.netbeans.api"
   val scalaz            = "org.scalaz"
@@ -39,13 +41,13 @@ object Dependencies {
   val nbUtil            = nb % "org-openide-util" % nbV
   val nbLookup          = nb % "org-openide-util-lookup" % nbV
 
-  val shapeless         = "com.chuusai" %% "shapeless" % "2.0.0"
+  val shapeless         = "com.chuusai" %% "shapeless" % shapelessV
   val scalaz_core       = scalaz %% "scalaz-core" % scalazV
   val scalaz_effect     = scalaz %% "scalaz-effect" % scalazV
   val scalaz_iteratee   = scalaz %% "scalaz-iteratee" % scalazV
   val scalaz_scalacheck = scalaz %% "scalaz-scalacheck-binding" % scalazV
 
-  val scalacheck        = "org.scalacheck" %% "scalacheck" % "1.11.4"
+  val scalacheck        = "org.scalacheck" %% "scalacheck" % scalacheckV
   val scalacheckT       = scalacheck % "test"
   val reflect           = "org.scala-lang" % "scala-reflect" % sv
 
