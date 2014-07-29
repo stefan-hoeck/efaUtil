@@ -18,7 +18,7 @@ class Bytes(bytes: Array[Byte]) extends java.io.ByteArrayInputStream(bytes) {
 object Bytes {
   def apply(bytes: Array[Byte]): Bytes = new Bytes(bytes)
 
-  def apply(str: String): Bytes = apply(str getBytes scalaz.CharSet.UTF8)
+  def apply(str: String): Bytes = apply(str getBytes CharSet.UTF8)
 
   def apply(lines: List[String]): Bytes = apply(lines mkString "\n")
 

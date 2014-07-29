@@ -5,8 +5,8 @@ import java.io._
 import scala.xml.{PrettyPrinter, XML}
 import scalaz.{Writer ⇒ _, _}, Scalaz._, effect.IO
 import scalaz.iteratee.EnumeratorT.enumOne
-import CharSet.UTF8
 import logDisIO._, resource._
+import efa.io.CharSet.UTF8
 
 trait AsOutput[A] extends Named[A] {
   protected def os(a: A): IO[OutputStream]

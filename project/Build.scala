@@ -65,7 +65,7 @@ object UtilBuild extends Build {
     "efa-util",
     file("."),
     settings = buildSettings
-  ) aggregate (core) //, io, localDe)
+  ) aggregate (core, io, localDe)
 
   lazy val core = Project(
     "efa-core",
