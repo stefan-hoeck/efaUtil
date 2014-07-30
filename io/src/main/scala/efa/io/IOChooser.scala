@@ -7,7 +7,7 @@ import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
 import scala.xml.PrettyPrinter
 import scalaz._, Scalaz._, effect._, iteratee.Iteratee.{sdone, emptyInput}
-import scalaz.CharSet.UTF8
+import efa.io.CharSet.UTF8
 
 case class IOChooser(
   chooser: LogDisIO[JFileChooser],

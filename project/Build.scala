@@ -30,7 +30,7 @@ object BuildSettings {
 object Dependencies {
   import BuildSettings.sv
 
-  val nbV               = "RELEASE71"
+  val nbV               = "RELEASE80"
   val scalazV           = "7.1.0-RC2"
 
   val nb                = "org.netbeans.api"
@@ -65,7 +65,7 @@ object UtilBuild extends Build {
     "efa-util",
     file("."),
     settings = buildSettings
-  ) aggregate (core) //, io, localDe)
+  ) aggregate (core, io, localDe)
 
   lazy val core = Project(
     "efa-core",

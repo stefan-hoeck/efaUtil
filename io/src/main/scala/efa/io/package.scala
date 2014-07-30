@@ -8,9 +8,9 @@ package object io {
 
   lazy val loc = Service.unique[IOLoc](IOLoc)
 
-  type DisIO[+A] = EitherT[IO,Nel[String],A]
+  type DisIO[A] = EitherT[IO,Nel[String],A]
 
-  type LogDisIO[+A] = Kleisli[DisIO,LoggerIO,A]
+  type LogDisIO[A] = Kleisli[DisIO,LoggerIO,A]
 
   type EnumIO[A] = EnumeratorT[A,LogDisIO]
 
