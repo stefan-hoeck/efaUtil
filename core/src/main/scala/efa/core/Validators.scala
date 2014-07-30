@@ -70,6 +70,9 @@ trait Validators {
 object Validators extends Validators
 
 trait ValidatorSpecs {
+  def validatedL[A:Equal,B](l: shapeless.Lens[A,B])(v: EndoVal[B])
+    : ((A,B)) ⇒ Boolean = validated[A,B]((a,b) ⇒ l.set(a)(b))(v)
+
   def validated[A:Equal,B] (f: (A,B) ⇒ A)(v: EndoVal[B]) = (p: (A,B)) ⇒ {
     val (a,b) = p
     def valRes = v(b).toOption ∘ f.curried(a)
