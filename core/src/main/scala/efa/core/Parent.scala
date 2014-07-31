@@ -17,7 +17,7 @@ import scalaz._, Scalaz._
   * @tparam F The container type in which objects of type P store
   *           their children
   */
-trait Parent[F[_],-P,C] {
+trait Parent[F[_],-P,C] { self ⇒ 
   implicit def T: Traverse[F]
 
   /** Returns all children associated with a parent
@@ -34,9 +34,11 @@ trait Parent[F[_],-P,C] {
     n nameSortF children(p)
 
   def contramap[A] (get: A ⇒ P): Parent[F,A,C] = new Parent[F,A,C] {
-    val T = Parent.this.T
-    def children(a: A) = Parent.this children get(a)
+    val T = self.T
+    def children(a: A) = self children get(a)
   }
+
+  def ∙ [A](f: A ⇒ P): Parent[F,A,C] = contramap(f)
 }
 
 trait ParentFunctions {

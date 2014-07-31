@@ -15,7 +15,7 @@ import scalaz._, Scalaz._
   * an implementation of type class Equal (Enum would be even better), and
   * are - of course - immutable.
   */
-trait UniqueId[A,I] {
+trait UniqueId[A,I] { self ⇒
   def id (a: A): I
 
   def idPair (a: A): (I, A) = id(a) → a
@@ -33,6 +33,12 @@ trait UniqueId[A,I] {
   def newId[F[_]:Foldable]
     (as: F[A])(implicit m: Monoid[I], e: Enum[I]): I =
     e succ as.foldLeft(m.zero) { (i,a) ⇒ i max id(a) }
+
+  def contramap[B](f: B ⇒ A): UniqueId[B,I] = new UniqueId[B,I] {
+    def id(b: B) = self id f(b)
+  }
+
+  def ∙ [B](f: B ⇒ A): UniqueId[B,I] = contramap(f)
 }
 
 object UniqueId extends UniqueIdFunctions {

@@ -6,6 +6,10 @@ import scalaz.Monoid, scalaz.syntax.monoid._
   */
 trait Default[+A] {
   val default: A
+
+  def map[B](f: A ⇒ B): Default[B] = Default.default(f(default))
+
+  def ∘ [B](f: A ⇒ B): Default[B] = map(f)
 }
 
 trait DefaultFunctions {

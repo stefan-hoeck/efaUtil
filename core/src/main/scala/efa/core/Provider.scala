@@ -6,8 +6,14 @@ import scalaz.DList
   *
   * This type class has its uses as a service provider
   */
-trait Provider[A] {
+trait Provider[A] { self ⇒ 
   def get: DList[A]
+
+  def map[B](f: A ⇒ B): Provider[B] = new Provider[B] {
+    def get = self.get map f
+  }
+
+  def ∘ [B](f: A ⇒ B): Provider[B] = map(f)
 }
 
 object Provider {

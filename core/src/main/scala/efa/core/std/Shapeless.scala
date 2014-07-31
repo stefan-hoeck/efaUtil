@@ -14,6 +14,14 @@ import org.scalacheck.{Gen, Arbitrary, Shrink}
   * once shapeless-contrib goes to 2.11 / 7.1.0
   */
 trait ShapelessFunctions {
+  def zlens[A,B](l: shapeless.Lens[A,B]): scalaz.Lens[A, B] =
+    scalaz.LensFamily.lensg(l.set, l.get)
+
+  def slens[A,B](l: scalaz.Lens[A,B]): shapeless.Lens[A, B] =
+    new shapeless.Lens[A, B] {
+      def get(a: A): B = l.get(a)
+      def set(a: A)(b: B): A = l.set(a, b)
+    }
 }
 
 trait ShapelessInstances {
@@ -151,10 +159,6 @@ trait ShapelessInstances {
 
   def deriveShow[T](implicit ev: TypeClass[Show]): Show[T] =
     macro GenericMacros.deriveInstance[Show, T]
-
-  implicit def shapelessLensOps[A, B](l: shapeless.Lens[A, B]) = new LensOps[A, B] {
-    override val asShapeless = l
-  }
 }
 
 trait Product[+C[_], F, T <: HList] {
@@ -367,19 +371,6 @@ object LifterAux {
         tail(G.apply2(gh, gf) { (h, f) => t => f(h :: t) })(G)(gi)
     }
   }
-
-}
-
-trait LensOps[A, B] {
-
-  def asZ: scalaz.Lens[A, B] =
-    scalaz.LensFamily.lensg(asShapeless.set, asShapeless.get)
-
-  def asShapeless: shapeless.Lens[A, B] =
-    new shapeless.Lens[A, B] {
-      def get(a: A): B = asZ.get(a)
-      def set(a: A)(b: B): A = asZ.set(a, b)
-    }
 
 }
 

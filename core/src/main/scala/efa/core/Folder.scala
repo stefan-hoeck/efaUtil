@@ -68,10 +68,7 @@ object Folder {
 
   def leaf[D,L](lbl: L) = Folder[D,L](Stream.empty, Stream.empty, lbl)
 
-  implicit def folderLenses[A,D,L] (l: Lens[A,Folder[D,L]]) =
-    FolderLenses[A,D,L] (l)
-
-  case class FolderLenses[A,D,L] (lens: A @> Folder[D,L])  {
+  implicit class FolderLenses[A,D,L](val lens: A @> Folder[D,L]) extends AnyVal {
 
     def label = lens >=> self.label
     

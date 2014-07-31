@@ -9,12 +9,9 @@ case class Root(id: Int, name: String, branches: List[Branch])
 
 object Root {
   val l = lens[Root]
-
-  val id = l >> 'id asZ
-
-  val name = l >> 'name asZ
-
-  val branches = l >> 'branches asZ
+  val id = zlens(l >> 'id)
+  val name = zlens(l >> 'name)
+  val branches = zlens(l >> 'branches)
 
   implicit lazy val RootEqual = deriveEqual[Root]
 

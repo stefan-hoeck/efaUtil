@@ -10,7 +10,7 @@ import scalaz.std.indexedSeq._
   * names of objects in some output device, but also to sort collections
   * of objects by name.
   */
-trait Named[A] extends Show[A] {
+trait Named[A] extends Show[A] { self ⇒
   def name (a: A): String
 
   final def nameSort(as: List[A]): List[A] = as sortBy name
@@ -23,6 +23,12 @@ trait Named[A] extends Show[A] {
     m.toList sortBy { p ⇒ name (p._2) }
 
   override def shows(a: A): String = name (a)
+
+  def contramap[B](f: B ⇒ A): Named[B] = new Named[B] {
+    def name(b: B) = self name f(b)
+  }
+
+  def ∙ [B](f: B ⇒ A): Named[B] = contramap(f)
 }
 
 object Named {

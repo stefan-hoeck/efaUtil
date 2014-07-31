@@ -8,7 +8,7 @@ import shapeless.lens
 case class Leaf(id: Int, name: String)
 
 object Leaf {
-  lazy val id = lens[Leaf] >> 'id asZ
+  lazy val id = zlens(lens[Leaf] >> 'id)
 
   implicit lazy val LeafEqual = deriveEqual[Leaf]
 

@@ -4,8 +4,14 @@ package efa.core
   *
   * Typically, these descriptions can be displayed conveniently in GUIs.
   */
-trait Described[-A] {
+trait Described[-A] { self ⇒ 
   def shortDesc (a: A): String
+
+  def contramap[B](f: B ⇒ A): Described[B] = new Described[B] {
+    def shortDesc(b: B) = self shortDesc f(b)
+  }
+
+  def ∙ [B](f: B ⇒ A): Described[B] = contramap(f)
 }
 
 /** This version of Described uses html to format its descriptions.
@@ -13,7 +19,7 @@ trait Described[-A] {
   * The html-description consists of a bold title (the object's name)
   * plus several tags in bold, each on its own line.
   */
-trait HtmlDescribed[A] extends Described[A] with Named[A] {
+trait HtmlDescribed[A] extends Described[A] with Named[A] { self ⇒ 
   import Described.{Tag, Tags}
 
   /** Returns a list of html tag in the form of `(String,String)`-pairs.
@@ -22,6 +28,14 @@ trait HtmlDescribed[A] extends Described[A] with Named[A] {
 
   override def shortDesc (a: A): String =
     Described namePlusTags (name (a), tags (a): _*)
+
+  override def contramap[B](f: B ⇒ A): HtmlDescribed[B] =
+    new HtmlDescribed[B] {
+      def tags(b: B) = self tags f(b)
+      def name(b: B) = self name f(b)
+    }
+
+  override def ∙ [B](f: B ⇒ A): HtmlDescribed[B] = contramap(f)
 }
 
 /** Helper functions to create typical html-formatted desciptions.

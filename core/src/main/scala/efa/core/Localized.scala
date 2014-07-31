@@ -5,7 +5,7 @@ import scalaz.Contravariant
 /** A type class that associates some [[efa.core.Localization]]s with objects
   * of a given type.
   */
-trait Localized[-A] {
+trait Localized[-A] { self ⇒
   def loc(a: A): Localization
 
   def locName(a: A): String = loc(a).locName
@@ -15,6 +15,12 @@ trait Localized[-A] {
   def desc(a: A): String = loc(a).desc
 
   def names(a: A): List[String] = loc(a).names
+
+  def contramap[B](f: B ⇒ A): Localized[B] = new Localized[B] {
+    def loc(b: B) = self loc f(b)
+  }
+
+  def ∙ [B](f: B ⇒ A): Localized[B] = contramap(f)
 }
 
 /** A helper-trait for code reuse in classes that have a

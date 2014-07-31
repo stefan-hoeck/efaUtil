@@ -35,9 +35,9 @@ object Cc {
   implicit val arbitrary: Arbitrary[Cc] = deriveArbitrary
 
   val Lenses = lens[Cc]
-  val aString = (Lenses >> 'aString).asZ
-  val anInt = (Lenses >> 'anInt).asZ
-  val anOption = (Lenses >> 'anOption).asZ
+  val aString = zlens(Lenses >> 'aString)
+  val anInt = zlens(Lenses >> 'anInt)
+  val anOption = zlens(Lenses >> 'anOption)
 
   implicit class CcLenses[A](val l: A @> Cc) extends AnyVal {
     def aString = l >=> Cc.aString

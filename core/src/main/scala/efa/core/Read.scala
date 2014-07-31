@@ -5,7 +5,7 @@ import scalaz._, Scalaz._
 /** A type class similar to the Read type class in Haskell but
   * which returns validated results after parsing a String.
   */
-trait Read[A] {
+trait Read[A] { self ⇒
 
   /** Tries to read a value from a String. The result is stored
     * in a `Validation`.
@@ -20,6 +20,20 @@ trait Read[A] {
   /** Parsing Strings in the Reader Monad
     */
   final lazy val validator: Validator[String,A] = Kleisli(readD)
+
+  def map[B](f: A ⇒ B): Read[B] = new Read[B] {
+    override def read(s: String) = self read s map f
+  }
+
+  def ∘ [B](f: A ⇒ B): Read[B] = map(f)
+
+  def reval[B](v: Validator[A,B]): Read[B] = revalD(v.run)
+
+  def revalV[B](v: A ⇒ ValRes[B]): Read[B] = revalD(v(_).disjunction)
+
+  def revalD[B](v: A ⇒ DisRes[B]): Read[B] = new Read[B] {
+    override def readD(s: String): DisRes[B] = self readD s flatMap v
+  }
 }
 
 trait ReadFunctions {

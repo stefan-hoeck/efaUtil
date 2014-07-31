@@ -9,10 +9,8 @@ case class Branch(id: Int, name: String, leaves: Map[Int,Leaf])
 
 object Branch {
   lazy val l = lens[Branch]
-
-  lazy val id = l >> 'id asZ
-
-  lazy val leaves = l >> 'leaves asZ
+  lazy val id = zlens(l >> 'id)
+  lazy val leaves = zlens(l >> 'leaves)
 
   implicit lazy val BranchEqual = deriveEqual[Branch]
 

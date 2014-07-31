@@ -25,7 +25,7 @@ object Level {
 
   implicit val LevelRead = new Read[Level] {
     override def read (s: String): ValRes[Level] =
-      map get s toSuccess (loc logLevelMsg s wrapNel)
+      Level.map get s toSuccess (loc logLevelMsg s wrapNel)
   }
 }
 
