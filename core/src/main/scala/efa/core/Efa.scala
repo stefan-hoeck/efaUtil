@@ -7,7 +7,6 @@ object Efa
   extends std.AllFunctions
   with std.AllInstances
   with DefaultFunctions
-  with DefaultInstances
   with Lenses
 
 // vim: set ts=2 sw=2 et:

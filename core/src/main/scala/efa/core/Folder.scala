@@ -1,6 +1,7 @@
 package efa.core
 
 import std.state.toState
+import Shapeless._
 import scalaz._, Scalaz._
 
 /**
@@ -122,14 +123,7 @@ object Folder {
     fSt(f) apply 0
   }
 
-  implicit def FolderEqual[A:Equal,B:Equal]: Equal[Folder[A,B]] =
-    new Equal[Folder[A,B]]{
-      def equal (fa: Folder[A,B], fb: Folder[A,B]) =
-        (fa.label ≟ fb.label) &&
-        (fa.data ≟ fb.data) &&
-        (fa.folders.length ≟ fb.folders.length) &&
-        (fa.folders zip fb.folders forall (p ⇒ (equal(p._1, p._2))))
-    }
+  implicit def FolderEqual[A:Equal,B:Equal]: Equal[Folder[A,B]] = deriveEqual
 
   implicit def FolderTraverse[R]: Traverse[({type λ[α]=Folder[α,R]})#λ] =
     new Traverse[({type λ[α]=Folder[α,R]})#λ] {
@@ -143,10 +137,7 @@ object Folder {
       }
     }
 
-  implicit def FolderMonoid[A,B:Monoid] = new Monoid[Folder[A,B]] {
-    val zero = Folder[A,B](Stream.empty, Stream.empty, ∅[B])
-    def append (fa: Folder[A,B], fb: ⇒ Folder[A,B]) = fa |+| fb
-  }
+  implicit def FolderMonoid[A,B:Monoid]: Monoid[Folder[A,B]] = deriveMonoid
 }
 
 // vim: set ts=2 sw=2 et:

@@ -23,16 +23,19 @@ trait Named[A] extends Show[A] { self ⇒
     m.toList sortBy { p ⇒ name (p._2) }
 
   override def shows(a: A): String = name (a)
-
-  def contramap[B](f: B ⇒ A): Named[B] = new Named[B] {
-    def name(b: B) = self name f(b)
-  }
-
-  def ∙ [B](f: B ⇒ A): Named[B] = contramap(f)
 }
 
 object Named {
   @inline def apply[A:Named]: Named[A] = implicitly
+
+  def contramap[A,B](d: Named[A])(f: B ⇒ A): Named[B] =
+    new Named[B] { def name(b: B) = d name f(b) }
+
+  implicit val NamedContravariant: Contravariant[Named] =
+    new Contravariant[Named] {
+      override def contramap[A,B](d: Named[A])(f: B ⇒ A) =
+        Named.contramap(d)(f)
+    }
 }
 
 // vim: set ts=2 sw=2 et:

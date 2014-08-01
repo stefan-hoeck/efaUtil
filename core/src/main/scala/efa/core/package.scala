@@ -46,6 +46,8 @@ package object core {
   def LongIdL[A:LongIdL]: LongIdL[A] = implicitly
 
   def StringIdL[A:StringIdL]: StringIdL[A] = implicitly
+
+  object Shapeless extends std.ShapelessInstances
 }
 
 // vim: set ts=2 sw=2 et:

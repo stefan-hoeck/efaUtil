@@ -1,17 +1,13 @@
 package efa.core
 
+import scalaz.Contravariant
+
 /** A type class representing a short description associated with a type.
   *
   * Typically, these descriptions can be displayed conveniently in GUIs.
   */
 trait Described[-A] { self ⇒ 
   def shortDesc (a: A): String
-
-  def contramap[B](f: B ⇒ A): Described[B] = new Described[B] {
-    def shortDesc(b: B) = self shortDesc f(b)
-  }
-
-  def ∙ [B](f: B ⇒ A): Described[B] = contramap(f)
 }
 
 /** This version of Described uses html to format its descriptions.
@@ -28,14 +24,6 @@ trait HtmlDescribed[A] extends Described[A] with Named[A] { self ⇒
 
   override def shortDesc (a: A): String =
     Described namePlusTags (name (a), tags (a): _*)
-
-  override def contramap[B](f: B ⇒ A): HtmlDescribed[B] =
-    new HtmlDescribed[B] {
-      def tags(b: B) = self tags f(b)
-      def name(b: B) = self name f(b)
-    }
-
-  override def ∙ [B](f: B ⇒ A): HtmlDescribed[B] = contramap(f)
 }
 
 /** Helper functions to create typical html-formatted desciptions.
@@ -43,37 +31,42 @@ trait HtmlDescribed[A] extends Described[A] with Named[A] { self ⇒
 trait DescribedFunctions {
   import Described.{Tag, Tags}
 
+  def contramap[A,B](d: Described[A])(f: B ⇒ A): Described[B] =
+    new Described[B] {
+      def shortDesc(b: B) = d shortDesc f(b)
+    }
+
   /** Displays a `Tag` on its own line, starting with the
     * `Tag`'s name in bold, followed by its value.
     */
-  def formatTag (t: Tag): String =  s"<P><B>${t._1}</B>: ${t._2}</P>"
+  def formatTag(t: Tag): String =  s"<P><B>${t._1}</B>: ${t._2}</P>"
 
   /** Displays a list of `Tag`s each on a separate line.
     */
-  def formatTags (ts: Tag*): String =  ts map formatTag mkString ""
+  def formatTags(ts: Tag*): String =  ts map formatTag mkString ""
 
   /** Displays a header with a name plus a list of `Tag`s (each on
     * a separate line). The whole string is wrapped in `html`
     * start and end tags.
     */
-  def namePlusTags (n: String, ts: Tag*): String =
-    titleBodyHtml (n, formatTags (ts: _*))
+  def namePlusTags(n: String, ts: Tag*): String =
+    titleBodyHtml(n, formatTags (ts: _*))
 
   /** Displays a header with a title in bold followed by a body
     * in a new paragraph.
     */
-  def titleBody (title: String, body: String) = s"<P><B>$title</B></P>$body"
+  def titleBody(title: String, body: String) = s"<P><B>$title</B></P>$body"
 
   /** Displays a header with a title in bold followed by a body
     * in a new paragraph. The whole string is wrapped in `html`
     * start and end tags.
     */
-  def titleBodyHtml (title: String, body: String) = 
-    wrapHtml (titleBody (title, body))
+  def titleBodyHtml(title: String, body: String) = 
+    wrapHtml(titleBody (title, body))
 
   /** Wraps a string in `html` start and end tags.
     */
-  def wrapHtml (s: String): String = s"<html>$s</html>"
+  def wrapHtml(s: String): String = s"<html>$s</html>"
 }
 
 object Described extends DescribedFunctions {
@@ -87,6 +80,28 @@ object Described extends DescribedFunctions {
   type Tag = (String, String)
 
   type Tags = Vector[Tag]
+
+  implicit val DescribedContravariant: Contravariant[Described] =
+    new Contravariant[Described] {
+      override def contramap[A,B](d: Described[A])(f: B ⇒ A) =
+        Described.contramap(d)(f)
+    }
+}
+
+object HtmlDescribed {
+  @inline def apply[A:HtmlDescribed]: HtmlDescribed[A] = implicitly
+
+  def contramap[A,B](d: HtmlDescribed[A])(f: B ⇒ A): HtmlDescribed[B] =
+    new HtmlDescribed[B] {
+      def tags(b: B) = d tags f(b)
+      def name(b: B) = d name f(b)
+    }
+
+  implicit val HtmlDescribedContravariant: Contravariant[HtmlDescribed] =
+    new Contravariant[HtmlDescribed] {
+      override def contramap[A,B](d: HtmlDescribed[A])(f: B ⇒ A) =
+        HtmlDescribed.contramap(d)(f)
+    }
 }
 
 // vim: set ts=2 sw=2 et:

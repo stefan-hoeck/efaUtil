@@ -1,6 +1,8 @@
 package efa.core
 
 import scalaz.Equal
+import scalaz.std.string._
+import Efa._
 
 /** Provides a couple of localized Strings typically used to describe
   * a property of a data type in different places in a GUI.
@@ -30,7 +32,9 @@ case class Localization(
 }
 
 object Localization {
-  implicit val LocalizationEqual: Equal[Localization] = Equal.equalA
+  implicit val LocalizationEqual = deriveEqual[Localization]
+
+  implicit val LocalizationOrder = deriveOrder[Localization]
 }
 
 // vim: set ts=2 sw=2 et:

@@ -13,17 +13,6 @@ import org.scalacheck.{Gen, Arbitrary, Shrink}
   * shapeless contrib and should become obsolete
   * once shapeless-contrib goes to 2.11 / 7.1.0
   */
-trait ShapelessFunctions {
-  def zlens[A,B](l: shapeless.Lens[A,B]): scalaz.Lens[A, B] =
-    scalaz.LensFamily.lensg(l.set, l.get)
-
-  def slens[A,B](l: scalaz.Lens[A,B]): shapeless.Lens[A, B] =
-    new shapeless.Lens[A, B] {
-      def get(a: A): B = l.get(a)
-      def set(a: A)(b: B): A = l.set(a, b)
-    }
-}
-
 trait ShapelessInstances {
   implicit class ApplicativeOps[G[_]](instance: Applicative[G]) {
     def liftA[F, R, I <: HList, GI <: HList, OF](f: F)(

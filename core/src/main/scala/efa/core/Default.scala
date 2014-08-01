@@ -1,15 +1,11 @@
 package efa.core
 
-import scalaz.Monoid, scalaz.syntax.monoid._
+import scalaz.{Monoid, Functor}
 
 /** A type class that represents a default value for a given type.
   */
 trait Default[+A] {
   val default: A
-
-  def map[B](f: A ⇒ B): Default[B] = Default.default(f(default))
-
-  def ∘ [B](f: A ⇒ B): Default[B] = map(f)
 }
 
 trait DefaultFunctions {
@@ -17,14 +13,17 @@ trait DefaultFunctions {
 
   def !!![A:Default]:A = Default[A].default
 
-  def monoid[A:Monoid]: Default[A] = default(∅)
+  def monoid[A:Monoid]: Default[A] = default(Monoid[A].zero)
+
+  def map[A,B](d: Default[A])(f: A ⇒ B) = default(f(d.default))
 }
 
-trait DefaultInstances {
-}
-
-object Default extends DefaultFunctions with DefaultInstances {
+object Default extends DefaultFunctions {
   def apply[A:Default]: Default[A] = implicitly
+
+  implicit val DefaultFunctor: Functor[Default] = new Functor[Default] {
+    def map[A,B](d: Default[A])(f: A ⇒ B) = Default.map(d)(f)
+  }
 }
 
 // vim: set ts=2 sw=2 et:

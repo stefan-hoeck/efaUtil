@@ -15,12 +15,6 @@ trait Localized[-A] { self ⇒
   def desc(a: A): String = loc(a).desc
 
   def names(a: A): List[String] = loc(a).names
-
-  def contramap[B](f: B ⇒ A): Localized[B] = new Localized[B] {
-    def loc(b: B) = self loc f(b)
-  }
-
-  def ∙ [B](f: B ⇒ A): Localized[B] = contramap(f)
 }
 
 /** A helper-trait for code reuse in classes that have a
@@ -45,11 +39,9 @@ object Localized {
     * instance.
     */
   def get[A](f: A ⇒ Localization): Localized[A] = new Localized[A] {
-    def loc (a: A) = f(a)
+    def loc(a: A) = f(a)
   }
 
-  @deprecated("Not sure, whether type class instances of type classes are" +
-               "the way to go.", "0.2.0-SNAPSHOT")
   implicit val LocalizedContravariant = new Contravariant[Localized] {
     def contramap[A,B](l: Localized[A])(f: B ⇒ A) = get(f andThen l.loc)
   }
