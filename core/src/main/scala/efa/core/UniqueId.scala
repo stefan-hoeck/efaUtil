@@ -33,16 +33,22 @@ trait UniqueId[A,I] { self ⇒
   def newId[F[_]:Foldable]
     (as: F[A])(implicit m: Monoid[I], e: Enum[I]): I =
     e succ as.foldLeft(m.zero) { (i,a) ⇒ i max id(a) }
-
-  def contramap[B](f: B ⇒ A): UniqueId[B,I] = new UniqueId[B,I] {
-    def id(b: B) = self id f(b)
-  }
-
-  def ∙ [B](f: B ⇒ A): UniqueId[B,I] = contramap(f)
 }
 
 object UniqueId extends UniqueIdFunctions {
   @inline def apply[A,I](implicit U: UniqueId[A,I]): UniqueId[A,I] = U
+
+  def contramap[A,B,I](get: B ⇒ A)(implicit P:UniqueId[A,I])
+    : UniqueId[B,I] = new UniqueId[B,I] {
+      def id(b: B) = P id get(b)
+    }
+
+  implicit def UniqueIdContravariant[I]
+    : Contravariant[({type λ[α]=UniqueId[α,I]})#λ] =
+    new Contravariant[({type λ[α]=UniqueId[α,I]})#λ] {
+      override def contramap[A,B](d: UniqueId[A,I])(f: B ⇒ A) =
+        UniqueId.contramap(f)(d)
+    }
 }
 
 trait UniqueIdFunctions {

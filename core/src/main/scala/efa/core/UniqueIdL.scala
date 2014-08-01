@@ -7,13 +7,17 @@ import scalaz._, Scalaz._
   *
   * See UniqueId for a more thorough explanation about identifiers.
   */
-trait UniqueIdL[A,I] extends UniqueId[A,I] {
+trait UniqueIdL[A,I] extends UniqueId[A,I] { self ⇒
 
   /** `scalaz.Lens` for accessing and updating the identifier
     */
   def idL: A @> I
 
   def id (a: A) = idL get a
+
+  def lensed[B](lens: B @> A): UniqueIdL[B,I] = new UniqueIdL[B,I] {
+    def idL = lens >=> self.idL
+  }
 
   /** Sets a unique identifier for each value in a container starting
     * at Monoid zero.
@@ -54,7 +58,7 @@ trait UniqueIdLFunctions {
 
   def idL[A]: UniqueIdL[A, A] = lens (Lens.lensId)
 
-  def lens[A,I] (l: A @> I): UniqueIdL[A,I] = new UniqueIdL[A,I] {
+  def lens[A,I](l: A @> I): UniqueIdL[A,I] = new UniqueIdL[A,I] {
     val idL = l
   }
 }

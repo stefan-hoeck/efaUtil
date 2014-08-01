@@ -5,6 +5,9 @@ import scalaz._, Scalaz._
 
 /** Type class that provides referentially transparent reading from
   * and writing to xml-format.
+  *
+  * @TODO: Split into a covariant typeclass FromXml and a contravariant
+  *        typeclass ToXml
   */
 trait ToXml[A] {
 

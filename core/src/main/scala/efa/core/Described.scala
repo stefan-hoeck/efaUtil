@@ -31,7 +31,7 @@ trait HtmlDescribed[A] extends Described[A] with Named[A] { self ⇒
 trait DescribedFunctions {
   import Described.{Tag, Tags}
 
-  def contramap[A,B](d: Described[A])(f: B ⇒ A): Described[B] =
+  def contramap[A,B](f: B ⇒ A)(implicit d: Described[A]): Described[B] =
     new Described[B] {
       def shortDesc(b: B) = d shortDesc f(b)
     }
@@ -84,15 +84,15 @@ object Described extends DescribedFunctions {
   implicit val DescribedContravariant: Contravariant[Described] =
     new Contravariant[Described] {
       override def contramap[A,B](d: Described[A])(f: B ⇒ A) =
-        Described.contramap(d)(f)
+        Described.contramap(f)(d)
     }
 }
 
 object HtmlDescribed {
   @inline def apply[A:HtmlDescribed]: HtmlDescribed[A] = implicitly
 
-  def contramap[A,B](d: HtmlDescribed[A])(f: B ⇒ A): HtmlDescribed[B] =
-    new HtmlDescribed[B] {
+  def contramap[A,B](f: B ⇒ A)(implicit d: HtmlDescribed[A])
+    : HtmlDescribed[B] = new HtmlDescribed[B] {
       def tags(b: B) = d tags f(b)
       def name(b: B) = d name f(b)
     }
@@ -100,7 +100,7 @@ object HtmlDescribed {
   implicit val HtmlDescribedContravariant: Contravariant[HtmlDescribed] =
     new Contravariant[HtmlDescribed] {
       override def contramap[A,B](d: HtmlDescribed[A])(f: B ⇒ A) =
-        HtmlDescribed.contramap(d)(f)
+        HtmlDescribed.contramap(f)(d)
     }
 }
 

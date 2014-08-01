@@ -1,7 +1,7 @@
 package efa.core
 
 import Efa._
-import efa.core.syntax.{NodeSeqOps, StringOps}
+import efa.core.syntax.{nodeSeq, string}
 import scalaz._, Scalaz._, scalacheck.ScalaCheckBinding._
 import org.scalacheck._, Arbitrary.arbitrary
 import scala.xml.Node

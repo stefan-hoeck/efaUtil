@@ -1,7 +1,7 @@
 package efa.io
 
 import efa.core.{DisRes, ToXml, Named}
-import efa.core.syntax.NodeSeqOps
+import efa.core.syntax.nodeSeq
 
 import java.io._
 import logDisIO._, resource._

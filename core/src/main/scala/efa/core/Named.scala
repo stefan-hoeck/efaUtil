@@ -28,13 +28,13 @@ trait Named[A] extends Show[A] { self ⇒
 object Named {
   @inline def apply[A:Named]: Named[A] = implicitly
 
-  def contramap[A,B](d: Named[A])(f: B ⇒ A): Named[B] =
+  def contramap[A,B](f: B ⇒ A)(implicit d: Named[A]): Named[B] =
     new Named[B] { def name(b: B) = d name f(b) }
 
   implicit val NamedContravariant: Contravariant[Named] =
     new Contravariant[Named] {
       override def contramap[A,B](d: Named[A])(f: B ⇒ A) =
-        Named.contramap(d)(f)
+        Named.contramap(f)(d)
     }
 }
 

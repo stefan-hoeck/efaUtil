@@ -32,13 +32,6 @@ trait Parent[F[_],-P,C] { self ⇒
     */
   def sortedChildren(p: P)(implicit n: Named[C]): List[C] =
     n nameSortF children(p)
-
-  def contramap[A] (get: A ⇒ P): Parent[F,A,C] = new Parent[F,A,C] {
-    val T = self.T
-    def children(a: A) = self children get(a)
-  }
-
-  def ∙ [A](f: A ⇒ P): Parent[F,A,C] = contramap(f)
 }
 
 trait ParentFunctions {
@@ -49,6 +42,21 @@ trait ParentFunctions {
     }
 }
 
-object Parent extends ParentFunctions
+object Parent extends ParentFunctions {
+  @inline def apply[F[_],P,C](implicit A: Parent[F,P,C]): Parent[F,P,C] = A
+
+  def contramap[A,F[_],P,C](get: A ⇒ P)(implicit P:Parent[F,P,C])
+    : Parent[F,A,C] = new Parent[F,A,C] {
+      val T = P.T
+      def children(a: A) = P children get(a)
+    }
+
+  implicit def ParentContravariant[F[_],C]
+    : Contravariant[({type λ[α]=Parent[F,α,C]})#λ] =
+    new Contravariant[({type λ[α]=Parent[F,α,C]})#λ] {
+      override def contramap[A,B](d: Parent[F,A,C])(f: B ⇒ A) =
+        Parent.contramap(f)(d)
+    }
+}
 
 // vim: set ts=2 sw=2 et:

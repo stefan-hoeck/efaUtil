@@ -15,14 +15,14 @@ trait DefaultFunctions {
 
   def monoid[A:Monoid]: Default[A] = default(Monoid[A].zero)
 
-  def map[A,B](d: Default[A])(f: A ⇒ B) = default(f(d.default))
+  def map[A,B](f: A ⇒ B)(implicit A: Default[A]) = default(f(A.default))
 }
 
 object Default extends DefaultFunctions {
   def apply[A:Default]: Default[A] = implicitly
 
   implicit val DefaultFunctor: Functor[Default] = new Functor[Default] {
-    def map[A,B](d: Default[A])(f: A ⇒ B) = Default.map(d)(f)
+    def map[A,B](d: Default[A])(f: A ⇒ B) = Default.map(f)(d)
   }
 }
 

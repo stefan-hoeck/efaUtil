@@ -7,7 +7,7 @@ import scalaz.effect.IO
 import std.lookup
 
 package object syntax {
-  implicit class LocalizedOps[A:Localized](val self: A) {
+  implicit class localized[A:Localized](val self: A) {
     private def F: Localized[A] = implicitly
 
     def loc: Localization = F loc self
@@ -17,12 +17,12 @@ package object syntax {
     def names: List[String] = F names self
   }
 
-  implicit class LookupOps(val self: Lookup) extends AnyVal {
-    def head[A:Manifest]: IO[Option[A]] = lookup head self
-    def all[A:Manifest]: IO[List[A]] = lookup all self
+  implicit class lookup(val self: Lookup) extends AnyVal {
+    def head[A:Manifest]: IO[Option[A]] = std.lookup head self
+    def all[A:Manifest]: IO[List[A]] = std.lookup all self
   }
 
-  implicit class NodeSeqOps(val self: Seq[Node]) extends AnyVal {
+  implicit class nodeSeq(val self: Seq[Node]) extends AnyVal {
     def read[A:ToXml]: ValRes[A] = ToXml[A] fromXml self
 
     def readD[A:ToXml]: DisRes[A] = read[A].disjunction
@@ -54,7 +54,7 @@ package object syntax {
     def tagged[A:TaggedToXml]: ValRes[A] = TaggedToXml[A] read self
   }
 
-  implicit class StringOps(val self: String) extends AnyVal {
+  implicit class string(val self: String) extends AnyVal {
     def read[A:Read]: ValRes[A] = Read[A] read self
 
     def xml[A:ToXml](a: A): scala.xml.Node = ToXml[A] writeTag (self, a)

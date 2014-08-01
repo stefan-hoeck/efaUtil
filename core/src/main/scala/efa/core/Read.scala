@@ -21,12 +21,6 @@ trait Read[A] { self ⇒
     */
   final lazy val validator: Validator[String,A] = Kleisli(readD)
 
-  def map[B](f: A ⇒ B): Read[B] = new Read[B] {
-    override def read(s: String) = self read s map f
-  }
-
-  def ∘ [B](f: A ⇒ B): Read[B] = map(f)
-
   def reval[B](v: Validator[A,B]): Read[B] = revalD(v.run)
 
   def revalV[B](v: A ⇒ ValRes[B]): Read[B] = revalD(v(_).disjunction)
@@ -60,11 +54,19 @@ trait ReadFunctions {
 
 object Read extends ReadFunctions {
   @inline def apply[A:Read]: Read[A] = implicitly
+
+  def map[A,B](f: A ⇒ B)(implicit A:Read[A]): Read[B] = new Read[B] {
+    override def read(s: String) = A read s map f
+  }
+
+  implicit val ReadFunctor: Functor[Read] = new Functor[Read] {
+    def map[A,B](p: Read[A])(f: A ⇒ B) = Read.map(f)(p)
+  }
 }
 
 trait ReadSpecs {
   import org.scalacheck.Prop, Prop._
-  import efa.core.syntax.StringOps
+  import efa.core.syntax.string
   import efa.core.std.prop._
   
   def showRead[A:Show:Read:Equal]: A ⇒ Prop =
