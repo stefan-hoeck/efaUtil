@@ -30,12 +30,6 @@ object ShapelessTest extends Properties ("Shapeless") {
 
 case class Cc (aString: String, anInt: Int, anOption: Option[Int])
 
-case class Cc2(a: Int, b: Int)
-
-object Cc2 {
-  implicit val monoid: Monoid[Cc2] = deriveMonoid[Cc2]
-}
-
 object Cc {
   implicit val optionDefault = Default.monoid[Option[Int]]
   implicit val d: Default[Cc] = deriveDefault[Cc]
