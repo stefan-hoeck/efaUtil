@@ -1,5 +1,6 @@
 package efa.core.std
 
+import efa.core.Default
 import scala.language.experimental.macros
 import scalaz.{Equal,Monoid,Semigroup, Cord, Order,
                Show, Ordering, Apply, Applicative, Lens}
@@ -104,6 +105,13 @@ trait ShapelessInstances {
       new IsomorphicMonoid[A, B] { def B = b; def to = ab; def from = ba }
   }
 
+  implicit def DefaultI: ProductTypeClass[Default] = new ProductTypeClass[Default] with Empty {
+    def product[F, T <: HList](f: Default[F], t: Default[T]) =
+      new ProductDefault[F, T] { def F = f; def T = t }
+    def project[A, B](b: => Default[B], ab: A => B, ba: B => A) =
+      new IsomorphicDefault[A, B] { def B = b; def to = ab; def from = ba }
+  }
+
   implicit def EqualI: TypeClass[Equal] = new TypeClass[Equal] with Empty {
     def product[F, T <: HList](f: Equal[F], t: Equal[T]) =
       new ProductEqual[F, T] { def F = f; def T = t }
@@ -131,7 +139,6 @@ trait ShapelessInstances {
       new IsomorphicOrder[A, B] { def B = b; def to = ab; def from = ba }
   }
 
-
   // Boilerplate
 
   def deriveSemigroup[T](implicit ev: ProductTypeClass[Semigroup]): Semigroup[T] =
@@ -139,6 +146,9 @@ trait ShapelessInstances {
 
   def deriveMonoid[T](implicit ev: ProductTypeClass[Monoid]): Monoid[T] =
     macro GenericMacros.deriveProductInstance[Monoid, T]
+
+  def deriveDefault[T](implicit ev: ProductTypeClass[Default]): Default[T] =
+    macro GenericMacros.deriveInstance[Default, T]
 
   def deriveEqual[T](implicit ev: TypeClass[Equal]): Equal[T] =
     macro GenericMacros.deriveInstance[Equal, T]
@@ -148,6 +158,7 @@ trait ShapelessInstances {
 
   def deriveShow[T](implicit ev: TypeClass[Show]): Show[T] =
     macro GenericMacros.deriveInstance[Show, T]
+
 }
 
 trait Product[+C[_], F, T <: HList] {
@@ -172,12 +183,13 @@ trait Isomorphic[+C[_], A, B] {
 
 private trait Empty {
 
-  def emptyProduct = new Monoid[HNil] with Order[HNil] with Show[HNil] {
+  def emptyProduct = new Monoid[HNil] with Order[HNil] with Show[HNil] with Default[HNil]{
     def zero = HNil
     def append(f1: HNil, f2: => HNil) = HNil
     override def equal(a1: HNil, a2: HNil) = true
     def order(x: HNil, y: HNil) = Monoid[Ordering].zero
     override def shows(f: HNil) = "HNil"
+    val default = HNil
   }
 
   def emptyCoproduct = new Monoid[CNil] with Order[CNil] with Show[CNil] {
@@ -228,6 +240,13 @@ private trait ProductOrder[F, T <: HList]
   def order(x: λ, y: λ) =
     Semigroup[Ordering].append(F.order(x.head, y.head), T.order(x.tail, y.tail))
 
+}
+
+private trait ProductDefault[F, T <: HList]
+  extends Default[F :: T]
+  with Product[Default, F, T] {
+
+  val default = F.default :: T.default
 }
 
 private trait ProductShow[F, T <: HList]
@@ -307,6 +326,13 @@ private trait IsomorphicMonoid[A, B]
 
   def zero = from(B.zero)
 
+}
+
+private trait IsomorphicDefault[A, B]
+  extends Default[A]
+  with Isomorphic[Default, A, B] {
+
+  val default = from(B.default)
 }
 
 private trait IsomorphicEqual[A, B]
