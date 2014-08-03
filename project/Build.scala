@@ -32,7 +32,7 @@ object Dependencies {
 
   val nbV               = "RELEASE80"
   val scalacheckV       = "1.11.4"
-  val scalazV           = "7.1.0-RC2"
+  val scalazV           = "7.1.0"
   val shapelessV        = "2.0.0"
 
   val nb                = "org.netbeans.api"
