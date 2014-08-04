@@ -34,6 +34,7 @@ object Dependencies {
   val scalacheckV       = "1.11.4"
   val scalazV           = "7.1.0"
   val shapelessV        = "2.0.0"
+  val scalaXmlV         = "1.0.2"
 
   val nb                = "org.netbeans.api"
   val scalaz            = "org.scalaz"
@@ -41,6 +42,7 @@ object Dependencies {
   val nbUtil            = nb % "org-openide-util" % nbV
   val nbLookup          = nb % "org-openide-util-lookup" % nbV
 
+  val scalaXml          = "org.scala-lang.modules" %% "scala-xml" % scalaXmlV
   val shapeless         = "com.chuusai" %% "shapeless" % shapelessV
   val scalaz_core       = scalaz %% "scalaz-core" % scalazV
   val scalaz_effect     = scalaz %% "scalaz-effect" % scalazV
@@ -52,7 +54,7 @@ object Dependencies {
   val reflect           = "org.scala-lang" % "scala-reflect" % sv
 
   val deps              = Seq(scalaz_core, scalaz_effect, scalaz_scalacheck,
-                              shapeless, reflect)
+                              shapeless, reflect, scalaXml)
 }
 
 object UtilBuild extends Build {
