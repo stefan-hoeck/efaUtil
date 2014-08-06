@@ -18,8 +18,8 @@ package object syntax {
   }
 
   implicit class lookup(val self: Lookup) extends AnyVal {
-    def head[A:Manifest]: IO[Option[A]] = std.lookup head self
-    def all[A:Manifest]: IO[List[A]] = std.lookup all self
+    def head[A:Lookupable]: IO[Option[A]] = std.lookup head self
+    def all[A:Lookupable]: IO[List[A]] = std.lookup all self
   }
 
   implicit class nodeSeq(val self: Seq[Node]) extends AnyVal {

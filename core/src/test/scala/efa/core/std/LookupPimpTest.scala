@@ -5,6 +5,8 @@ import org.scalacheck._
 import org.openide.util.Lookup
 import org.openide.util.lookup.{InstanceContent, AbstractLookup}
 
+case class TestClass(s: String)
+
 object LookupFunctionsTest
   extends Properties("LookupFunctions")
   with LookupFunctions {
@@ -15,7 +17,6 @@ object LookupFunctionsTest
     new AbstractLookup(ic)
   }
 
-  case class TestClass(s: String)
   implicit val TestClassEquals = Equal.equalA[TestClass] 
 
   val tcGen = for {s <- Arbitrary.arbitrary[String]} yield TestClass(s)

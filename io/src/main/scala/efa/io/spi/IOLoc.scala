@@ -1,5 +1,6 @@
 package efa.io.spi
 
+import efa.core.Default
 import java.io.File
 
 trait IOLoc {
@@ -37,6 +38,8 @@ trait IOLoc {
 }
 
 object IOLoc extends IOLoc {
+  implicit val defaultImpl: Default[IOLoc] = Default.default(this)
+
   def allFiles = "All Files"
   def closed(s: String) = s"Closed $s"
   def copied(from: String, to: String) = s"Copied $from to $to"

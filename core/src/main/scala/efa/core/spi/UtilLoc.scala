@@ -1,7 +1,8 @@
 package efa.core.spi
 
-import efa.core.{ValRes, Localization}
+import efa.core.{ValRes, Localization, Default, Lookupable}
 import scalaz.syntax.validation._
+import scala.reflect.classTag
 
 trait UtilLoc {
   lazy val commentLoc =
@@ -39,6 +40,12 @@ trait UtilLoc {
  * Default localization (English)
  */
 object UtilLoc extends UtilLoc {
+  // Necessary as macro of this project cannot yet be expanded
+  implicit val lookupableImpl: Lookupable[UtilLoc] =
+    Lookupable.unsafe(classTag[UtilLoc])
+
+  implicit val defaultImpl: Default[UtilLoc] = Default.default(this)
+
   def comment = "Comment"
   def commentShort = "Comm."
   def desc = "Description"

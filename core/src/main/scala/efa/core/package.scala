@@ -5,7 +5,7 @@ import efa.core.spi.UtilLoc
 
 package object core {
 
-  lazy val loc = Service.unique[UtilLoc](UtilLoc)
+  lazy val loc = Service.unique[UtilLoc]
 
   type Nel[A] = NonEmptyList[A]
 

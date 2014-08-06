@@ -6,7 +6,7 @@ import scalaz._, Scalaz._, effect._, iteratee._
 
 package object io {
 
-  lazy val loc = Service.unique[IOLoc](IOLoc)
+  lazy val loc = Service.unique[IOLoc]
 
   type DisIO[A] = EitherT[IO,Nel[String],A]
 
