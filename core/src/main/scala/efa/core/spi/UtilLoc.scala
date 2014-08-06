@@ -1,6 +1,6 @@
 package efa.core.spi
 
-import efa.core.{ValRes, Localization, Default, Lookupable}
+import efa.core.{ValRes, Localization, Default, Unerased}
 import scalaz.syntax.validation._
 import scala.reflect.classTag
 
@@ -41,8 +41,8 @@ trait UtilLoc {
  */
 object UtilLoc extends UtilLoc {
   // Necessary as macro of this project cannot yet be expanded
-  implicit val lookupableImpl: Lookupable[UtilLoc] =
-    Lookupable.unsafe(classTag[UtilLoc])
+  implicit val lookupableImpl: Unerased[UtilLoc] =
+    Unerased.unsafe(classTag[UtilLoc])
 
   implicit val defaultImpl: Default[UtilLoc] = Default.default(this)
 

@@ -9,7 +9,7 @@ import scalaz._, Scalaz._, effect._
   * class therefore should not be used for services whose implementations are
   * to change at runtime.
   */
-sealed abstract class Service[A:Lookupable:Default] {
+sealed abstract class Service[A:Unerased:Default] {
 
   /** Use this only for referentially transparent services that never change
     * during the application live-cycle. One use case might be for
@@ -25,9 +25,9 @@ sealed abstract class Service[A:Lookupable:Default] {
 } 
 
 object Service {
-  def apply[A:Lookupable:Default]: Service[A] = new Service[A]{}
+  def apply[A:Unerased:Default]: Service[A] = new Service[A]{}
 
-  def unique[A:Lookupable:Default]: A = apply[A].unsafeGet
+  def unique[A:Unerased:Default]: A = apply[A].unsafeGet
 }
 
 // vim: set ts=2 sw=2 et:
