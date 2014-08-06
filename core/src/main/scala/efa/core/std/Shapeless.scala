@@ -1,10 +1,11 @@
 package efa.core.std
 
-import efa.core.Default
+import efa.core.{Default, Named, Described, UniqueId, Localized}
 import scala.language.experimental.macros
 import scalaz.{Equal,Monoid,Semigroup, Cord, Order,
                Show, Ordering, Apply, Applicative, Lens}
 import scalaz.syntax.applicative._
+import scalaz.syntax.contravariant._
 import shapeless._
 import shapeless.ops.function._
 import shapeless.syntax.std.function._
@@ -15,6 +16,19 @@ import org.scalacheck.{Gen, Arbitrary, Shrink}
   * once shapeless-contrib goes to 2.11 / 7.1.0
   */
 trait ShapelessInstances {
+
+  implicit def HListNamed[A:Named,T <: HList]: Named[A :: T] =
+    Named[A] ∙ (_.head)
+
+  implicit def HListDescribed[A:Described,T <: HList]: Described[A :: T] =
+    Described[A] ∙ (_.head)
+
+  implicit def HListLocalized[A:Localized,T <: HList]: Localized[A :: T] =
+    Localized[A] ∙ (_.head)
+
+  implicit def HListUid[A,T <: HList,Id](implicit U:UniqueId[A,Id])
+    : UniqueId[A :: T,Id] = U ∙ (_.head)
+
   implicit class ApplicativeOps[G[_]](instance: Applicative[G]) {
     def liftA[F, R, I <: HList, GI <: HList, OF](f: F)(
       implicit hlister: FnToProduct.Aux[F, I => R],
