@@ -58,10 +58,6 @@ object Read extends ReadFunctions {
   def map[A,B](f: A ⇒ B)(implicit A:Read[A]): Read[B] = new Read[B] {
     override def read(s: String) = A read s map f
   }
-
-  implicit val ReadFunctor: Functor[Read] = new Functor[Read] {
-    def map[A,B](p: Read[A])(f: A ⇒ B) = Read.map(f)(p)
-  }
 }
 
 trait ReadSpecs {

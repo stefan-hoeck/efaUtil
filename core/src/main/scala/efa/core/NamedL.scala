@@ -1,6 +1,6 @@
 package efa.core
 
-import scalaz.{@>, InvariantFunctor}
+import scalaz.@>
 
 /** Type class that associates an editable (and typically localized)
   * name with objects of a type.
@@ -18,20 +18,14 @@ trait NamedL[A] extends Named[A] {
 object NamedL {
   def apply[A:NamedL]: NamedL[A] = implicitly
 
-  def xmap[A,B](n: NamedL[A], f: A ⇒ B, g: B ⇒ A): NamedL[B] =
+  def xmap[A,B](f: A ⇒ B)(g: B ⇒ A)(implicit A: NamedL[A]): NamedL[B] =
     new NamedL[B] {
-      def nameL: B @> String = n.nameL.xmapA(f)(g)
+      def nameL: B @> String = A.nameL.xmapA(f)(g)
     }
 
-  def lensed[A,B](n: NamedL[A])(l: B @> A): NamedL[B] = new NamedL[B] {
-    val nameL = l >=> n.nameL
+  def lensed[A,B](l: B @> A)(implicit A: NamedL[A]): NamedL[B] = new NamedL[B] {
+    val nameL = l >=> A.nameL
   }
-
-  implicit val NamedLInvariant: InvariantFunctor[NamedL] =
-    new InvariantFunctor[NamedL] {
-      def xmap[A,B](ma: NamedL[A], f: A ⇒ B, g: B ⇒ A) =
-        NamedL.xmap(ma, f, g)
-    }
 }
 
 // vim: set ts=2 sw=2 et:

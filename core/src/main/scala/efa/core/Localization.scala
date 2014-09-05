@@ -1,6 +1,6 @@
 package efa.core
 
-import scalaz.Equal
+import scalaz.Order
 import scalaz.std.string._
 import Efa._
 
@@ -32,9 +32,7 @@ case class Localization(
 }
 
 object Localization {
-  implicit val LocalizationEqual = deriveEqual[Localization]
-
-  implicit val LocalizationOrder = deriveOrder[Localization]
+  implicit val orderInst: Order[Localization] = deriveOrder
 }
 
 // vim: set ts=2 sw=2 et:

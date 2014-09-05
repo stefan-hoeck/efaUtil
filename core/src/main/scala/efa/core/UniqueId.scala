@@ -42,13 +42,6 @@ object UniqueId extends UniqueIdFunctions {
     : UniqueId[B,I] = new UniqueId[B,I] {
       def id(b: B) = P id get(b)
     }
-
-  implicit def UniqueIdContravariant[I]
-    : Contravariant[({type λ[α]=UniqueId[α,I]})#λ] =
-    new Contravariant[({type λ[α]=UniqueId[α,I]})#λ] {
-      override def contramap[A,B](d: UniqueId[A,I])(f: B ⇒ A) =
-        UniqueId.contramap(f)(d)
-    }
 }
 
 trait UniqueIdFunctions {

@@ -46,6 +46,14 @@ trait UniqueIdL[A,I] extends UniqueId[A,I] { self ⇒
 
 object UniqueIdL extends UniqueIdLFunctions {
   @inline def apply[A,I](implicit U: UniqueIdL[A,I]): UniqueIdL[A,I] = U
+
+  def xmap[A,B,I](f: A ⇒ B)(g: B ⇒ A)(implicit A: UniqueIdL[A,I]): UniqueIdL[B,I] =
+    new UniqueIdL[B,I] {
+      def idL: B @> I = A.idL.xmapA(f)(g)
+    }
+
+  def lensed[A,B,I](l: B @> A)(implicit A: UniqueIdL[A,I]): UniqueIdL[B,I] =
+    A lensed l
 }
 
 trait UniqueIdLFunctions {

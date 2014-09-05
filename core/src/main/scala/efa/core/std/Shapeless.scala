@@ -18,16 +18,16 @@ import org.scalacheck.{Gen, Arbitrary, Shrink}
 trait ShapelessInstances {
 
   implicit def HListNamed[A:Named,T <: HList]: Named[A :: T] =
-    Named[A] ∙ (_.head)
+    Named contramap (_.head)
 
   implicit def HListDescribed[A:Described,T <: HList]: Described[A :: T] =
-    Described[A] ∙ (_.head)
+    Described contramap (_.head)
 
   implicit def HListLocalized[A:Localized,T <: HList]: Localized[A :: T] =
-    Localized[A] ∙ (_.head)
+    Localized contramap (_.head)
 
   implicit def HListUid[A,T <: HList,Id](implicit U:UniqueId[A,Id])
-    : UniqueId[A :: T,Id] = U ∙ (_.head)
+    : UniqueId[A :: T,Id] = UniqueId contramap (_.head)
 
   implicit class ApplicativeOps[G[_]](instance: Applicative[G]) {
     def liftA[F, R, I <: HList, GI <: HList, OF](f: F)(

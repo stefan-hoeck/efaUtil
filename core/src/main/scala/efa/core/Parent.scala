@@ -1,6 +1,7 @@
 package efa.core
 
-import scalaz._, Scalaz._
+import scalaz.Traverse
+import scalaz.syntax.traverse._
 
 /** Represents a parent-child relationship between two types.
   *
@@ -49,13 +50,6 @@ object Parent extends ParentFunctions {
     : Parent[F,A,C] = new Parent[F,A,C] {
       val T = P.T
       def children(a: A) = P children get(a)
-    }
-
-  implicit def ParentContravariant[F[_],C]
-    : Contravariant[({type λ[α]=Parent[F,α,C]})#λ] =
-    new Contravariant[({type λ[α]=Parent[F,α,C]})#λ] {
-      override def contramap[A,B](d: Parent[F,A,C])(f: B ⇒ A) =
-        Parent.contramap(f)(d)
     }
 }
 

@@ -42,9 +42,8 @@ object Localized {
     def loc(a: A) = f(a)
   }
 
-  implicit val LocalizedContravariant = new Contravariant[Localized] {
-    def contramap[A,B](l: Localized[A])(f: B ⇒ A) = get(f andThen l.loc)
-  }
+  def contramap[A,B](f: B ⇒ A)(implicit l: Localized[A]): Localized[B] =
+    get(f andThen l.loc)
 }
 
 // vim: set ts=2 sw=2 et:

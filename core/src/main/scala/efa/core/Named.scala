@@ -1,7 +1,8 @@
 package efa.core
 
-import scalaz._, Scalaz._
-import scalaz.std.indexedSeq._
+import scalaz.{Foldable, Show}
+import scalaz.syntax.foldable._
+import scalaz.std.indexedSeq.IxSq
 
 /** Type class that associates a (typically localized) name with
   * an object of a type.
@@ -30,12 +31,6 @@ object Named {
 
   def contramap[A,B](f: B ⇒ A)(implicit d: Named[A]): Named[B] =
     new Named[B] { def name(b: B) = d name f(b) }
-
-  implicit val NamedContravariant: Contravariant[Named] =
-    new Contravariant[Named] {
-      override def contramap[A,B](d: Named[A])(f: B ⇒ A) =
-        Named.contramap(f)(d)
-    }
 }
 
 // vim: set ts=2 sw=2 et:

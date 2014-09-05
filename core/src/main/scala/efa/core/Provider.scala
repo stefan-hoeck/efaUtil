@@ -1,6 +1,6 @@
 package efa.core
 
-import scalaz.{DList, Functor}
+import scalaz.DList
 
 /** A type class that gives access to a list of objects of a given type.
   *
@@ -17,10 +17,6 @@ object Provider {
     new Provider[B] {
       def get = A.get map f
     }
-
-  implicit val ProviderFunctor: Functor[Provider] = new Functor[Provider] {
-    def map[A,B](p: Provider[A])(f: A ⇒ B) = Provider.map(f)(p)
-  }
 }
 
 // vim: set ts=2 sw=2 et:

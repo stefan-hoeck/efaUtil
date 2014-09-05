@@ -1,7 +1,5 @@
 package efa.core
 
-import scalaz.Contravariant
-
 /** A type class representing a short description associated with a type.
   *
   * Typically, these descriptions can be displayed conveniently in GUIs.
@@ -30,11 +28,6 @@ trait HtmlDescribed[A] extends Described[A] with Named[A] { self ⇒
   */
 trait DescribedFunctions {
   import Described.{Tag, Tags}
-
-  def contramap[A,B](f: B ⇒ A)(implicit d: Described[A]): Described[B] =
-    new Described[B] {
-      def shortDesc(b: B) = d shortDesc f(b)
-    }
 
   /** Displays a `Tag` on its own line, starting with the
     * `Tag`'s name in bold, followed by its value.
@@ -81,10 +74,9 @@ object Described extends DescribedFunctions {
 
   type Tags = Vector[Tag]
 
-  implicit val DescribedContravariant: Contravariant[Described] =
-    new Contravariant[Described] {
-      override def contramap[A,B](d: Described[A])(f: B ⇒ A) =
-        Described.contramap(f)(d)
+  def contramap[A,B](f: B ⇒ A)(implicit d: Described[A]): Described[B] =
+    new Described[B] {
+      def shortDesc(b: B) = d shortDesc f(b)
     }
 }
 
@@ -95,12 +87,6 @@ object HtmlDescribed {
     : HtmlDescribed[B] = new HtmlDescribed[B] {
       def tags(b: B) = d tags f(b)
       def name(b: B) = d name f(b)
-    }
-
-  implicit val HtmlDescribedContravariant: Contravariant[HtmlDescribed] =
-    new Contravariant[HtmlDescribed] {
-      override def contramap[A,B](d: HtmlDescribed[A])(f: B ⇒ A) =
-        HtmlDescribed.contramap(f)(d)
     }
 }
 
