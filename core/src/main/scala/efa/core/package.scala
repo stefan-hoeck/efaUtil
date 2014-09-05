@@ -1,6 +1,6 @@
 package efa
 
-import scalaz.{Kleisli, \/, Validation, DList, NonEmptyList, State}
+import scalaz._
 import efa.core.spi.UtilLoc
 
 package object core {
@@ -48,6 +48,24 @@ package object core {
   def StringIdL[A:StringIdL]: StringIdL[A] = implicitly
 
   object Shapeless extends std.ShapelessInstances
+
+  object equal {
+    def contramap[A:Equal,B](f: B ⇒ A): Equal[B] = Equal equalBy f
+  }
+
+  object order {
+    def contramap[A:Order,B](f: B ⇒ A): Order[B] = Order orderBy f
+  }
+
+  object enum {
+    def xmap[A,B](f: A ⇒ B)(g: B ⇒ A)(implicit A: Enum[A]): Enum[B] = new Enum[B] {
+      def pred(b: B): B = f(A pred g(b))
+      def succ(b: B): B = f(A succ g(b))
+      def order(v1: B, v2: B): Ordering = Order[A] order (g(v1), g(v2))
+      override def min: Option[B] = A.min map f
+      override def max: Option[B] = A.max map f
+    }
+  }
 }
 
 // vim: set ts=2 sw=2 et:
