@@ -4,7 +4,7 @@ package efa.core
   *
   * Typically, these descriptions can be displayed conveniently in GUIs.
   */
-trait Described[-A] { self ⇒ 
+trait Described[A] { self ⇒ 
   def shortDesc (a: A): String
 }
 

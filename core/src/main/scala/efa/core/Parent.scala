@@ -18,7 +18,7 @@ import scalaz.syntax.traverse._
   * @tparam F The container type in which objects of type P store
   *           their children
   */
-trait Parent[F[_],-P,C] { self ⇒ 
+trait Parent[F[_],P,C] { self ⇒ 
   implicit def T: Traverse[F]
 
   /** Returns all children associated with a parent

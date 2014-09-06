@@ -5,7 +5,7 @@ import scalaz.Contravariant
 /** A type class that associates some [[efa.core.Localization]]s with objects
   * of a given type.
   */
-trait Localized[-A] { self ⇒
+trait Localized[A] { self ⇒
   def loc(a: A): Localization
 
   def locName(a: A): String = loc(a).locName

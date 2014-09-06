@@ -4,7 +4,7 @@ import scalaz.{Monoid, Functor}
 
 /** A type class that represents a default value for a given type.
   */
-trait Default[+A] {
+trait Default[A] {
   val default: A
 }
 
