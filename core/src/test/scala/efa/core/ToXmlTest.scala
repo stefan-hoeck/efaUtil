@@ -6,6 +6,15 @@ import scalaz._, Scalaz._, scalacheck.ScalaCheckBinding._
 import org.scalacheck._, Arbitrary.arbitrary
 import scala.xml.Node
 
+case class ToXmlCc(id: Id, name: Name, desc: Desc)
+
+object ToXmlCc {
+  implicit val equalInst: Equal[ToXmlCc] = deriveEqual
+  implicit val defaultInst: Default[ToXmlCc] = Default.derive
+  implicit val arbInst: Arbitrary[ToXmlCc] = deriveArbitrary
+  implicit val toXmlInst: ToXml[ToXmlCc] = ToXml.derive
+}
+
 object ToXmlTest extends Properties("ToXml") with ToXmlSpecs {
   property("stringXml") = Prop forAll writeReadXml[String]
 
@@ -16,6 +25,8 @@ object ToXmlTest extends Properties("ToXml") with ToXmlSpecs {
   property("doubleXml") = Prop forAll writeReadXml[Double]
 
   property("booleanXml") = Prop forAll writeReadXml[Boolean]
+
+  property("derive") = Prop forAll writeReadXml[ToXmlCc]
 
   implicit val toXmlListInt = ToXml.listToXml[Int]("anInt")
 

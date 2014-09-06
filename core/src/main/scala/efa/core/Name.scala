@@ -20,12 +20,15 @@ final case class Name(v: String) extends AnyVal {
 }
 
 object Name extends Function1[String,Name] {
+
+  // Type Class instances
   implicit val showInst: Show[Name] = Show shows (_.v)
   implicit val orderInst: Order[Name] = order.contramap(_.v)
   implicit val monoidInst: Monoid[Name] = monoid.xmap(Name)(_.v)
   implicit val defaultInst: Default[Name] = Default default Name(loc.name)
   implicit val readInst: Read[Name] = Read map Name
   implicit val orderingInst: Ordering[Name] = orderInst.toScalaOrdering
+  implicit val toXmlInst: ToXml[Name] = ToXml.readShow
 
   private[core] val basicLatin     = Gen choose (0x0020 toChar, 0x007E toChar)
   private[core] val otherPrintable = Gen choose (0x00A0 toChar, 0xD7FF toChar)

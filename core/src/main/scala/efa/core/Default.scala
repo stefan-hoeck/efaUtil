@@ -1,8 +1,8 @@
 package efa.core
 
+import scala.language.experimental.macros
 import scalaz.{Monoid, Functor}
 import shapeless.{ProductTypeClass, HNil, HList, ::, GenericMacros}
-import scala.language.experimental.macros
 
 /** A type class that represents a default value for a given type.
   */

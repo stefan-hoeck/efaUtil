@@ -20,11 +20,14 @@ final case class Desc(v: String) extends AnyVal {
 }
 
 object Desc extends Function1[String,Desc] {
+
+  // Type Class instances
   implicit val showInst: Show[Desc] = Show shows (_.v)
   implicit val orderInst: Order[Desc] = order.contramap(_.v)
   implicit val monoidInst: Monoid[Desc] = monoid.xmap(Desc)(_.v)
   implicit val defaultInst: Default[Desc] = Default default Desc("")
   implicit val readInst: Read[Desc] = Read map Desc
+  implicit val toXmlInst: ToXml[Desc] = ToXml.readShow
 
   private val whiteSpace = Gen oneOf (
     0x0009 toChar, //tab

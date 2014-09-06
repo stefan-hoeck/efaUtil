@@ -1,13 +1,11 @@
 package efa.core.std
 
-import efa.core.{Named, Described, UniqueId, Localized,
-                 ToXml, ValRes}
+import efa.core.{Named, Described, UniqueId, Localized}
 import scala.language.experimental.macros
 import scalaz.{Equal,Monoid,Semigroup, Cord, Order,
                Show, Ordering, Apply, Applicative, Lens}
 import scalaz.syntax.applicative._
 import scalaz.syntax.contravariant._
-import scala.xml.Node
 import shapeless._
 import shapeless.ops.function._
 import shapeless.syntax.std.function._
@@ -121,13 +119,6 @@ trait ShapelessInstances {
       new IsomorphicMonoid[A, B] { def B = b; def to = ab; def from = ba }
   }
 
-  implicit def ToXmlI: ProductTypeClass[ToXml] = new ProductTypeClass[ToXml] with Empty {
-    def product[F, T <: HList](f: ToXml[F], t: ToXml[T]) =
-      new ProductToXml[F, T] { def F = f; def T = t }
-    def project[A, B](b: => ToXml[B], ab: A => B, ba: B => A) =
-      new IsomorphicToXml[A, B] { def B = b; def to = ab; def from = ba }
-  }
-
   implicit def EqualI: TypeClass[Equal] = new TypeClass[Equal] with Empty {
     def product[F, T <: HList](f: Equal[F], t: Equal[T]) =
       new ProductEqual[F, T] { def F = f; def T = t }
@@ -196,17 +187,12 @@ trait Isomorphic[+C[_], A, B] {
 
 private trait Empty {
 
-  def emptyProduct = new Monoid[HNil] with Order[HNil] with Show[HNil]
-                                      with ToXml[HNil] {
+  def emptyProduct = new Monoid[HNil] with Order[HNil] with Show[HNil] {
     def zero = HNil
     def append(f1: HNil, f2: => HNil) = HNil
     override def equal(a1: HNil, a2: HNil) = true
     def order(x: HNil, y: HNil) = Monoid[Ordering].zero
     override def shows(f: HNil) = "HNil"
-    def toXml(h: HNil): Seq[Node] = Nil
-
-    import scalaz.syntax.validation._
-    def fromXml(ns: Seq[Node]): ValRes[HNil] = HNil.success
   }
 
   def emptyCoproduct = new Monoid[CNil] with Order[CNil] with Show[CNil] {
@@ -257,16 +243,6 @@ private trait ProductOrder[F, T <: HList]
   def order(x: λ, y: λ) =
     Semigroup[Ordering].append(F.order(x.head, y.head), T.order(x.tail, y.tail))
 
-}
-
-private trait ProductToXml[F, T <: HList]
-  extends ToXml[F :: T]
-  with Product[ToXml, F, T] {
-
-  def toXml(a: F::T): Seq[Node] = ???
-  def fromXml(ns: Seq[Node]): ValRes[F::T] = ???
-
-  // val default = F.default :: T.default
 }
 
 private trait ProductShow[F, T <: HList]
@@ -346,14 +322,6 @@ private trait IsomorphicMonoid[A, B]
 
   def zero = from(B.zero)
 
-}
-
-private trait IsomorphicToXml[A, B]
-  extends ToXml[A]
-  with Isomorphic[ToXml, A, B] {
-
-  def toXml(a: A): Seq[Node] = B toXml to(a)
-  def fromXml(ns: Seq[Node]): ValRes[A] = B fromXml ns map from
 }
 
 private trait IsomorphicEqual[A, B]
