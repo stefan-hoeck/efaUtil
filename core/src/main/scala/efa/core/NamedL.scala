@@ -10,9 +10,9 @@ import scalaz.@>
   * @see [[scalaz.Lens]]
   */
 trait NamedL[A] extends Named[A] {
-  def nameL: A @> String
+  def nameL: A @> Name
 
-  final override def name(a: A): String = nameL get a
+  final override def name(a: A): Name = nameL get a
 }
 
 object NamedL {
@@ -20,7 +20,7 @@ object NamedL {
 
   def xmap[A,B](f: A ⇒ B)(g: B ⇒ A)(implicit A: NamedL[A]): NamedL[B] =
     new NamedL[B] {
-      def nameL: B @> String = A.nameL.xmapA(f)(g)
+      def nameL: B @> Name = A.nameL.xmapA(f)(g)
     }
 
   def lensed[A,B](l: B @> A)(implicit A: NamedL[A]): NamedL[B] = new NamedL[B] {

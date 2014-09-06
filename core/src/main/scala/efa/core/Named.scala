@@ -12,7 +12,7 @@ import scalaz.std.indexedSeq.IxSq
   * of objects by name.
   */
 trait Named[A] extends Show[A] { self ⇒
-  def name (a: A): String
+  def name(a: A): Name
 
   final def nameSort(as: List[A]): List[A] = as sortBy name
 
@@ -23,7 +23,7 @@ trait Named[A] extends Show[A] { self ⇒
   final def sortedPairs[B](m: Map[B,A]): List[(B,A)] =
     m.toList sortBy { p ⇒ name (p._2) }
 
-  override def shows(a: A): String = name (a)
+  override def shows(a: A): String = name(a).v
 }
 
 object Named {

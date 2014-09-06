@@ -10,7 +10,9 @@ import scalaz.{Reader ⇒ _, _}, Scalaz._, iteratee._, Iteratee._, effect.IO
 import scalaz.std.indexedSeq._
 import scala.xml.XML
 
-trait AsInput[A] extends Named[A] {
+trait AsInput[A] {
+  def name(a: A): String
+
   /** Returns an `InputStream` from an A
     *
     * It is OK for this IO-action to throw an exception when being run.

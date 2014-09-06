@@ -8,8 +8,10 @@ import scalaz.iteratee.EnumeratorT.enumOne
 import logDisIO._, resource._
 import efa.io.CharSet.UTF8
 
-trait AsOutput[A] extends Named[A] {
+trait AsOutput[A] {
   protected def os(a: A): IO[OutputStream]
+
+  def name(a: A): String
 
   def outputStream(a: A): LogDisIO[OutputStream] = for {
     o ← except(liftIO(os(a)), openError(a))
