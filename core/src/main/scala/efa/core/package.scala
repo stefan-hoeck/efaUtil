@@ -23,6 +23,10 @@ package object core {
 
   //Aliases for some of the most common UniqueId types
 
+  type UId[A] = UniqueId[A,Id]
+
+  type UIdL[A] = UniqueIdL[A,Id]
+
   type IntId[A] = UniqueId[A,Int]
 
   type IntIdL[A] = UniqueIdL[A,Int]
@@ -41,11 +45,15 @@ package object core {
 
   def StringId[A:StringId]: StringId[A] = implicitly
 
+  def UId[A:UId]: UId[A] = implicitly
+
   def IntIdL[A:IntIdL]: IntIdL[A] = implicitly
 
   def LongIdL[A:LongIdL]: LongIdL[A] = implicitly
 
   def StringIdL[A:StringIdL]: StringIdL[A] = implicitly
+
+  def UIdL[A:UIdL]: UIdL[A] = implicitly
 
   object Shapeless extends std.ShapelessInstances
 

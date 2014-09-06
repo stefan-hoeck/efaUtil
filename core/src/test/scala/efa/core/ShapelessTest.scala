@@ -32,7 +32,7 @@ case class Cc (aString: String, anInt: Int, anOption: Option[Int])
 
 object Cc {
   implicit val optionDefault = Default.monoid[Option[Int]]
-  implicit val d: Default[Cc] = deriveDefault[Cc]
+  implicit val d: Default[Cc] = Default.derive
   implicit val equal: Equal[Cc] = deriveEqual
   implicit val arbitrary: Arbitrary[Cc] = deriveArbitrary
 

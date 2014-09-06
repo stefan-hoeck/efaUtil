@@ -1,11 +1,13 @@
 package efa.core.std
 
-import efa.core.{Default, Named, Described, UniqueId, Localized}
+import efa.core.{Named, Described, UniqueId, Localized,
+                 ToXml, ValRes}
 import scala.language.experimental.macros
 import scalaz.{Equal,Monoid,Semigroup, Cord, Order,
                Show, Ordering, Apply, Applicative, Lens}
 import scalaz.syntax.applicative._
 import scalaz.syntax.contravariant._
+import scala.xml.Node
 import shapeless._
 import shapeless.ops.function._
 import shapeless.syntax.std.function._
@@ -119,11 +121,11 @@ trait ShapelessInstances {
       new IsomorphicMonoid[A, B] { def B = b; def to = ab; def from = ba }
   }
 
-  implicit def DefaultI: ProductTypeClass[Default] = new ProductTypeClass[Default] with Empty {
-    def product[F, T <: HList](f: Default[F], t: Default[T]) =
-      new ProductDefault[F, T] { def F = f; def T = t }
-    def project[A, B](b: => Default[B], ab: A => B, ba: B => A) =
-      new IsomorphicDefault[A, B] { def B = b; def to = ab; def from = ba }
+  implicit def ToXmlI: ProductTypeClass[ToXml] = new ProductTypeClass[ToXml] with Empty {
+    def product[F, T <: HList](f: ToXml[F], t: ToXml[T]) =
+      new ProductToXml[F, T] { def F = f; def T = t }
+    def project[A, B](b: => ToXml[B], ab: A => B, ba: B => A) =
+      new IsomorphicToXml[A, B] { def B = b; def to = ab; def from = ba }
   }
 
   implicit def EqualI: TypeClass[Equal] = new TypeClass[Equal] with Empty {
@@ -161,9 +163,6 @@ trait ShapelessInstances {
   def deriveMonoid[T](implicit ev: ProductTypeClass[Monoid]): Monoid[T] =
     macro GenericMacros.deriveProductInstance[Monoid, T]
 
-  def deriveDefault[T](implicit ev: ProductTypeClass[Default]): Default[T] =
-    macro GenericMacros.deriveProductInstance[Default, T]
-
   def deriveEqual[T](implicit ev: TypeClass[Equal]): Equal[T] =
     macro GenericMacros.deriveInstance[Equal, T]
 
@@ -197,18 +196,21 @@ trait Isomorphic[+C[_], A, B] {
 
 private trait Empty {
 
-  def emptyProduct = new Monoid[HNil] with Order[HNil] with Show[HNil] with Default[HNil]{
+  def emptyProduct = new Monoid[HNil] with Order[HNil] with Show[HNil]
+                                      with ToXml[HNil] {
     def zero = HNil
     def append(f1: HNil, f2: => HNil) = HNil
     override def equal(a1: HNil, a2: HNil) = true
     def order(x: HNil, y: HNil) = Monoid[Ordering].zero
     override def shows(f: HNil) = "HNil"
-    val default = HNil
+    def toXml(h: HNil): Seq[Node] = Nil
+
+    import scalaz.syntax.validation._
+    def fromXml(ns: Seq[Node]): ValRes[HNil] = HNil.success
   }
 
-  def emptyCoproduct = new Monoid[CNil] with Order[CNil] with Show[CNil] with Default[CNil] {
+  def emptyCoproduct = new Monoid[CNil] with Order[CNil] with Show[CNil] {
     def zero = ???
-    lazy val default = ???
     def append(f1: CNil, f2: => CNil) = f1
     def order(x: CNil, y: CNil) = Monoid[Ordering].zero
   }
@@ -257,11 +259,14 @@ private trait ProductOrder[F, T <: HList]
 
 }
 
-private trait ProductDefault[F, T <: HList]
-  extends Default[F :: T]
-  with Product[Default, F, T] {
+private trait ProductToXml[F, T <: HList]
+  extends ToXml[F :: T]
+  with Product[ToXml, F, T] {
 
-  val default = F.default :: T.default
+  def toXml(a: F::T): Seq[Node] = ???
+  def fromXml(ns: Seq[Node]): ValRes[F::T] = ???
+
+  // val default = F.default :: T.default
 }
 
 private trait ProductShow[F, T <: HList]
@@ -343,11 +348,12 @@ private trait IsomorphicMonoid[A, B]
 
 }
 
-private trait IsomorphicDefault[A, B]
-  extends Default[A]
-  with Isomorphic[Default, A, B] {
+private trait IsomorphicToXml[A, B]
+  extends ToXml[A]
+  with Isomorphic[ToXml, A, B] {
 
-  val default = from(B.default)
+  def toXml(a: A): Seq[Node] = B toXml to(a)
+  def fromXml(ns: Seq[Node]): ValRes[A] = B fromXml ns map from
 }
 
 private trait IsomorphicEqual[A, B]
