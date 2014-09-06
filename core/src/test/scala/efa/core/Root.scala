@@ -4,6 +4,7 @@ import Efa._
 import org.scalacheck._, Prop._
 import scalaz._, Scalaz._
 import shapeless.{HList, HNil, ::, lens}
+import shapeless.contrib.scalaz._
 
 case class Root(id: Int, name: String, branches: List[Branch])
 

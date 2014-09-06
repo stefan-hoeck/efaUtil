@@ -2,9 +2,9 @@ package efa.core
 
 import Default.!!!
 import org.scalacheck.Properties
-import Shapeless._
 import scalaz.Equal
 import scalaz.syntax.equal._
+import shapeless.contrib.scalaz._
 
 case class DefaultCc(id: Id, name: Name)
 

@@ -8,11 +8,6 @@ import scalaz.Show
   *
   * In addition to ToXml's basic functionality, this type class links
   * its type paramete to a fixed tag name.
-  *
-  * TODO: Split into a covariant typeclass TaggedFromXml
-  *       and a contravariant typeclass TaggedToXml
-  *       It should then be possible to derive instances of
-  *       both from product types like case classes.
   */
 trait TaggedToXml[A] extends ToXml[A] {
   def tag: String

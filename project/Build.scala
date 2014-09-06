@@ -35,9 +35,11 @@ object Dependencies {
   val scalazV           = "7.1.0"
   val shapelessV        = "2.0.0"
   val scalaXmlV         = "1.0.2"
+  val contribV          = "0.3"
 
   val nb                = "org.netbeans.api"
   val scalaz            = "org.scalaz"
+  val typelevel         = "org.typelevel"
 
   val nbUtil            = nb % "org-openide-util" % nbV
   val nbLookup          = nb % "org-openide-util-lookup" % nbV
@@ -48,13 +50,16 @@ object Dependencies {
   val scalaz_effect     = scalaz %% "scalaz-effect" % scalazV
   val scalaz_iteratee   = scalaz %% "scalaz-iteratee" % scalazV
   val scalaz_scalacheck = scalaz %% "scalaz-scalacheck-binding" % scalazV
+  val shapeless_scalaz  = typelevel %% "shapeless-scalaz" % contribV
+  val shapeless_check   = typelevel %% "shapeless-scalacheck" % contribV
 
   val scalacheck        = "org.scalacheck" %% "scalacheck" % scalacheckV
   val scalacheckT       = scalacheck % "test"
   val reflect           = "org.scala-lang" % "scala-reflect" % sv
 
   val deps              = Seq(scalaz_core, scalaz_effect, scalaz_scalacheck,
-                              shapeless, reflect, scalaXml)
+                              shapeless, reflect, scalaXml, shapeless_scalaz,
+                              shapeless_check)
 }
 
 object UtilBuild extends Build {

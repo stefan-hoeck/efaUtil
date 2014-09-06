@@ -1,10 +1,12 @@
 package efa.core
 
-import Efa._
+import efa.core.Efa._
 import efa.core.syntax.{nodeSeq, string}
 import scalaz._, Scalaz._, scalacheck.ScalaCheckBinding._
 import org.scalacheck._, Arbitrary.arbitrary
 import scala.xml.Node
+import shapeless.contrib.scalaz._
+import shapeless.contrib.scalacheck._
 
 case class ToXmlCc(id: Id, name: Name, desc: Desc)
 

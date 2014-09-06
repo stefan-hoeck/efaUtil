@@ -2,7 +2,7 @@ package efa.core
 
 import scalaz.Order
 import scalaz.std.string._
-import Efa._
+import shapeless.contrib.scalaz._
 
 /** Provides a couple of localized Strings typically used to describe
   * a property of a data type in different places in a GUI.

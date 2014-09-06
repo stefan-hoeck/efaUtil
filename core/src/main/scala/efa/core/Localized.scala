@@ -1,6 +1,7 @@
 package efa.core
 
 import scalaz.Contravariant
+import shapeless.{HList, ::}
 
 /** A type class that associates some [[efa.core.Localization]]s with objects
   * of a given type.
@@ -44,6 +45,9 @@ object Localized {
 
   def contramap[A,B](f: B ⇒ A)(implicit l: Localized[A]): Localized[B] =
     get(f andThen l.loc)
+
+  implicit def hlist[A:Localized,T <: HList]: Localized[A :: T] =
+    contramap(_.head)
 }
 
 // vim: set ts=2 sw=2 et:

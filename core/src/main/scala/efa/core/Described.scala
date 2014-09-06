@@ -1,5 +1,6 @@
 package efa.core
 
+import shapeless.{HList, ::}
 /** A type class representing a short description associated with a type.
   *
   * Typically, these descriptions can be displayed conveniently in GUIs.
@@ -78,6 +79,9 @@ object Described extends DescribedFunctions {
     new Described[B] {
       def shortDesc(b: B) = d shortDesc f(b)
     }
+
+  implicit def hlist[A:Described,T <: HList]: Described[A :: T] =
+    contramap(_.head)
 }
 
 object HtmlDescribed {

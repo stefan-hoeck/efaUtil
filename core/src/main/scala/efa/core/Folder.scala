@@ -1,8 +1,8 @@
 package efa.core
 
 import std.state.toState
-import Shapeless._
 import scalaz._, Scalaz._
+import shapeless.contrib.scalaz._
 
 /**
  * A data structure to can be used to represent an

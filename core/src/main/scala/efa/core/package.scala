@@ -55,8 +55,6 @@ package object core {
 
   def UIdL[A:UIdL]: UIdL[A] = implicitly
 
-  object Shapeless extends std.ShapelessInstances
-
   object equal {
     def contramap[A:Equal,B](f: B ⇒ A): Equal[B] = Equal equalBy f
   }

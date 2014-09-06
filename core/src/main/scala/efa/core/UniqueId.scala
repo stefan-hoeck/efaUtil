@@ -1,6 +1,7 @@
 package efa.core
 
 import scalaz._, Scalaz._
+import shapeless.{HList, ::}
 
 /** Type class that links objects of a given type to unique
   * identifiers of another type.
@@ -42,6 +43,9 @@ object UniqueId extends UniqueIdFunctions {
     : UniqueId[B,I] = new UniqueId[B,I] {
       def id(b: B) = P id get(b)
     }
+
+  implicit def hlist[A,T <: HList,I](implicit U:UniqueId[A,I])
+    : UniqueId[A :: T,I] = contramap(_.head)
 }
 
 trait UniqueIdFunctions {

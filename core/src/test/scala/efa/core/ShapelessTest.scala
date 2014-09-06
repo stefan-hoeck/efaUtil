@@ -4,6 +4,8 @@ import efa.core.Efa._
 import org.scalacheck._, Prop._
 import shapeless._, HList._
 import scalaz._, Scalaz._, scalaz.{Lens ⇒ Lensz}
+import shapeless.contrib.scalaz._
+import shapeless.contrib.scalacheck._
 
 object ShapelessTest extends Properties ("Shapeless") {
   val L = Lensz.lensId[Cc]

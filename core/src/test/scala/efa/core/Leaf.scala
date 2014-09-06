@@ -4,6 +4,7 @@ import Efa._
 import org.scalacheck._, Prop._
 import scalaz._, Scalaz._
 import shapeless.lens
+import shapeless.contrib.scalaz._
 
 case class Leaf(id: Int, name: String)
 
