@@ -1,29 +1,27 @@
 package efa.core
 
 import Efa._
+import efa.core.syntax.lens
 import org.scalacheck._, Prop._
 import scalaz._, Scalaz._
-import shapeless.{HList, HNil, ::, lens}
-import shapeless.contrib.scalaz._
+import shapeless.{HList, HNil, ::}
 
-case class Root(id: Int, name: String, branches: List[Branch])
+case class Root(id: Id, name: Name, branches: List[Branch])
 
 object Root {
-  val l = lens[Root]
-  val id = zlens(l >> 'id)
-  val name = zlens(l >> 'name)
-  val branches = zlens(l >> 'branches)
+  val l = L[Root]
+  val id = l >> 'id
+  val branches = l >> 'branches
 
-  implicit lazy val RootEqual = deriveEqual[Root]
-
-  implicit lazy val RootUId = UniqueIdL lens id
+  implicit lazy val equalInst: Equal[Root] = typeclass.equal
+  implicit lazy val uidInst: UIdL[Root] = UniqueIdL lens id
 
   implicit lazy val RootArb = Arbitrary(
     for {
-      n  ← Gen.identifier
+      n  ← Arbitrary.arbitrary[Name]
       i  ← Gen choose (1, 10)
       ls ← Gen listOfN (i, Arbitrary.arbitrary[Branch])
-    } yield Root(0, n, UniqueIdL[Branch,Int] generateIds ls)
+    } yield Root(Id(0), n, UniqueIdL[Branch,Id] generateIds ls)
   )
 
   implicit lazy val RootParent: ParentL[List,Root,Branch,Root :: HNil] =

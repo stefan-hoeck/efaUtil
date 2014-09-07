@@ -1,8 +1,8 @@
 package efa.core
 
+import efa.core.typeclass.OrderI
 import scalaz.Order
 import scalaz.std.string._
-import shapeless.contrib.scalaz._
 
 /** Provides a couple of localized Strings typically used to describe
   * a property of a data type in different places in a GUI.
@@ -32,7 +32,7 @@ case class Localization(
 }
 
 object Localization {
-  implicit val orderInst: Order[Localization] = deriveOrder
+  implicit val orderInst: Order[Localization] = efa.core.typeclass.order
 }
 
 // vim: set ts=2 sw=2 et:

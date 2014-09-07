@@ -4,12 +4,12 @@ import Default.!!!
 import org.scalacheck.Properties
 import scalaz.Equal
 import scalaz.syntax.equal._
-import shapeless.contrib.scalaz._
+import typeclass._
 
 case class DefaultCc(id: Id, name: Name)
 
 object DefaultCc {
-  implicit val equalInst: Equal[DefaultCc] = deriveEqual
+  implicit val equalInst: Equal[DefaultCc] = typeclass.equal
   implicit val defaultInst: Default[DefaultCc] = Default.derive
 }
 

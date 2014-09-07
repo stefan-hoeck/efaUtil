@@ -1,21 +1,18 @@
 package efa.core
 
 import Efa._
+import efa.core.syntax.lens
 import org.scalacheck._, Prop._
 import scalaz._, Scalaz._
-import shapeless.lens
-import shapeless.contrib.scalaz._
 
-case class Leaf(id: Int, name: String)
+case class Leaf(id: Id, name: Name)
 
 object Leaf {
-  lazy val id = zlens(lens[Leaf] >> 'id)
-
-  implicit lazy val LeafEqual = deriveEqual[Leaf]
-
-  implicit lazy val LeafUId = UniqueIdL lens id
-
-  implicit lazy val LeafArb = Arbitrary(Gen.identifier map (Leaf(0,_)))
+  val l = L[Leaf]
+  val id: Leaf @> Id = l >> 'id
+  implicit lazy val equalInst: Equal[Leaf] = typeclass.equal
+  implicit lazy val uidInst: UIdL[Leaf] = UniqueIdL lens id
+  implicit lazy val arbInst: Arbitrary[Leaf] = typeclass.arbitrary
 }
 
 // vim: set ts=2 sw=2 et:

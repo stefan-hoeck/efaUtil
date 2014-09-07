@@ -5,15 +5,16 @@ import efa.core.syntax.{nodeSeq, string}
 import scalaz._, Scalaz._, scalacheck.ScalaCheckBinding._
 import org.scalacheck._, Arbitrary.arbitrary
 import scala.xml.Node
-import shapeless.contrib.scalaz._
-import shapeless.contrib.scalacheck._
+import shapeless.contrib.scalaz.instances.{EqualI, deriveEqual}
+import shapeless.contrib.scalacheck.ArbitraryI
+import shapeless.contrib.scalacheck
 
 case class ToXmlCc(id: Id, name: Name, desc: Desc)
 
 object ToXmlCc {
   implicit val equalInst: Equal[ToXmlCc] = deriveEqual
   implicit val defaultInst: Default[ToXmlCc] = Default.derive
-  implicit val arbInst: Arbitrary[ToXmlCc] = deriveArbitrary
+  implicit val arbInst: Arbitrary[ToXmlCc] = scalacheck.deriveArbitrary
   implicit val toXmlInst: ToXml[ToXmlCc] = ToXml.derive
 }
 

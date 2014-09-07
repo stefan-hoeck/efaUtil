@@ -20,29 +20,28 @@ final case class Desc(v: String) extends AnyVal {
 }
 
 object Desc extends Function1[String,Desc] {
-
   // Type Class instances
   implicit val showInst: Show[Desc] = Show shows (_.v)
   implicit val orderInst: Order[Desc] = order.contramap(_.v)
+  implicit val orderingInst: Ordering[Desc] = orderInst.toScalaOrdering
   implicit val monoidInst: Monoid[Desc] = monoid.xmap(Desc)(_.v)
   implicit val defaultInst: Default[Desc] = Default default Desc("")
   implicit val readInst: Read[Desc] = Read map Desc
   implicit val toXmlInst: ToXml[Desc] = ToXml.readShow
+  implicit val arbInst: Arb[Desc] = 
+    Arb(Gen.listOf(descCharGen) map (cs ⇒ Desc(cs.mkString)))
 
-  private val whiteSpace = Gen oneOf (
+  private def whiteSpace = Gen oneOf (
     0x0009 toChar, //tab
     0x000A toChar, //line feed
     0x000D toChar //carriage return
   )
 
-  private val descCharGen = Gen.frequency(
+  private def descCharGen = Gen.frequency(
     (10, basicLatin),
     (2, otherPrintable),
     (1, whiteSpace)
   )
-
-  implicit val arbInst: Arb[Desc] = 
-    Arb(Gen.listOf(descCharGen) map (cs ⇒ Desc(cs.mkString)))
 }
 
 // vim: set ts=2 sw=2 et:

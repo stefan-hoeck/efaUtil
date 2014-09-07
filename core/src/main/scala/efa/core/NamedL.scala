@@ -18,6 +18,8 @@ trait NamedL[A] extends Named[A] {
 object NamedL {
   def apply[A:NamedL]: NamedL[A] = implicitly
 
+  def lens[A](l: A @> Name): NamedL[A] = new NamedL[A] { def nameL = l }
+
   def xmap[A,B](f: A ⇒ B)(g: B ⇒ A)(implicit A: NamedL[A]): NamedL[B] =
     new NamedL[B] {
       def nameL: B @> Name = A.nameL.xmapA(f)(g)

@@ -20,7 +20,6 @@ final case class Name(v: String) extends AnyVal {
 }
 
 object Name extends Function1[String,Name] {
-
   // Type Class instances
   implicit val showInst: Show[Name] = Show shows (_.v)
   implicit val orderInst: Order[Name] = order.contramap(_.v)
@@ -29,14 +28,13 @@ object Name extends Function1[String,Name] {
   implicit val readInst: Read[Name] = Read map Name
   implicit val orderingInst: Ordering[Name] = orderInst.toScalaOrdering
   implicit val toXmlInst: ToXml[Name] = ToXml.readShow
-
-  private[core] val basicLatin     = Gen choose (0x0020 toChar, 0x007E toChar)
-  private[core] val otherPrintable = Gen choose (0x00A0 toChar, 0xD7FF toChar)
-
-  private val nameCharGen = Gen.frequency((10, basicLatin),(1, otherPrintable))
-
   implicit val arbInst: Arb[Name] = 
     Arb(Gen.listOf(nameCharGen) map (cs ⇒ Name(cs.mkString)))
+
+  private[core] def basicLatin     = Gen choose (0x0020 toChar, 0x007E toChar)
+  private[core] def otherPrintable = Gen choose (0x00A0 toChar, 0xD7FF toChar)
+
+  private def nameCharGen = Gen.frequency((10, basicLatin),(1, otherPrintable))
 }
 
 // vim: set ts=2 sw=2 et:

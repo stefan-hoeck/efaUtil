@@ -13,7 +13,7 @@ trait UniqueIdL[A,I] extends UniqueId[A,I] { self ⇒
     */
   def idL: A @> I
 
-  def id (a: A) = idL get a
+  def id(a: A) = idL get a
 
   def lensed[B](lens: B @> A): UniqueIdL[B,I] = new UniqueIdL[B,I] {
     def idL = lens >=> self.idL
@@ -57,18 +57,9 @@ object UniqueIdL extends UniqueIdLFunctions {
 }
 
 trait UniqueIdLFunctions {
+  def idL[A]: UniqueIdL[A, A] = lens(Lenses.L)
 
-  def intIdL[A] (l: A @> Int): IntIdL[A] = lens (l)
-
-  def longIdL[A] (l: A @> Long): LongIdL[A] = lens (l)
-
-  def stringIdL[A] (l: A @> String): StringIdL[A] = lens (l)
-
-  def idL[A]: UniqueIdL[A, A] = lens (Lens.lensId)
-
-  def lens[A,I](l: A @> I): UniqueIdL[A,I] = new UniqueIdL[A,I] {
-    val idL = l
-  }
+  def lens[A,I](l: A @> I): UniqueIdL[A,I] = new UniqueIdL[A,I]{ val idL = l }
 }
 
 // vim: set ts=2 sw=2 et:
