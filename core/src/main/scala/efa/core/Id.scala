@@ -5,7 +5,9 @@ import org.scalacheck.{Arbitrary ⇒ Arb, Gen}
 import scalaz.{Show, Enum, Monoid}
 import scalaz.std.anyVal._
 
-final case class Id(val v: Long) extends AnyVal
+final case class Id(val v: Long) extends AnyVal {
+  override def toString = v.toString
+}
 
 object Id extends Function1[Long,Id] {
   // Type Class instances

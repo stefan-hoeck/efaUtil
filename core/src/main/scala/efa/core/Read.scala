@@ -61,22 +61,27 @@ object Read extends ReadFunctions {
 }
 
 trait ReadSpecs {
-  import org.scalacheck.Prop, Prop._
+  import org.scalacheck.{Prop, Arbitrary}, Prop._
   import efa.core.syntax.string
   import efa.core.std.prop._
   
-  def showRead[A:Show:Read:Equal]: A ⇒ Prop =
-    a ⇒ compareP(a, a.shows.read[A])
+  def showRead[A:Show:Read:Equal:Arbitrary]: Prop = Prop forAll { a: A ⇒ 
+    compareP(a, a.shows.read[A])
+  }
 
-  def toStringRead[A:Read:Equal]: A ⇒ Prop =
-    a ⇒ compareP(a, a.toString.read[A])
+  def toStringRead[A:Read:Equal:Arbitrary]: Prop = Prop forAll { a: A ⇒ 
+    compareP(a, a.toString.read[A])
+  }
 
-  def localizedRead[A:Localized:Read:Equal]: A ⇒ Prop =
-    a ⇒ Localized[A].names(a) foldMap (s ⇒ compareP(a, s.read[A]))
+  def localizedRead[A:Localized:Read:Equal:Arbitrary]: Prop = forAll { a: A ⇒ 
+    Localized[A].names(a) foldMap (s ⇒ compareP(a, s.read[A]))
+  }
 
-  def readAll[A:Read]: String ⇒ Prop = s ⇒ try{
-    val r = s.read[A]; true
-  } catch { case util.control.NonFatal(e) ⇒ false }
+  def readAll[A:Read]: Prop = forAll { s: String ⇒ 
+    try{
+      val r = s.read[A]; true
+    } catch { case util.control.NonFatal(e) ⇒ false }
+  }
 }
 
 object ReadSpecs extends ReadSpecs

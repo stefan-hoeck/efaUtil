@@ -8,39 +8,39 @@ object ReadTest
   extends Properties("Read")
   with ReadSpecs {
 
-  property("readInt") = Prop forAll showRead[Int]
+  property("readInt") = showRead[Int]
 
-  property("readLong") = Prop forAll showRead[Long]
+  property("readLong") = showRead[Long]
 
-  property("readShort") = Prop forAll showRead[Short]
+  property("readShort") = showRead[Short]
 
-  property("readByte") = Prop forAll showRead[Byte]
+  property("readByte") = showRead[Byte]
 
-  property("readFloat") = Prop forAll showRead[Float]
+  property("readFloat") = showRead[Float]
 
-  property("readDouble") = Prop forAll showRead[Double]
+  property("readDouble") = showRead[Double]
 
-  property("readBoolean") = Prop forAll showRead[Boolean]
+  property("readBoolean") = showRead[Boolean]
 
-  property("intReadFail") = Prop forAll readAll[Int]
+  property("intReadFail") = readAll[Int]
 
-  property("longReadFail") = Prop forAll readAll[Long]
+  property("longReadFail") = readAll[Long]
 
-  property("shortReadFail") = Prop forAll readAll[Short]
+  property("shortReadFail") = readAll[Short]
 
-  property("byteReadFail") = Prop forAll readAll[Byte]
+  property("byteReadFail") = readAll[Byte]
 
-  property("floatReadFail") = Prop forAll readAll[Float]
+  property("floatReadFail") = readAll[Float]
 
-  property("doubleReadFail") = Prop forAll readAll[Double]
+  property("doubleReadFail") = readAll[Double]
 
-  property("booleanReadFail") = Prop forAll readAll[Boolean]
+  property("booleanReadFail") = readAll[Boolean]
 
   import TestLoc._
 
-  property("localizedRead") = Prop forAll localizedRead[TestLoc]
+  property("localizedRead") = localizedRead[TestLoc]
 
-  property("localizedReadFail") = Prop forAll readAll[TestLoc]
+  property("localizedReadFail") = readAll[TestLoc]
 } 
 
 // Stubs to test the properties of LocalizedParser

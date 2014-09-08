@@ -137,10 +137,11 @@ object ToXml {
 
 trait ToXmlSpecs {
   import Efa._, syntax._
-  import org.scalacheck.Prop
+  import org.scalacheck.{Prop, Arbitrary}
 
-  def writeReadXml[A:Equal:ToXml]: A ⇒ Prop = a ⇒
+  def writeReadXml[A:Equal:ToXml:Arbitrary]: Prop = Prop forAll { a: A ⇒
     compareP(a, (("tag" xml a).read[A]))
+  }
 }
 
 object ToXmlSpecs extends ToXmlSpecs
