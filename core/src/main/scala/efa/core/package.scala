@@ -55,6 +55,12 @@ package object core {
 
   def UIdL[A:UIdL]: UIdL[A] = implicitly
 
+  def uid[A](get: A ⇒ Id): UId[A] = UniqueId get get
+
+  def uidl[A](l: A @> Id): UIdL[A] = UniqueIdL lens l
+
+  def idL[A]: A @> A = scalaz.Lens.lensId
+
   object equal {
     def contramap[A:Equal,B](f: B ⇒ A): Equal[B] = Equal equalBy f
   }
