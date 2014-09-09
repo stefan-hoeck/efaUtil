@@ -53,7 +53,7 @@ trait ToXml[A] {
     :A = readTagD(ns, tag).fold(_ ⇒ A.zero, identity)
 }
 
-object ToXml {
+object ToXml extends ToXmlSpecs {
   @inline def apply[A:ToXml]: ToXml[A] = implicitly
 
   val defaultEncoding = "UTF-8"
@@ -139,11 +139,9 @@ trait ToXmlSpecs {
   import Efa._, syntax._
   import org.scalacheck.{Prop, Arbitrary}
 
-  def writeReadXml[A:Equal:ToXml:Arbitrary]: Prop = Prop forAll { a: A ⇒
+  def laws[A:Equal:ToXml:Arbitrary]: Prop = Prop forAll { a: A ⇒
     compareP(a, (("tag" xml a).read[A]))
   }
 }
-
-object ToXmlSpecs extends ToXmlSpecs
 
 // vim: set ts=2 sw=2 et:

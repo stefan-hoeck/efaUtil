@@ -19,21 +19,21 @@ object ToXmlCc {
 }
 
 object ToXmlTest extends Properties("ToXml") with ToXmlSpecs {
-  property("stringXml") = writeReadXml[String]
+  property("stringXml") = laws[String]
 
-  property("intXml") = writeReadXml[Int]
+  property("intXml") = laws[Int]
 
-  property("longXml") = writeReadXml[Long]
+  property("longXml") = laws[Long]
 
-  property("doubleXml") = writeReadXml[Double]
+  property("doubleXml") = laws[Double]
 
-  property("booleanXml") = writeReadXml[Boolean]
+  property("booleanXml") = laws[Boolean]
 
-  property("derive") = writeReadXml[ToXmlCc]
+  property("derive") = laws[ToXmlCc]
 
   implicit val toXmlListInt = ToXml.listToXml[Int]("anInt")
 
-  property("listToXml") = writeReadXml[List[Int]]
+  property("listToXml") = laws[List[Int]]
 
   implicit val TestClassEqual = Equal.equalA[TestClass]
 

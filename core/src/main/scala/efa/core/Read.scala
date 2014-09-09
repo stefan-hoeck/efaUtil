@@ -52,7 +52,7 @@ trait ReadFunctions {
   }
 }
 
-object Read extends ReadFunctions {
+object Read extends ReadFunctions with ReadSpecs {
   @inline def apply[A:Read]: Read[A] = implicitly
 
   def map[A,B](f: A ⇒ B)(implicit A:Read[A]): Read[B] = new Read[B] {
@@ -61,9 +61,25 @@ object Read extends ReadFunctions {
 }
 
 trait ReadSpecs {
-  import org.scalacheck.{Prop, Arbitrary}, Prop._
+  import org.scalacheck.{Prop, Arbitrary, Properties}, Prop._
   import efa.core.syntax.string
   import efa.core.std.prop._
+
+  def laws[A:Read:Equal:Arbitrary] = new Properties("read") {
+    property("toStringRead") = toStringRead[A]
+    property("readAll") = readAll[A]
+  }
+
+  def showLaws[A:Show:Read:Equal:Arbitrary] = new Properties("readShow") {
+    include(laws[A])
+    property("showRead") = showRead[A]
+  }
+
+  def localizeLaws[A:Localized:Show:Read:Equal:Arbitrary] =
+    new Properties("readLocalize") {
+      include(showLaws[A])
+      property("localizedRead") = localizedRead[A]
+    }
   
   def showRead[A:Show:Read:Equal:Arbitrary]: Prop = Prop forAll { a: A ⇒ 
     compareP(a, a.shows.read[A])

@@ -4,10 +4,8 @@ import org.scalacheck.Properties
 import scalaz.scalacheck.ScalazProperties.{order ⇒ orderz, monoid ⇒ monoidz}
 
 object NameTest extends Properties("Name") {
-  property("readShow") = ReadSpecs.showRead[Name]
-  property("toStringRead") = ReadSpecs.toStringRead[Name]
-  property("readAll") = ReadSpecs.readAll[Name]
-  property("toXml") = ToXmlSpecs.writeReadXml[Name]
+  property("readShow") = Read.showLaws[Name]
+  property("toXml") = ToXml.laws[Name]
   property("enum laws") =  orderz.laws[Name]
   property("monoid laws") = monoidz.laws[Name]
 }
