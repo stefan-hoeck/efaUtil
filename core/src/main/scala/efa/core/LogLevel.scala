@@ -1,6 +1,6 @@
 package efa.core
 
-import scalaz.{Enum, Order}
+import scalaz.{Enum, Order, Show}
 import scalaz.std.anyVal._
 import scalaz.syntax.std.option._
 import scalaz.syntax.nel._
@@ -32,7 +32,7 @@ object Level {
   case object Error extends Level (10000){ def succ = Trace; def pred = Warning}
 
   lazy val values = List[Level] (Trace, Debug, Info, Warning, Error)
-  lazy val map = values map (_.name) zip values toMap
+  lazy val map = values flatMap (l ⇒ List(l.name → l, l.toString → l)) toMap
 
   implicit val arbInst: Arb[Level] = Arb(Gen oneOf values)
 
@@ -48,6 +48,8 @@ object Level {
     override def read (s: String): ValRes[Level] =
       Level.map get s toSuccess (loc logLevelMsg s wrapNel)
   }
+
+  implicit val showInst: Show[Level] = Show shows (_.name)
 }
 
 // vim: set ts=2 sw=2 et:

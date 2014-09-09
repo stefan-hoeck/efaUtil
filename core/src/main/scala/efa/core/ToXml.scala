@@ -137,10 +137,12 @@ object ToXml extends ToXmlSpecs {
 
 trait ToXmlSpecs {
   import Efa._, syntax._
-  import org.scalacheck.{Prop, Arbitrary}
+  import org.scalacheck.{Prop, Arbitrary, Properties}
 
-  def laws[A:Equal:ToXml:Arbitrary]: Prop = Prop forAll { a: A ⇒
-    compareP(a, (("tag" xml a).read[A]))
+  def laws[A:Equal:ToXml:Arbitrary] = new Properties("toXml") {
+    property("toXml / fromXml identity") = Prop forAll { a: A ⇒
+      compareP(a, (("tag" xml a).read[A]))
+    }
   }
 }
 

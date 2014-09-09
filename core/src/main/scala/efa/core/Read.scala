@@ -66,19 +66,19 @@ trait ReadSpecs {
   import efa.core.std.prop._
 
   def laws[A:Read:Equal:Arbitrary] = new Properties("read") {
-    property("toStringRead") = toStringRead[A]
-    property("readAll") = readAll[A]
+    property("read / toString identity") = toStringRead[A]
+    property("read is total") = readAll[A]
   }
 
   def showLaws[A:Show:Read:Equal:Arbitrary] = new Properties("readShow") {
     include(laws[A])
-    property("showRead") = showRead[A]
+    property("show / read identity") = showRead[A]
   }
 
-  def localizeLaws[A:Localized:Show:Read:Equal:Arbitrary] =
+  def localizedLaws[A:Localized:Show:Read:Equal:Arbitrary] =
     new Properties("readLocalize") {
       include(showLaws[A])
-      property("localizedRead") = localizedRead[A]
+      property("localized / read identity") = localizedRead[A]
     }
   
   def showRead[A:Show:Read:Equal:Arbitrary]: Prop = Prop forAll { a: A ⇒ 
@@ -99,7 +99,5 @@ trait ReadSpecs {
     } catch { case util.control.NonFatal(e) ⇒ false }
   }
 }
-
-object ReadSpecs extends ReadSpecs
 
 // vim: set ts=2 sw=2 et:
