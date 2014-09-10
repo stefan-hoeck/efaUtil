@@ -6,7 +6,7 @@ import shapeless.{HList, ::}
 /** A type class that associates some [[efa.core.Localization]]s with objects
   * of a given type.
   */
-trait Localized[A] { self ⇒
+trait Localized[A] extends Named[A] with Described[A] { self ⇒
   def loc(a: A): Localization
 
   def locName(a: A): String = loc(a).locName
@@ -16,6 +16,10 @@ trait Localized[A] { self ⇒
   def desc(a: A): String = loc(a).desc
 
   def names(a: A): List[String] = loc(a).names
+
+  def shortDesc(a: A): Desc = Desc(desc(a))
+
+  def name(a: A): Name = Name(locName(a))
 }
 
 /** A helper-trait for code reuse in classes that have a
@@ -24,6 +28,7 @@ trait Localized[A] { self ⇒
   * Just mix-in this trait to conveniently get direct access to
   * `locName`, `desc`, and `shortName`.
   */
+@deprecated("Use syntax.localized instead", "2.3.0")
 trait IsLocalized {
   def loc: Localization
   def locName = loc.locName

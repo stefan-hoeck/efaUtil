@@ -6,7 +6,7 @@ import shapeless.{HList, ::}
   * Typically, these descriptions can be displayed conveniently in GUIs.
   */
 trait Described[A] { self ⇒ 
-  def shortDesc (a: A): Desc
+  def shortDesc(a: A): Desc
 }
 
 /** This version of Described uses html to format its descriptions.
@@ -19,7 +19,7 @@ trait HtmlDescribed[A] extends Described[A] with Named[A] { self ⇒
 
   /** Returns a list of html tag in the form of `(String,String)`-pairs.
     */
-  def tags (a: A): Tags
+  def tags(a: A): Tags
 
   override def shortDesc(a: A): Desc =
     Described namePlusTags (name(a), tags (a): _*)

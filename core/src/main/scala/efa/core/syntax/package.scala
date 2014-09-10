@@ -8,14 +8,31 @@ import scalaz.@>
 import std.lookup
 
 package object syntax {
-  implicit class localized[A:Localized](val self: A) {
-    private def F: Localized[A] = implicitly
+  implicit class id[A](val self: A) extends AnyVal {
+    def loc(implicit F: Localized[A]): Localization = F loc self
 
-    def loc: Localization = F loc self
-    def locName: String = F locName self
-    def shortName: String = F shortName self
-    def desc: String = F desc self
-    def names: List[String] = F names self
+    def locName(implicit F: Localized[A]): String = F locName self
+
+    def shortName(implicit F: Localized[A]): String = F shortName self
+
+    def desc(implicit F: Localized[A]): String = F desc self
+
+    def names(implicit F: Localized[A]): List[String] = F names self
+
+    def name(implicit F: Named[A]): Name = F name self
+
+    def shortDesc(implicit F: Described[A]): Desc = F shortDesc self
+
+    def setName(n: Name)(implicit F: NamedL[A]): A = F.nameL.set(self, n)
+
+    def modName(f: Name ⇒ Name)(implicit F: NamedL[A]): A =
+      F.nameL.mod(f, self)
+
+    def id[I](implicit F: UniqueId[A,I]): I = F id self
+
+    def setId[I](i: I)(implicit F: UniqueIdL[A,I]): A = F.idL.set(self, i)
+
+    def modId[I](f: I ⇒ I)(implicit F: UniqueIdL[A,I]): A = F.idL.mod(f, self)
   }
 
   implicit class lookup(val self: Lookup) extends AnyVal {

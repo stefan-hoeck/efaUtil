@@ -39,27 +39,27 @@ package object core {
 
   type StringIdL[A] = UniqueIdL[A,String]
 
-  def IntId[A:IntId]: IntId[A] = implicitly
+  @inline def IntId[A:IntId]: IntId[A] = implicitly
 
-  def LongId[A:LongId]: LongId[A] = implicitly
+  @inline def LongId[A:LongId]: LongId[A] = implicitly
 
-  def StringId[A:StringId]: StringId[A] = implicitly
+  @inline def StringId[A:StringId]: StringId[A] = implicitly
 
-  def UId[A:UId]: UId[A] = implicitly
+  @inline def UId[A:UId]: UId[A] = implicitly
 
-  def IntIdL[A:IntIdL]: IntIdL[A] = implicitly
+  @inline def IntIdL[A:IntIdL]: IntIdL[A] = implicitly
 
-  def LongIdL[A:LongIdL]: LongIdL[A] = implicitly
+  @inline def LongIdL[A:LongIdL]: LongIdL[A] = implicitly
 
-  def StringIdL[A:StringIdL]: StringIdL[A] = implicitly
+  @inline def StringIdL[A:StringIdL]: StringIdL[A] = implicitly
 
-  def UIdL[A:UIdL]: UIdL[A] = implicitly
+  @inline def UIdL[A:UIdL]: UIdL[A] = implicitly
 
-  def uid[A](get: A ⇒ Id): UId[A] = UniqueId get get
+  @inline def uid[A](get: A ⇒ Id): UId[A] = UniqueId get get
 
-  def uidl[A](l: A @> Id): UIdL[A] = UniqueIdL lens l
+  @inline def uidl[A](l: A @> Id): UIdL[A] = UniqueIdL lens l
 
-  def idL[A]: A @> A = scalaz.Lens.lensId
+  @inline def idL[A]: A @> A = scalaz.Lens.lensId
 
   object equal {
     def contramap[A:Equal,B](f: B ⇒ A): Equal[B] = Equal equalBy f

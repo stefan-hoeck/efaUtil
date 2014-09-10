@@ -4,7 +4,7 @@ import scala.language.experimental.macros
 import scalaz.{Monoid, Functor}
 import shapeless.{ProductTypeClass, HNil, HList, ::, GenericMacros}
 
-/** A type class that represents a default value for a given type.
+/** A type clars that represents a default value for a given type.
   */
 trait Default[A] {
   val default: A
