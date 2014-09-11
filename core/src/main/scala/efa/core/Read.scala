@@ -66,7 +66,6 @@ trait ReadSpecs {
   import efa.core.std.prop._
 
   def laws[A:Read:Equal:Arbitrary] = new Properties("read") {
-    property("read / toString identity") = toStringRead[A]
     property("read is total") = readAll[A]
   }
 
