@@ -2,7 +2,6 @@ package efa.core
 
 import std.state.toState
 import scalaz._, Scalaz._
-import shapeless.contrib.scalaz._
 
 /**
  * A data structure to can be used to represent an
@@ -123,7 +122,14 @@ object Folder {
     fSt(f) apply 0
   }
 
-  implicit def FolderEqual[A:Equal,B:Equal]: Equal[Folder[A,B]] = deriveEqual
+  implicit def FolderEqual[A:Equal,B:Equal]: Equal[Folder[A,B]] = new Equal[Folder[A,B]] {
+    def equal(a1: Folder[A,B], a2: Folder[A,B]): Boolean =
+      (a1.data === a2.data) &&
+      (a1.label === a2.label) &&
+      (a1.folders.length === a2.folders.length) &&
+      (a1.folders.zip(a2.folders).forall{ case (a,b) ⇒ equal(a,b) })
+      
+  }
 
   implicit def FolderTraverse[R]: Traverse[({type λ[α]=Folder[α,R]})#λ] =
     new Traverse[({type λ[α]=Folder[α,R]})#λ] {
@@ -137,7 +143,11 @@ object Folder {
       }
     }
 
-  implicit def FolderMonoid[A,B:Monoid]: Monoid[Folder[A,B]] = deriveMonoid
+//  implicit def FolderMonoid[A,B:Monoid]: Monoid[Folder[A,B]] = new Monoid[Folder[A,B]] {
+//    val M = Monoid[B]
+//    def zero = Folder(Stream.empty, Stream.empty, M.zero)
+//    def append
+//  }
 }
 
 // vim: set ts=2 sw=2 et:

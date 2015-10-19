@@ -1,45 +1,32 @@
 package efa.core
 
 import org.scalacheck.{Shrink, Arbitrary}
-import scala.language.experimental.macros
 import scalaz.{Semigroup, Monoid, Equal, Show, Order}
-import shapeless.{ProductTypeClass, TypeClass, GenericMacros}
-import shapeless.contrib.scalaz.instances
-import shapeless.contrib.scalacheck
 
 trait TypeClassInstances {
-  implicit val ArbitraryI: TypeClass[Arbitrary] = scalacheck.ArbitraryI
-  implicit val ShrinkI: TypeClass[Shrink] = scalacheck.ShrinkI
-  implicit val SemigroupI: ProductTypeClass[Semigroup] = instances.SemigroupI
-  implicit val MonoidI: ProductTypeClass[Monoid] = instances.MonoidI
-  implicit val EqualI: TypeClass[Equal] = instances.EqualI
-  implicit val ShowI: TypeClass[Show] = instances.ShowI
-  implicit val OrderI: TypeClass[Order] = instances.OrderI
 }
 
-trait TypeClassFunctions {
-  def arbitrary[T](implicit ev: TypeClass[Arbitrary]): Arbitrary[T] =
-    macro GenericMacros.deriveInstance[Arbitrary, T]
-
-  def shrink[T](implicit ev: TypeClass[Shrink]): Shrink[T] =
-    macro GenericMacros.deriveInstance[Shrink, T]
-
-  def semigroup[T](implicit ev: ProductTypeClass[Semigroup]): Semigroup[T] =
-    macro GenericMacros.deriveProductInstance[Semigroup, T]
-
-  def monoid[T](implicit ev: ProductTypeClass[Monoid]): Monoid[T] =
-    macro GenericMacros.deriveProductInstance[Monoid, T]
-
-  def equal[T](implicit ev: TypeClass[Equal]): Equal[T] =
-    macro GenericMacros.deriveInstance[Equal, T]
-
-  def order[T](implicit ev: TypeClass[Order]): Order[T] =
-    macro GenericMacros.deriveInstance[Order, T]
-
-  def show[T](implicit ev: TypeClass[Show]): Show[T] =
-    macro GenericMacros.deriveInstance[Show, T]
+trait TypeClassFunctions extends shapeless.contrib.scalaz.Instances {
+//  def arbitrary[T,G](implicit gen: Generic.Aux[T, G], cg: Lazy[Arbitrary[G]]): Arbitrary[T] =
+//    ArbitraryDerivedOrphans.deriveInstance
+//
+//  def semigroup[T,G](implicit gen: Generic.Aux[T, G], cg: Lazy[Semigroup[G]]): Semigroup[T] =
+//    SemigroupDerivedOrphans.deriveInstance
+//
+//  def monoid[T,G](implicit gen: Generic.Aux[T, G], cg: Lazy[Monoid[G]]): Monoid[T] =
+//    MonoidDerivedOrphans.deriveInstance
+//
+//  def equal[T,G](implicit gen: Generic.Aux[T, G], cg: Lazy[Equal[G]]): Equal[T] =
+//    EqualDerivedOrphans.deriveInstance
+//
+//  def order[T,G](implicit gen: Generic.Aux[T, G], cg: Lazy[Order[G]]): Order[T] =
+//    OrderDerivedOrphans.deriveInstance
+//
+//  def show[T,G](implicit gen: Generic.Aux[T, G], cg: Lazy[Show[G]]): Show[T] =
+//    ShowDerivedOrphans.deriveInstance
 }
 
-object typeclass extends TypeClassInstances with TypeClassFunctions
+object typeclass extends TypeClassInstances with TypeClassFunctions {
+}
 
 // vim: set ts=2 sw=2 et:

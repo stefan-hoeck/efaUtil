@@ -2,10 +2,12 @@ package efa.io
 
 import efa.core.{ToXml, Name}
 import efa.core.std.anyVal._
-import efa.core.typeclass._
 import org.scalacheck.Arbitrary
 import scalaz.Equal
 import scalaz.std.anyVal._
+import shapeless._
+import shapeless.contrib.scalacheck._
+import efa.core.typeclass._
 
 case class TestClass(name: Name, int: Int, bool: Boolean)
 

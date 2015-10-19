@@ -1,9 +1,7 @@
 package efa.core
 
-import scala.language.experimental.macros
 import scala.xml.{Node, MetaData, Null, NamespaceBinding, TopScope, Text, XML}
 import scalaz._, Scalaz._
-import shapeless.{LabelledProductTypeClass, HNil, HList, GenericMacros, :: ⇒ HCons}
 
 /** Type class that provides referentially transparent reading from
   * and writing to xml-format.
@@ -72,31 +70,6 @@ object ToXml extends ToXmlSpecs {
 
   def readShow[A:Read:Show]: ToXml[A] = read(_.shows)
 
-  implicit val productTCInst: LabelledProductTypeClass[ToXml] =
-    new LabelledProductTypeClass[ToXml] {
-      val emptyProduct: ToXml[HNil] = new ToXml[HNil]{
-        def toXml(h: HNil): Seq[Node] = Nil
-        def fromXml(ns: Seq[Node]): ValRes[HNil] = HNil.success
-      }
-
-      def project[F,G](inst: ⇒ ToXml[G], to: F ⇒ G, from: G ⇒ F): ToXml[F] =
-        new ToXml[F] {
-          def toXml(f: F) = inst toXml to(f)
-          def fromXml(ns: Seq[Node]) = inst fromXml ns map from
-        }
-
-      def product[H,T <: HList](lbl: String, ch: ToXml[H], ct: ToXml[T])
-        : ToXml[HCons[H,T]] = new ToXml[HCons[H,T]] {
-          def toXml(ht: HCons[H,T]): Seq[Node] =
-            ch.writeTag(lbl, ht.head) ++ ct.toXml(ht.tail)
-
-          def fromXml(ns: Seq[Node]): ValRes[HCons[H,T]] = 
-            ^(ch.readTag(ns, lbl), ct.fromXml(ns))(HCons.apply)
-        }
-    }
-
-  def derive[A](implicit ev: LabelledProductTypeClass[ToXml]): ToXml[A] =
-    macro GenericMacros.deriveLabelledProductInstance[ToXml, A]
 
   def listToXml[A:ToXml](label: String) = new ToXml[List[A]] {
     private[this] val x = seqToXml[A] (label)

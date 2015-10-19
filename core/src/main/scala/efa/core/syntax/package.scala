@@ -78,24 +78,24 @@ package object syntax {
     def xml[A:ToXml](a: A): scala.xml.Node = ToXml[A] writeTag (self, a)
   }
 
-  implicit class lens[C,F](val self: C @> F) extends AnyVal {
-    import shapeless._
-    import ops.hlist.{ At, Init, Last, Prepend, Selector, ReplaceAt,
-                       Replacer, Tupler }
-    import ops.record.{ Selector => RSelector, Updater }
-    import record.{ FieldType, field }
-
-    type Gen[O] = LabelledGeneric.Aux[F, O]
-    def >>[Out0 <: HList : Gen, V](k: Witness)(implicit s: RSelector.Aux[Out0, k.T, V], u: Updater.Aux[Out0, FieldType[k.T, V], Out0]) = {
-      import shapeless.syntax
-      val gen = implicitly[LabelledGeneric.Aux[F, Out0]]
-
-      scalaz.Lens.lensg[C, V](
-        (c: C) ⇒ (f: V) ⇒  self.set(c, gen.from(record.recordOps(gen.to(self.get(c))).updated(k, f))),
-        (c: C) ⇒ s(gen.to(self.get(c)))
-      )
-    }
-  }
+//  implicit class lens[C,F](val self: C @> F) extends AnyVal {
+//    import shapeless._
+//    import ops.hlist.{ At, Init, Last, Prepend, Selector, ReplaceAt,
+//                       Replacer, Tupler }
+//    import ops.record.{ Selector => RSelector, Updater }
+//    import record.{ FieldType, field }
+//
+//    type Gen[O] = LabelledGeneric.Aux[F, O]
+//    def >>[Out0 <: HList : Gen, V](k: Witness)(implicit s: RSelector.Aux[Out0, k.T, V], u: Updater.Aux[Out0, FieldType[k.T, V], Out0]) = {
+//      import shapeless.syntax
+//      val gen = implicitly[LabelledGeneric.Aux[F, Out0]]
+//
+//      scalaz.Lens.lensg[C, V](
+//        (c: C) ⇒ (f: V) ⇒  self.set(c, gen.from(record.recordOps(gen.to(self.get(c))).updated(k, f))),
+//        (c: C) ⇒ s(gen.to(self.get(c)))
+//      )
+//    }
+//  }
 }
 
 

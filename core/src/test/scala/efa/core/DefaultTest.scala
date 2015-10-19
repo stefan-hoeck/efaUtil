@@ -4,13 +4,14 @@ import Default.!!!
 import org.scalacheck.Properties
 import scalaz.Equal
 import scalaz.syntax.equal._
-import typeclass._
+import shapeless._
+import efa.core.typeclass._
 
 case class DefaultCc(id: Id, name: Name)
 
 object DefaultCc {
-  implicit val equalInst: Equal[DefaultCc] = typeclass.equal
-  implicit val defaultInst: Default[DefaultCc] = Default.derive
+  implicit val equalInst: Equal[DefaultCc] = efa.core.typeclass.equal
+  implicit val defaultInst: Default[DefaultCc] = efa.core.Default.deriveInstance
 }
 
 object DefaultTest extends Properties("Default") {

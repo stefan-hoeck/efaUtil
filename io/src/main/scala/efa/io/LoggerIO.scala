@@ -31,7 +31,7 @@ sealed trait LoggerIO {
 
   def logDis[A](i: LogDisIO[A], default: A): IO[A] = logDisV(i) | default
     
-  def logDisD[A:Default](i: LogDisIO[A]): IO[A] = logDis(i, !!!)
+  def logDisD[A:Default](i: LogDisIO[A]): IO[A] = logDis(i, !!![A])
     
   def logDisZ[A:Monoid](i: LogDisIO[A]): IO[A] = logDis(i, ∅[A])
 
