@@ -5,17 +5,31 @@ import efa.core.syntax.{nodeSeq, string}
 import scalaz._, Scalaz._, scalacheck.ScalaCheckBinding._
 import org.scalacheck._, Arbitrary.arbitrary
 import scala.xml.Node
-import shapeless.contrib.scalacheck.ArbitraryI
-import shapeless.contrib.scalacheck
-import efa.core.typeclass._
 
 case class ToXmlCc(id: Id, name: Name, desc: Desc)
 
 object ToXmlCc {
-  implicit val equalInst: Equal[ToXmlCc] = equal
-  implicit val defaultInst: Default[ToXmlCc] = Default.deriveInstance
-  implicit val arbInst: Arbitrary[ToXmlCc] = arbitrary
-  implicit val toXmlInst: ToXml[ToXmlCc] = ToXml.derive
+  implicit val equalInst: Equal[ToXmlCc] = Equal.equalA
+  implicit val defaultInst: Default[ToXmlCc] =
+    Default default ToXmlCc(!!![Id], !!![Name], !!![Desc])
+  implicit val arbInst: Arbitrary[ToXmlCc] = Arbitrary(
+    ^^(arbitrary[Id],
+       arbitrary[Name],
+       arbitrary[Desc]
+      )(ToXmlCc.apply)
+  )
+  implicit val toXmlInst: ToXml[ToXmlCc] = new ToXml[ToXmlCc]{
+    def toXml(tc: ToXmlCc) =
+      ("id" xml tc.id) ++
+      ("name" xml tc.name) ++
+      ("desc" xml tc.desc)
+
+    def fromXml(ns: Seq[Node]) = ^^(
+      ns.readTag[Id]("id"),
+      ns.readTag[Name]("name"),
+      ns.readTag[Desc]("desc")
+    )(ToXmlCc.apply)
+  }
 }
 
 object ToXmlTest extends Properties("ToXml") with ToXmlSpecs {

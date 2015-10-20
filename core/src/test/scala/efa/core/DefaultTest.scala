@@ -10,8 +10,9 @@ import efa.core.typeclass._
 case class DefaultCc(id: Id, name: Name)
 
 object DefaultCc {
-  implicit val equalInst: Equal[DefaultCc] = efa.core.typeclass.equal
-  implicit val defaultInst: Default[DefaultCc] = efa.core.Default.deriveInstance
+  implicit val equalInst: Equal[DefaultCc] = Equal.equalA
+  implicit val defaultInst: Default[DefaultCc] = 
+    Default default DefaultCc(!!![Id],!!![Name])
 }
 
 object DefaultTest extends Properties("Default") {
