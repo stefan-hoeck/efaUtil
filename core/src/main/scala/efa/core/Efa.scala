@@ -8,7 +8,5 @@ object Efa
   with std.AllInstances
   with DefaultFunctions
   with Lenses
-  with TypeClassInstances
-  with TypeClassFunctions
 
 // vim: set ts=2 sw=2 et:

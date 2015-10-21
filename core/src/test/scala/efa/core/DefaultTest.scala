@@ -4,8 +4,6 @@ import Default.!!!
 import org.scalacheck.Properties
 import scalaz.Equal
 import scalaz.syntax.equal._
-import shapeless._
-import efa.core.typeclass._
 
 case class DefaultCc(id: Id, name: Name)
 
