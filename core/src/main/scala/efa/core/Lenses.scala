@@ -31,11 +31,9 @@ trait Lenses {
   def traverseLookup[F[_]:Traverse,A:Equal](a: A): F[A] @?> A = 
     traverseLookupBy { a ≟ _ }
 
-  @deprecated("We hope to be able to do without shapeless lenses", "2.3.0")
   def zlens[A,B](l: shapeless.Lens[A,B]): A @> B =
     scalaz.LensFamily.lensg(l.set, l.get)
 
-  @deprecated("We hope to be able to do without shapeless lenses", "2.3.0")
   def slens[A,B](l: A @> B): shapeless.Lens[A, B] =
     new shapeless.Lens[A, B] {
       def get(a: A): B = l.get(a)
