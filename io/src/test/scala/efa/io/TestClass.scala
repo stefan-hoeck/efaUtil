@@ -7,12 +7,12 @@ import scala.xml.Node
 import scalaz.Equal
 import scalaz.{Scalaz, Equal}, Scalaz._, scalaz.scalacheck.ScalaCheckBinding._
 
-case class TestClass(name: Name, int: Int, bool: Boolean)
+case class TestClass(name: String, int: Int, bool: Boolean)
 
 object TestClass {
   implicit val equalInst: Equal[TestClass] = Equal.equalA
   implicit val arbInst: Arbitrary[TestClass] = Arbitrary(
-    ^^(arbitrary[Name], 
+    ^^(Gen.identifier,
        arbitrary[Int],
        arbitrary[Boolean]
       )(TestClass.apply)
@@ -24,7 +24,7 @@ object TestClass {
       ("bool" xml tc.bool)
 
     def fromXml(ns: Seq[Node]) =
-      ^^(ns.readTag[Name]("name"),
+      ^^(ns.readTag[String]("name"),
          ns.readTag[Int]("int"),
          ns.readTag[Boolean]("bool")
         )(TestClass.apply)

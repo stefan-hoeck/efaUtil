@@ -19,13 +19,13 @@ package object syntax {
 
     def names(implicit F: Localized[A]): List[String] = F names self
 
-    def name(implicit F: Named[A]): Name = F name self
+    def name(implicit F: Named[A]): String = F name self
 
-    def shortDesc(implicit F: Described[A]): Desc = F shortDesc self
+    def shortDesc(implicit F: Described[A]): String = F shortDesc self
 
-    def setName(n: Name)(implicit F: NamedL[A]): A = F.nameL.set(self, n)
+    def setName(n: String)(implicit F: NamedL[A]): A = F.nameL.set(self, n)
 
-    def modName(f: Name ⇒ Name)(implicit F: NamedL[A]): A =
+    def modName(f: String ⇒ String)(implicit F: NamedL[A]): A =
       F.nameL.mod(f, self)
 
     def id[I](implicit F: UniqueId[A,I]): I = F id self

@@ -4,15 +4,15 @@ import Efa._
 import org.scalacheck._, Prop._, Arbitrary.arbitrary
 import scalaz.{Equal, @>, Lens, Scalaz}, Scalaz._, scalaz.scalacheck.ScalaCheckBinding._
 
-case class Leaf(id: Id, name: Name)
+case class Leaf(id: Int, name: String)
 
 object Leaf {
-  val id: Leaf @> Id = Lens.lensu((a,b) ⇒ a copy (id = b), _.id)
+  val id: Leaf @> Int = Lens.lensu((a,b) ⇒ a copy (id = b), _.id)
 
   implicit lazy val equalInst: Equal[Leaf] = Equal.equalA
-  implicit lazy val uidInst: UIdL[Leaf] = UniqueIdL lens id
+  implicit lazy val uidInst: IntIdL[Leaf] = UniqueIdL lens id
   implicit lazy val arbInst: Arbitrary[Leaf] = Arbitrary(
-    ^(arbitrary[Id], arbitrary[Name])(Leaf.apply)
+    ^(Gen choose (0,100), Gen.identifier)(Leaf.apply)
   )
 }
 

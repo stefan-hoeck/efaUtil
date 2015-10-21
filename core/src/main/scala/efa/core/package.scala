@@ -23,10 +23,6 @@ package object core {
 
   //Aliases for some of the most common UniqueId types
 
-  type UId[A] = UniqueId[A,Id]
-
-  type UIdL[A] = UniqueIdL[A,Id]
-
   type IntId[A] = UniqueId[A,Int]
 
   type IntIdL[A] = UniqueIdL[A,Int]
@@ -45,19 +41,11 @@ package object core {
 
   @inline def StringId[A:StringId]: StringId[A] = implicitly
 
-  @inline def UId[A:UId]: UId[A] = implicitly
-
   @inline def IntIdL[A:IntIdL]: IntIdL[A] = implicitly
 
   @inline def LongIdL[A:LongIdL]: LongIdL[A] = implicitly
 
   @inline def StringIdL[A:StringIdL]: StringIdL[A] = implicitly
-
-  @inline def UIdL[A:UIdL]: UIdL[A] = implicitly
-
-  @inline def uid[A](get: A ⇒ Id): UId[A] = UniqueId get get
-
-  @inline def uidl[A](l: A @> Id): UIdL[A] = UniqueIdL lens l
 
   @inline def idL[A]: A @> A = scalaz.Lens.lensId
 

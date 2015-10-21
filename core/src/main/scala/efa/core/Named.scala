@@ -13,7 +13,7 @@ import shapeless.{HList, ::}
   * of objects by name.
   */
 trait Named[A] extends Show[A] { self ⇒
-  def name(a: A): Name
+  def name(a: A): String
 
   final def nameSort(as: List[A]): List[A] = as sortBy name
 
@@ -24,7 +24,7 @@ trait Named[A] extends Show[A] { self ⇒
   final def sortedPairs[B](m: Map[B,A]): List[(B,A)] =
     m.toList sortBy { p ⇒ name (p._2) }
 
-  override def shows(a: A): String = name(a).v
+  override def shows(a: A): String = name(a)
 }
 
 object Named {

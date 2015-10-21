@@ -6,7 +6,7 @@ import shapeless.{HList, ::}
   * Typically, these descriptions can be displayed conveniently in GUIs.
   */
 trait Described[A] { self ⇒ 
-  def shortDesc(a: A): Desc
+  def shortDesc(a: A): String
 }
 
 /** This version of Described uses html to format its descriptions.
@@ -21,7 +21,7 @@ trait HtmlDescribed[A] extends Described[A] with Named[A] { self ⇒
     */
   def tags(a: A): Tags
 
-  override def shortDesc(a: A): Desc =
+  override def shortDesc(a: A): String =
     Described namePlusTags (name(a), tags (a): _*)
 }
 
@@ -43,8 +43,8 @@ trait DescribedFunctions {
     * a separate line). The whole string is wrapped in `html`
     * start and end tags.
     */
-  def namePlusTags(n: Name, ts: Tag*): Desc =
-    Desc(titleBodyHtml(n.v, formatTags (ts: _*)))
+  def namePlusTags(n: String, ts: Tag*): String =
+    titleBodyHtml(n, formatTags (ts: _*))
 
   /** Displays a header with a title in bold followed by a body
     * in a new paragraph.

@@ -17,9 +17,9 @@ trait Localized[A] extends Named[A] with Described[A] { self ⇒
 
   def names(a: A): List[String] = loc(a).names
 
-  def shortDesc(a: A): Desc = Desc(desc(a))
+  def shortDesc(a: A): String = desc(a)
 
-  def name(a: A): Name = Name(locName(a))
+  def name(a: A): String = locName(a)
 }
 
 /** A helper-trait for code reuse in classes that have a

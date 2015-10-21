@@ -6,16 +6,16 @@ import scalaz._, Scalaz._, scalacheck.ScalaCheckBinding._
 import org.scalacheck._, Arbitrary.arbitrary
 import scala.xml.Node
 
-case class ToXmlCc(id: Id, name: Name, desc: Desc)
+case class ToXmlCc(id: Int, name: String, desc: String)
 
 object ToXmlCc {
   implicit val equalInst: Equal[ToXmlCc] = Equal.equalA
   implicit val defaultInst: Default[ToXmlCc] =
-    Default default ToXmlCc(!!![Id], !!![Name], !!![Desc])
+    Default default ToXmlCc(0,"","")
   implicit val arbInst: Arbitrary[ToXmlCc] = Arbitrary(
-    ^^(arbitrary[Id],
-       arbitrary[Name],
-       arbitrary[Desc]
+    ^^(Gen choose (0,100),
+       Gen.identifier,
+       Gen.identifier
       )(ToXmlCc.apply)
   )
   implicit val toXmlInst: ToXml[ToXmlCc] = new ToXml[ToXmlCc]{
@@ -25,9 +25,9 @@ object ToXmlCc {
       ("desc" xml tc.desc)
 
     def fromXml(ns: Seq[Node]) = ^^(
-      ns.readTag[Id]("id"),
-      ns.readTag[Name]("name"),
-      ns.readTag[Desc]("desc")
+      ns.readTag[Int]("id"),
+      ns.readTag[String]("name"),
+      ns.readTag[String]("desc")
     )(ToXmlCc.apply)
   }
 }
