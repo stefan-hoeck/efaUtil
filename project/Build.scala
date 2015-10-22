@@ -4,7 +4,7 @@ import Keys._
 object BuildSettings {
   val sv                = "2.11.7"
   val buildOrganization = "efa"
-  val buildVersion      = "0.2.4-SNAPSHOT"
+  val buildVersion      = "0.2.4"
   val buildScalaVersion = sv
   val netbeansRepo      = "Netbeans" at "http://bits.netbeans.org/maven2/"
 
