@@ -4,7 +4,7 @@ import efa.core._, Efa._
 import EfaIO._
 import java.io.File
 import org.scalacheck._, Prop._
-import scalaz._, Scalaz._, scalaz.std.indexedSeq._
+import scalaz._, Scalaz._, scalaz.std.vector._
 
 object AsInputTest extends Properties("AsInput") {
   val logger = ∅[LoggerIO]
@@ -29,7 +29,7 @@ object AsInputTest extends Properties("AsInput") {
   property("allLines") = forAll(Gen listOf Gen.identifier) { ls ⇒ 
     val bs = Bytes(ls mkString "\n")
 
-    testIO(bs.allLines) ≟ ls.toIndexedSeq.right
+    testIO(bs.allLines) == ls.toVector.right
   }
 
   property("readXml_error") = forAll { bytes: List[Byte] ⇒ 

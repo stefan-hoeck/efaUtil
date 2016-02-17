@@ -2,7 +2,7 @@ package efa.core
 
 import scalaz.{Foldable, Show}
 import scalaz.syntax.foldable._
-import scalaz.std.indexedSeq.IxSq
+import scalaz.std.vector._
 import shapeless.{HList, ::}
 
 /** Type class that associates a (typically localized) name with
@@ -17,7 +17,7 @@ trait Named[A] extends Show[A] { self ⇒
 
   final def nameSort(as: List[A]): List[A] = as sortBy name
 
-  final def nameSort(as: IxSq[A]): IxSq[A] = as sortBy name
+  final def nameSort(as: Vector[A]): Vector[A] = as sortBy name
 
   final def nameSortF[F[_]:Foldable](as: F[A]): List[A] = nameSort(as.toList)
 

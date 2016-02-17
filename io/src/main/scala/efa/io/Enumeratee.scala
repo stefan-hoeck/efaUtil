@@ -1,8 +1,8 @@
 package efa.io
 
 import efa.core.DisRes
-import scala.collection.immutable.{IndexedSeq ⇒ IxSq}
-import scalaz._, Scalaz._, std.indexedSeq._
+import scala.collection.immutable.{Vector ⇒ IxSq}
+import scalaz._, Scalaz._, std.vector._
 import scalaz.iteratee._, Iteratee._
 import StepT.{Cont, Done}
 
@@ -44,7 +44,7 @@ trait EnumerateeFunctions {
   }
 
   def parMap[O,I,F[_]:Monad](f: O ⇒ I): EnumerateeT[IxSq[O],IxSq[I],F] =
-    mapper(_.par map f toIndexedSeq)
+    mapper(_.par map f toVector)
 
   /** Map through a validator */
   def mapDis[O,I](f: O ⇒ DisRes[I]): EnumerateeT[O,I,LogDisIO] =

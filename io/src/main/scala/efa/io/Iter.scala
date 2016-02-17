@@ -2,7 +2,7 @@ package efa.io
 
 import efa.core.{Level, Log, Logs, DisRes}
 import scala.util.control.NonFatal
-import scalaz.{Reader ⇒ _, Writer ⇒ _, _}, Scalaz._, std.indexedSeq._
+import scalaz.{Reader ⇒ _, Writer ⇒ _, _}, Scalaz._, std.vector._
 import scalaz.iteratee._, Iteratee._
 import scalaz.effect._
 

@@ -80,7 +80,7 @@ object ToXml extends ToXmlSpecs {
 
   def nelToXml[A:ToXml](label: String) = new ToXml[Nel[A]] {
     private[this] val x = listToXml[A] (label)
-    def toXml(as: Nel[A]): Seq[Node] = x toXml as.list
+    def toXml(as: Nel[A]): Seq[Node] = x toXml as.list.toList
     def fromXml(ns: Seq[Node]): ValRes[Nel[A]] =
       (x fromXml ns).disjunctioned (_ flatMap toNel)
 

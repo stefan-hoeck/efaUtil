@@ -7,7 +7,8 @@ import java.io._
 import logDisIO._, resource._
 import scala.util.control.NonFatal
 import scalaz.{Reader ⇒ _, _}, Scalaz._, iteratee._, Iteratee._, effect.IO
-import scalaz.std.indexedSeq._
+import scalaz.std.vector._
+import scalaz.std.vector.{vectorInstance ⇒ VE}
 import scala.xml.XML
 
 trait AsInput[A] {
@@ -42,8 +43,8 @@ trait AsInput[A] {
   def readXml[B:ToXml](a: A): LogDisIO[B] =
     (IterateeT.head[B,LogDisIO] &= xml(a) run) map { _.get }
 
-  def allLines(a: A): LogDisIO[IxSq[String]] =
-    consume[String,LogDisIO,IxSq] &= lines(a) run
+  def allLines(a: A): LogDisIO[Vector[String]] =
+    consume[String,LogDisIO,Vector](Monad[LogDisIO],VE,VE) &= lines(a) run
 
   def xml[B:ToXml](a: A): EnumIO[B] =
     iter.resourceEnum(inputStream(a), name(a))(xmlR[B](a))
@@ -103,7 +104,7 @@ trait AsInputSyntax {
 
     def readXml[B:ToXml]: LogDisIO[B] = I.readXml[B](a)
 
-    def allLines: LogDisIO[IxSq[String]] = I allLines a
+    def allLines: LogDisIO[Vector[String]] = I allLines a
 
     def xmlIn[B:ToXml]: EnumIO[B] = I xml a
 

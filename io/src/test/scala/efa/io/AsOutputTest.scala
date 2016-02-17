@@ -4,7 +4,7 @@ import efa.core._, Efa._
 import EfaIO._
 import java.io.File
 import org.scalacheck._, Prop._
-import scalaz._, Scalaz._, scalaz.std.indexedSeq._
+import scalaz._, Scalaz._, scalaz.std.vector._
 
 object AsOutputTest extends Properties("AsOutput") {
   val logger = ∅[LoggerIO]
