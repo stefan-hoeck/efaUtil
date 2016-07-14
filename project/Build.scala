@@ -2,7 +2,7 @@ import sbt._
 import Keys._
 
 object BuildSettings {
-  val sv                = "2.11.7"
+  val sv                = "2.11.8"
   val buildOrganization = "efa"
   val buildVersion      = "0.2.5-SNAPSHOT"
   val buildScalaVersion = sv
@@ -32,7 +32,7 @@ object Dependencies {
 
   val nbV               = "RELEASE80"
   val scalacheckV       = "1.12.5"
-  val scalazV           = "7.2.0"
+  val scalazV           = "7.2.4"
   val shapelessV        = "2.2.5"
   val scalaXmlV         = "1.0.5"
 
