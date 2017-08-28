@@ -4,14 +4,14 @@ import efa.core.{Provider, Unerased}
 import org.openide.util.Lookup
 import scalaz._, Scalaz._
 import scalaz.effect.IO
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 trait LookupFunctions {
   private[this] def lkp[A:Unerased](l: Lookup): Option[A] =
     Option(l lookup Unerased[A].clazz)
 
   private[this] def lkpAll[A:Unerased](l: Lookup): List[A] =
-    l lookupAll Unerased[A].clazz toList
+    (l lookupAll Unerased[A].clazz).asScala.toList
 
   def head[A:Unerased](l: Lookup): IO[Option[A]] = IO(lkp[A](l))
 

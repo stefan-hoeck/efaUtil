@@ -144,12 +144,12 @@ trait IterFunctions {
   /** Create an Enumerator that reads input through a side-effecting
     * method until this method returns `None`
     */
-  def readerEnum[E](read: () ⇒ Option[DisRes[E]],
+  def readerEnum[E](read: Unit ⇒ Option[DisRes[E]],
                     msg: Throwable ⇒ String): EnumIO[E] =
     new EnumeratorT[E,LogDisIO] {
       def apply[A] = (s: StepIO[E,A]) ⇒ s mapCont { k ⇒
         try {
-          read() cata (
+          read(()) cata (
             _ fold (
               nel ⇒ iter.vIter(k(eofInput).value >> failNel(nel)),
               e ⇒ k(elInput(e)) >>== apply[A]
@@ -167,10 +167,11 @@ trait IterFunctions {
   /** Create an Enumerator that produces input through a side-effecting
     * method only once
     */
-  def singleEnum[E](read: () ⇒ DisRes[E],
+  def singleEnum[E](read: Unit ⇒ DisRes[E],
                     msg: Throwable ⇒ String): EnumIO[E] = {
     var done = false
-    def r() = if (done) None else Some(read())
+    def r: Unit ⇒ Option[DisRes[E]] = _ ⇒
+      if (done) None else { done = true; Some(read(())) }
 
     readerEnum(r, msg)
   }

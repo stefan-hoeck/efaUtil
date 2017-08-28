@@ -69,10 +69,10 @@ trait AsInput[A] {
     iter.resourceEnum(inputStream(a), name(a))(bytesR(a, buffer))
 
   private def xmlR[B:ToXml](a: A)(i: InputStream): EnumIO[B] =
-    iter.singleEnum[B](() ⇒ XML.load(i).readD[B], readError(a))
+    iter.singleEnum[B](_ ⇒ XML.load(i).readD[B], readError(a))
 
   private def lineR(a: A)(r: BufferedReader): EnumIO[String] =
-    iter.readerEnum(() ⇒ Option(r.readLine) map { _.right }, readError(a))
+    iter.readerEnum(_ ⇒ Option(r.readLine) map { _.right }, readError(a))
 
   private def bytesR(a: A, buffer: Int)(i: InputStream)
     : EnumIO[Array[Byte]] = new RecursiveEnumIO[Array[Byte]](readError(a)) {
